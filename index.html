@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>飲料店菜單</title>
+<style>
+  /* 外層容器放寬一點 */
+  .wrap {
+    max-width: 960px;            /* 你也可以用 1200px */
+    margin: 0 auto;
+    padding: 40px 16px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+
+  /* 讓格子自動排到多欄：手機 1 欄、平板 2~3 欄、桌機 4 欄 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .card {
+    display: block;
+    padding: 14px 16px;
+    background: #111;
+    color: #fff;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: .2s;
+  }
+  .card:hover { opacity: .9; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>選擇飲料店看菜單</h1>
+    <div class="grid">
+<style>
+  .wrap { max-width: 600px; margin: 0 auto; padding: 24px 16px; font-family: Arial, sans-serif; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }  /* 單欄 */
+  .card {
+    display: block; width: 100%;
+    padding: 14px 16px; background: #111; color: #fff;
+    border-radius: 10px; text-decoration: none; transition: .2s;
+  }
+  .card b { display:block; font-size:16px; }
+  .card small { display:block; opacity:.8; margin-top:2px; }
+  .card:hover { opacity:.9; }
+</style>
+<div class="wrap">
+  <div class="grid">
+    <a class="card" href="./milksha.html"><b>迷克夏</b><small>Milksha</small></a>
+    <a class="card" href="./damingtea.html"><b>大茗本味製茶堂</b><small>DAMING</small></a>
+    <a class="card" href="./truedan.html"><b>珍煮丹</b><small>TRUEDAN</small></a>
+    <a class="card" href="./dejeng.html"><b>得正</b><small>Dejeng</small></a>
+    <a class="card" href="./50lan.html"><b>50嵐</b><small>50 Lan</small></a>
+    <a class="card" href="./minimini.html"><b>米里米里</b><small>minimini</small></a>
+    <a class="card" href="./macutea.html"><b>麻古茶坊</b><small>macu</small></a>
+    <a class="card" href="./8yotea.html"><b>八曜和茶</b><small>8yo Tea</small></a>
+    <a class="card" href="./youindrink.html"><b>有飲</b><small>Youin Drink</small></a>
+    <a class="card" href="./peaktea.html"><b>青山</b><small>Peak Tea</small></a>
+  </div>
+</div>
+    </div>
+  </div>
+</body>
+</html>

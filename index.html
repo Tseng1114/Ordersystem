@@ -5,16 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>飲料店菜單</title>
 <style>
-  /* 外層容器放寬一點 */
   .wrap {
-    max-width: 960px;            /* 你也可以用 1200px */
+    max-width: 960px;
     margin: 0 auto;
     padding: 40px 16px;
     font-family: Arial, sans-serif;
     text-align: center;
   }
 
-  /* 讓格子自動排到多欄：手機 1 欄、平板 2~3 欄、桌機 4 欄 */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -39,29 +37,123 @@
     <h1>選擇飲料店看菜單</h1>
     <div class="grid">
 <style>
-  .wrap { max-width: 600px; margin: 0 auto; padding: 24px 16px; font-family: Arial, sans-serif; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }  /* 單欄 */
-  .card {
-    display: block; width: 100%;
-    padding: 14px 16px; background: #111; color: #fff;
-    border-radius: 10px; text-decoration: none; transition: .2s;
+  /* ===== 全站設定（可調參數） ===== */
+  :root{
+    --card-w: 260px;      /* 卡片寬度：240–300 之間都好看 */
+    --gap-x: 28px;        /* 左右欄間距 */
+    --gap-y: 22px;        /* 上下列間距 */
+    --radius: 14px;       /* 卡片圓角 */
+    --bg: #111;           /* 卡片背景色 */
+    --fg: #fff;           /* 文字顏色 */
+    --logo-size: 44px;    /* Logo 正方形邊長 */
+    --hover-scale: 1.02;  /* 滑過微放大 */
   }
-  .card b { display:block; font-size:16px; }
-  .card small { display:block; opacity:.8; margin-top:2px; }
-  .card:hover { opacity:.9; }
+
+  /* ===== 頁面排版 ===== */
+  body { margin:0; font-family: Arial, "Noto Sans TC", sans-serif; }
+  .page-wrap{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 16px 60px;
+  }
+  .title{
+    text-align:center; margin: 12px 0 24px; font-size: 28px; font-weight: 700;
+  }
+
+  /* 2 欄置中（手機自動單欄） */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(2, var(--card-w));
+    justify-content: center;         /* 讓兩欄整排置中 */
+    column-gap: var(--gap-x);
+    row-gap: var(--gap-y);
+  }
+  @media (max-width: 640px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  /* ===== 卡片 ===== */
+  .card{
+    width: var(--card-w);
+    min-height: 68px;
+    display:flex; align-items:center; gap:12px;
+    padding: 10px 12px;
+    background: var(--bg); color: var(--fg);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  .card:hover{
+    transform: scale(var(--hover-scale));
+    box-shadow: 0 6px 18px rgba(0,0,0,.24);
+    opacity: .98;
+  }
+
+  /* Logo 統一尺寸與對齊 */
+  .logo{
+    width: var(--logo-size); height: var(--logo-size);
+    object-fit: contain; flex: 0 0 var(--logo-size);
+    border-radius: 8px; background:#fff;   /* 有些透明底 Logo 在深色卡片上會更好看 */
+  }
+
+  /* 文字置中 */
+  .label{ flex:1; text-align:center; line-height:1.2; }
+  .label b{ display:block; font-size:16px; }
+  .label small{ display:block; font-size:12px; opacity:.85; margin-top:3px; }
 </style>
+
 <div class="wrap">
   <div class="grid">
-    <a class="card" href="./milksha.html"><b>迷克夏</b><small>Milksha</small></a>
-    <a class="card" href="./damingtea.html"><b>大茗本味製茶堂</b><small>DAMING</small></a>
-    <a class="card" href="./truedan.html"><b>珍煮丹</b><small>TRUEDAN</small></a>
-    <a class="card" href="./dejeng.html"><b>得正</b><small>Dejeng</small></a>
-    <a class="card" href="./50lan.html"><b>50嵐</b><small>50 Lan</small></a>
-    <a class="card" href="./minimini.html"><b>米里米里</b><small>minimini</small></a>
-    <a class="card" href="./macutea.html"><b>麻古茶坊</b><small>macu</small></a>
-    <a class="card" href="./8yotea.html"><b>八曜和茶</b><small>8yo Tea</small></a>
-    <a class="card" href="./youindrink.html"><b>有飲</b><small>Youin Drink</small></a>
-    <a class="card" href="./peaktea.html"><b>青山</b><small>Peak Tea</small></a>
+    <a class="card" href="./milksha.html">
+      <img class="logo" src="./logos/milksha_logo.png" alt="Milksha">
+      <div class="label"><b>迷克夏</b><small>Milksha</small></div>
+    </a>
+
+    <a class="card" href="./damingtea.html">
+      <img class="logo" src="./logos/damingtea_logo.png" alt="DAMING">
+      <div class="label"><b>大茗本味製茶堂</b><small>damingtea</small></div>
+    </a>
+
+    <a class="card" href="./truedan.html">
+      <img class="logo" src="./logos/truedan_logo.png" alt="TRUEDAN">
+      <div class="label"><b>珍煮丹</b><small>TRUEDAN</small></div>
+    </a>
+
+    <a class="card" href="./dejeng.html">
+      <img class="logo" src="./logos/dejeng_logo.png" alt="Dejeng">
+      <div class="label"><b>得正</b><small>Dejeng</small></div>
+    </a>
+
+    <a class="card" href="./50lan.html">
+      <img class="logo" src="./logos/50lan_logo.png" alt="50Lan">
+      <div class="label"><b>50嵐</b><small>50lan</small></div>
+    </a>
+
+    <a class="card" href="./minimini.html">
+      <img class="logo" src="./logos/minimini_logo.png" alt="minimini">
+      <div class="label"><b>米里米里</b><small>minimini</small></div>
+    </a>
+
+    <a class="card" href="./macutea.html">
+      <img class="logo" src="./logos/macutea_logo.png" alt="macu">
+      <div class="label"><b>麻古茶坊</b><small>macu</small></div>
+    </a>
+
+    <a class="card" href="./8yotea.html">
+      <img class="logo" src="./logos/8yotea_logo.png" alt="8yotea">
+      <div class="label"><b>八曜和茶</b><small>8yotea</small></div>
+    </a>
+
+    <a class="card" href="./youindrink.html">
+      <img class="logo" src="./logos/youindrink_logo.png" alt="youin">
+      <div class="label"><b>有飲</b><small>You in</small></div>
+    </a>
+
+    <a class="card" href="./peaktea.html">
+      <img class="logo" src="./logos/peaktea_logo.png" alt="Peak Tea">
+      <div class="label"><b>青山</b><small>PEAK TEA</small></div>
+    </a>
   </div>
 </div>
     </div>

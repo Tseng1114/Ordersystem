@@ -31,7 +31,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyv_mDzUPahEbxU6sWXVgKLReUNXIQ8QAU3KnwtQadDXh9aKU463W2Ht8Xr5pV6mhI/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
     const EVENT_ID = new URLSearchParams(location.search).get('event');
 
     function jsonp(url, params) {
@@ -111,7 +111,6 @@
     }
 
     function collectRows() {
-      // 每列必須有 姓名 + 飲料；數量預設 1
       const rows = [...document.querySelectorAll('#itemsTbl tbody tr')].map(tr=>{
         const who   = tr.querySelector('.who')?.value.trim()   || '';
         const name  = tr.querySelector('.drink')?.value.trim() || '';
@@ -120,7 +119,6 @@
         const qty   = Number(tr.querySelector('.qty')?.value || 0);
         return { who, item: { name, sugar, ice, qty } };
       });
-      // 過濾掉空列，並檢查必填
       const invalid = rows.find(r => !r.who || !r.item.name || !(r.item.qty>0));
       if (invalid) return { ok:false, error:'每筆都要填「姓名」與「飲料」，數量需 ≥ 1' };
       return { ok:true, rows: rows.filter(r=>r.who && r.item.name && r.item.qty>0) };
@@ -131,7 +129,6 @@
       const { ok, rows, error } = collectRows();
       if (!ok) return alert(error || '請檢查每筆資料');
 
-      // 逐列送出：一個人一杯 → 一次 addOrder（保留你的後端格式）
       let success = 0, fail = 0, msg = '';
       for (const r of rows) {
         const payload = { eventId: EVENT_ID, customer: r.who, items: [ r.item ] };

@@ -10,9 +10,23 @@
 <body>
   <div class="page-wrap">
     <h1 class="title">選擇飲料店菜單</h1>
-      <div class="order-btn-container">
-        <a href="order.html" class="order-btn">開始下單</a>
-      </div>
+
+    <div class="order-btn-container">
+      <a href="create_event.html" class="order-btn">發起飲料事件</a>
+      <a id="summaryLink" href="summary.html" class="order-btn">查看彙整</a>
+      <script>
+        (() => {
+          try {
+            const id = localStorage.getItem('last_event_id');
+            if (id) {
+              document.getElementById('summaryLink').href =
+                'summary.html?event=' + encodeURIComponent(id);
+            }
+          } catch (e) {}
+        })();
+      </script>
+    </div>
+
     <div class="grid">
       <a class="card" href="./all_html/milksha.html">
         <img class="logo" src="./logos/milksha_logo.png" alt="Milksha">
@@ -65,7 +79,7 @@
       </a>
 
       <a class="card" href="./all_html/aniceholiday.html">
-        <img class="logo" src="./logos/aniceholiday_logo.jpg" alt="Peak Tea">
+        <img class="logo" src="./logos/aniceholiday_logo.jpg" alt="A NICE HOLIDAY">
         <div class="label"><b>一沐日</b><small>A NICE HOLIDAY</small></div>
       </a>
     </div>

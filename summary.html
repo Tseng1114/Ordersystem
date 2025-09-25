@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>彙整</title>
+  <link rel="stylesheet" href="css/order_style.css">
+  <style>
+    .meta{
+       color:#666;
+       margin:8px 0 12px
+     }
+    .controls{
+       display:flex;
+       gap:10px;
+       margin:8px 0 12px
+    }
+    .names{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:10px 14px
+    }
+    .pill{
+      background:#eef1f5;
+      border:1px solid #e0e4ea;
+      padding:10px 12px;
+      border-radius:999px;
+      text-align:center;
+      font-weight:600
+    }
+    .by-person{
+      margin-top:20px;
+      display:grid;
+      gap:12px
+    }
+    .person{
+      padding:12px 14px;
+      border:1px solid #e9edf2;
+      border-radius:12px;
+      background:#fafbfc
+    }
+    .person h4{
+      margin:0 0 8px;
+      font-size:16px
+    }
+    .person ul{
+      margin:0;
+      padding-left:18px
+    }
+    .hidden{
+      display:none
+    }
+    .error{
+      color:#b00020;
+      margin-top:8px
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="page-title">彙整</h1>
+
+    <div id="loginCard" class="card">
+      <label for="pass">管理者通關碼</label>
+      <input id="pass" type="password" placeholder="請輸入通關碼">
+      <div class="actions">
+        <a class="back-home" href="index.html">回首頁</a>
+        <button class="primary" id="loginBtn" type="button">登入</button>
+      </div>
+    </div>
+
+    <div id="contentCard" class="card hidden">
+      <div id="meta" class="meta"></div>
+      <div id="error" class="error"></div>
+
+      <h3 style="margin:6px 0;">誰有點</h3>
+      <div id="list" class="names"></div>
+
+      <h3 style="margin:20px 0 6px;">誰點什麼</h3>
+      <div id="byPerson" class="by-person"></div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
+    const TOKEN_KEY = 'drinksys_token';
+    let EVENT_ID = new URLSearchParams(location.search).get('event')
+                 || localStorage.getItem('last_event_id')
+                 || '';
+    if (EVENT_ID) { try { localStorage.setItem('last_event_id', EVENT_ID); } catch(_) {} }
+
+
+    function jsonp(url, params){
+      return new Promise((resolve,reject)=>{
+        const cb='cb_'+Date.now()+Math.random().toString(36).slice(2);
+        params.callback=cb;
+        const s=document.createElement('script');
+        s.src=url+'?'+new URLSearchParams(params).toString();
+        window[cb]=(data)=>{resolve(data);cleanup();};
+        s.onerror=()=>{reject(new Error('JSONP failed'));cleanup();};
+        function cleanup(){delete window[cb]; s.remove();}
+        document.body.appendChild(s);
+      });
+    }
+    const collator = new Intl.Collator('zh-Hant');
+    const toName = v => (v==null?'':String(v)).trim();
+    const sortNames = arr => arr.sort((a,b)=>collator.compare(a,b));
+    function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+    function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
+
+    async function login(){
+      const pass = document.querySelector('#pass').value.trim();
+      if (!pass) return alert('請輸入通關碼');
+      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
+      if (!res.ok) return alert('登入失敗：'+(res.error||''));
+      setToken(res.token);
+      document.querySelector('#loginCard').classList.add('hidden');
+      document.querySelector('#contentCard').classList.remove('hidden');
+      load();
+    }
+
+    async function load(){
+      const token = getToken();
+      if (!token){ document.querySelector('#loginCard').classList.remove('hidden'); return; }
+      if (!EVENT_ID){ document.querySelector('#error').textContent = '缺少 event 參數'; return; }
+
+      const $meta=document.querySelector('#meta'), $err=document.querySelector('#error'), $names=document.querySelector('#list'), $by=document.querySelector('#byPerson');
+      $err.textContent=''; $names.innerHTML=''; $by.innerHTML=''; $meta.textContent='讀取中…';
+
+      try{
+        const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
+        if (!info.ok){ $meta.textContent=''; $err.textContent='事件讀取失敗：'+(info.error||''); return; }
+        const ev = info.event;
+        document.title = `彙整 - ${ev.shop||''}`;
+        document.querySelector('.page-title').textContent = `${ev.shop||'飲料事件'} 的彙整`;
+        $meta.textContent = `狀態：${ev.status}${ev.deadline ? `｜截止：${ev.deadline}` : ''}`;
+
+        const res = await jsonp(WEB_APP_URL, { action:'listOrders', eventId: EVENT_ID, token });
+        if (!res.ok){ $err.textContent='訂單讀取失敗：'+(res.error||''); return; }
+        const orders = Array.isArray(res.orders) ? res.orders : [];
+
+        if (!orders.length){ $names.innerHTML = '<div class="pill">（尚無訂單）</div>'; }
+        else{
+          const uniq = [...new Set(orders.map(o=>toName(o.customer)).filter(Boolean))];
+          $names.innerHTML = sortNames(uniq).map(n=>`<div class="pill">${n}</div>`).join('');
+        }
+
+        const map = new Map();
+        for(const o of orders){
+          const k = toName(o.customer); if (!k) continue;
+          (map.get(k) || map.set(k,[]).get(k)).push(o);
+        }
+        const people = sortNames([...map.keys()]);
+        if (!people.length){ $by.innerHTML = '<div class="person">（尚無明細）</div>'; }
+        else{
+          $by.innerHTML = people.map(name=>{
+            const lines = map.get(name).map(o=>{
+              const drink=toName(o.name), sugar=toName(o.sugar)||'—', ice=toName(o.ice)||'—', qty=Number(o.qty||0)||1;
+              return `<li>${drink||'（未填品項）'}／${sugar}／${ice} × ${qty}</li>`;
+            }).join('');
+            return `<div class="person"><h4>${name}</h4><ul>${lines}</ul></div>`;
+          }).join('');
+        }
+      }catch(e){ $meta.textContent=''; $err.textContent='讀取失敗：'+(e?.message||e); }
+    }
+
+    document.querySelector('#loginBtn').addEventListener('click', login);
+
+    if (getToken()){
+      document.querySelector('#loginCard').classList.add('hidden');
+      document.querySelector('#contentCard').classList.remove('hidden');
+      load();
+    }
+  </script>
+</body>
+</html>

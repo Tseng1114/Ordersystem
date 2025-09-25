@@ -16,12 +16,16 @@
   --shadow: 0 4px 20px rgba(0,0,0,.06);
   --shadow-lg: 0 10px 24px rgba(0,0,0,.12);
 
-  --col-grid: minmax(220px,.6fr) 180px 180px 120px 64px;
+  --col-grid: 180px minmax(220px,.6fr) 110px 110px 80px 76px;
   --gap: 12px;
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+* {
+box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+}
 body{
   margin: 0;
   font-family: Arial, "Noto Sans TC", sans-serif;

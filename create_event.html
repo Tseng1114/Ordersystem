@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>建立飲料事件</title>
+  <link rel="stylesheet" href="css/order_style.css">
+  <style>
+    .wrap{
+      max-width:760px
+    }
+    .hidden{
+      display:none
+    }
+    .hint{
+      color:#666;
+      margin:6px 0 12px
+    }
+    select.select-like{
+      width:100%; height:44px;
+      padding:10px 12px;
+      border:1px solid #d9dde4;
+      border-radius:10px;
+      background:#fff;
+      outline:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="page-title">建立飲料事件</h1>
+
+    <div id="loginCard" class="card">
+      <label for="pass">管理者通關碼</label>
+      <input id="pass" type="password" placeholder="請輸入通關碼">
+      <div class="actions">
+        <a class="back-home" href="index.html">回首頁</a>
+        <button class="primary" id="loginBtn" type="button">登入</button>
+      </div>
+      <div class="hint">登入成功後即可建立事件。</div>
+    </div>
+
+    <div id="createCard" class="card hidden">
+      <label for="shopSelect">店家</label>
+      <select id="shopSelect" class="select-like">
+        <option value="" selected>請選擇店家</option>
+        <option>迷客夏</option>
+        <option>大茗本味製茶堂</option>
+        <option>珍煮丹</option>
+        <option>得正</option>
+        <option>50嵐</option>
+        <option>米里米里</option>
+        <option>麻古茶坊</option>
+        <option>八曜和茶</option>
+        <option>有飲</option>
+        <option>青山</option>
+        <option>一沐日</option>
+        <option value="__other">其他（自訂）</option>
+      </select>
+
+      <div id="otherBox" class="hidden" style="margin-top:10px;">
+        <input id="shopOther" placeholder="請輸入店家名稱">
+      </div>
+
+      <label for="deadline" style="margin-top:12px;">截止時間（可留空）</label>
+      <input id="deadline" type="datetime-local" />
+
+      <div class="actions">
+        <a class="back-home" href="index.html">回首頁</a>
+        <button class="primary" id="createBtn" type="button">建立事件</button>
+      </div>
+
+      <div id="result" style="margin-top:16px; display:none;">
+        <p>分享這個連結給大家下單：</p>
+        <input id="shareLink" readonly style="width:100%;height:44px;padding:10px 12px;border:1px solid #ccc;border-radius:10px;">
+        <div class="actions" style="margin-top:12px;">
+          <button class="primary" id="copyBtn" type="button">複製下單連結</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyv_mDzUPahEbxU6sWXVgKLReUNXIQ8QAU3KnwtQadDXh9aKU463W2Ht8Xr5pV6mhI/exec';
+    const TOKEN_KEY = 'drinksys_token';
+
+    function jsonp(url, params){
+      return new Promise((resolve,reject)=>{
+        const cb='cb_'+Date.now()+Math.random().toString(36).slice(2);
+        params.callback=cb;
+        const s=document.createElement('script');
+        s.src=url+'?'+new URLSearchParams(params).toString();
+        window[cb]=(data)=>{resolve(data);cleanup();};
+        s.onerror=()=>{reject(new Error('JSONP failed'));cleanup();};
+        function cleanup(){delete window[cb]; s.remove();}
+        document.body.appendChild(s);
+      });
+    }
+    function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
+    function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+
+    const shopSelect = document.querySelector('#shopSelect');
+    const otherBox = document.querySelector('#otherBox');
+    const shopOther = document.querySelector('#shopOther');
+    shopSelect.addEventListener('change',()=>{
+      if (shopSelect.value === '__other') {
+        otherBox.classList.remove('hidden');
+        shopOther.focus();
+      } else {
+        otherBox.classList.add('hidden');
+        shopOther.value = '';
+      }
+    });
+
+    async function login(){
+      const pass = document.querySelector('#pass').value.trim();
+      if (!pass) return alert('請輸入通關碼');
+      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
+      if (!res.ok) return alert('登入失敗：'+(res.error||''));
+      setToken(res.token);
+      document.querySelector('#loginCard').classList.add('hidden');
+      document.querySelector('#createCard').classList.remove('hidden');
+    }
+
+    async function createEvent(){
+      const sel = shopSelect.value;
+      const shop = sel === '__other' ? shopOther.value.trim() : sel.trim();
+      const deadline = document.querySelector('#deadline').value;
+
+      if (!shop) return alert('請選擇店家或輸入自訂店名');
+
+      const token = getToken();
+      const res = await jsonp(WEB_APP_URL, { action:'createEvent', shop, deadline, token });
+      if (!res.ok) return alert('建立失敗：'+(res.error||''));
+      const id = res.id;
+
+      try { localStorage.setItem('last_event_id', id); } catch(_) {}
+
+      const base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
+      const orderLink = `${base}order.html?event=${encodeURIComponent(id)}`;
+
+      const input = document.querySelector('#shareLink');
+      input.value = orderLink;
+      document.querySelector('#result').style.display='block';
+
+      document.querySelector('#copyBtn').onclick = async ()=>{
+        try{
+          if (navigator.clipboard) await navigator.clipboard.writeText(orderLink);
+          else { input.select(); document.execCommand('copy'); }
+          alert('已複製下單連結');
+        }catch(e){ alert('複製失敗，請手動複製'); }
+      };
+    }
+
+    document.querySelector('#loginBtn').addEventListener('click', login);
+    document.querySelector('#createBtn').addEventListener('click', createEvent);
+
+    if (getToken()){
+      document.querySelector('#loginCard').classList.add('hidden');
+      document.querySelector('#createCard').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

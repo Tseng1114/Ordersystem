@@ -3,54 +3,102 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>下單 Order</title>
+  <title>下單</title>
   <link rel="stylesheet" href="css/order_style.css">
 </head>
 
 <body>
   <div class="wrap">
     <h1 class="page-title">下單</h1>
-    <div class="card">
-      <div class="name-grid">
-        <label>姓名</label>
-        <input  id="customer" name="customer">
-      </div>
-      <div style="margin-top:10px;">
-        <table id="itemsTbl">
-          <thead>
-            <tr>
-              <th>飲料名稱</th><th>糖度</th><th>冰量</th><th>數量</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <div class="actions">
-          <button type="button" class="add" id="addItem">新增一筆</button>
-        </div>
-      </div>
 
-      <div class="actions" style="margin-top:16px;">
+    <div class="card">
+
+      <table id="itemsTbl">
+        <thead>
+          <tr>
+            <th>姓名</th><th>飲料</th><th>糖度</th><th>冰量</th><th>數量</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
+        <button type="button" class="add" id="addItem">＋新增一筆</button>
         <button type="button" class="primary" id="submitBtn">送出訂單</button>
       </div>
     </div>
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwftAeTHXYAcyHCHJN8rs6Rxr1_cKjkPj8IkucuDFo4iQsrE1zunjJiUWgA-b_YRIQ/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyv_mDzUPahEbxU6sWXVgKLReUNXIQ8QAU3KnwtQadDXh9aKU463W2Ht8Xr5pV6mhI/exec';
+    const EVENT_ID = new URLSearchParams(location.search).get('event');
+
+    function jsonp(url, params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + Math.random().toString(36).slice(2);
+        params.callback = cb;
+        const qs = new URLSearchParams(params).toString();
+        const s = document.createElement('script');
+        s.src = url + '?' + qs;
+        window[cb] = (data) => { resolve(data); cleanup(); };
+        s.onerror = () => { reject(new Error('JSONP failed')); cleanup(); };
+        function cleanup(){ delete window[cb]; s.remove(); }
+        document.body.appendChild(s);
+      });
+    }
+
+    function parseDeadline(deadline){
+      if (!deadline) return null;
+      if (deadline instanceof Date && !isNaN(deadline)) return new Date(deadline.getTime());
+      let s = String(deadline).trim();
+      if (!s) return null;
+      if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}$/.test(s)) s = s.replace(' ', 'T');
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) s = s + ':00';
+      const d = new Date(s);
+      return isNaN(d) ? null : d;
+    }
+    function isExpired(deadlineStr){
+      const d = parseDeadline(deadlineStr);
+      if (!d) return false;
+      return Date.now() > d.getTime();
+    }
+
+    async function ensureEvent(){
+      if(!EVENT_ID){
+        alert('缺少 event 參數，請從「建立事件」頁面取得分享連結進入。');
+        return;
+      }
+      const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
+      if (!info.ok) { alert('找不到事件：' + (info.error||'')); return; }
+
+      const ev = info.event;
+      document.title = `${ev.title || '下單'} - ${ev.shop || ''}`;
+      const h1 = document.querySelector('.page-title');
+      if (h1) h1.textContent = `${ev.shop || ev.title || '下單'}`;
+
+      const closed = String(ev.status||'').toLowerCase()==='closed';
+      const expired = (typeof info.expired === 'boolean') ? info.expired : isExpired(ev.deadline);
+      if (closed || expired){
+        document.querySelector('#addItem').disabled = true;
+        document.querySelector('#submitBtn').disabled = true;
+        alert(expired ? '已過截止時間，無法再下單。' : '此事件已結單。');
+      }
+    }
 
     function addRow(defaults={}) {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><input value="${defaults.name||''}"></td>
+        <td><input class="who" placeholder="你的姓名" value="${defaults.who||''}"></td>
+        <td><input class="drink" placeholder="飲料名稱" value="${defaults.name||''}"></td>
         <td>
-          <select>
+          <select class="sugar">
             <option value="">—</option>
-            <option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常</option>
+            <option>無糖</option><option>一分糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常</option>
           </select>
         </td>
         <td>
-          <select>
+          <select class="ice">
             <option value="">—</option>
             <option>去冰</option><option>微冰</option><option>少冰</option><option>正常</option>
           </select>
@@ -62,57 +110,45 @@
       tr.querySelector('.del').addEventListener('click',()=>tr.remove());
     }
 
-    function collectItems() {
-      return [...document.querySelectorAll('#itemsTbl tbody tr')].map(tr=>{
-        const [name,sugar,ice,qty] = tr.querySelectorAll('input,select');
-        return {
-          name:name.value.trim(),
-          sugar:sugar.value,
-          ice:ice.value,
-          qty:Number(qty.value||0)
-        };
-      }).filter(it=>it.name && it.qty>0);
-    }
-
-    function jsonp(url, params) {
-      return new Promise((resolve, reject) => {
-        const cb = 'cb_' + Date.now() + Math.random().toString(36).slice(2);
-        params.callback = cb;
-        const qs = new URLSearchParams(params).toString();
-        const s = document.createElement('script');
-        s.src = url + '?' + qs;
-
-        window[cb] = (data) => { resolve(data); cleanup(); };
-        s.onerror = () => { reject(new Error('JSONP failed')); cleanup(); };
-        function cleanup(){ delete window[cb]; s.remove(); }
-
-        document.body.appendChild(s);
+    function collectRows() {
+      // 每列必須有 姓名 + 飲料；數量預設 1
+      const rows = [...document.querySelectorAll('#itemsTbl tbody tr')].map(tr=>{
+        const who   = tr.querySelector('.who')?.value.trim()   || '';
+        const name  = tr.querySelector('.drink')?.value.trim() || '';
+        const sugar = tr.querySelector('.sugar')?.value || '';
+        const ice   = tr.querySelector('.ice')?.value   || '';
+        const qty   = Number(tr.querySelector('.qty')?.value || 0);
+        return { who, item: { name, sugar, ice, qty } };
       });
+      // 過濾掉空列，並檢查必填
+      const invalid = rows.find(r => !r.who || !r.item.name || !(r.item.qty>0));
+      if (invalid) return { ok:false, error:'每筆都要填「姓名」與「飲料」，數量需 ≥ 1' };
+      return { ok:true, rows: rows.filter(r=>r.who && r.item.name && r.item.qty>0) };
     }
 
     async function submitOrder(ev){
       ev?.preventDefault();
-      const customer = document.querySelector('#customer').value.trim();
-      const items = collectItems();
-      if (!customer) return alert('請填寫姓名');
-      if (!items.length) return alert('請至少新增一筆飲料');
+      const { ok, rows, error } = collectRows();
+      if (!ok) return alert(error || '請檢查每筆資料');
 
-      try {
-        const payload = { customer, items };
-        const res = await jsonp(WEB_APP_URL, { payload: JSON.stringify(payload) });
-        if (!res.ok) throw new Error(res.error || '下單失敗');
-
-        alert(`下單成功！已寫入試算表`);
-      } catch(err){
-        alert('下單失敗：'+(err?.message||err));
-        console.error(err);
+      // 逐列送出：一個人一杯 → 一次 addOrder（保留你的後端格式）
+      let success = 0, fail = 0, msg = '';
+      for (const r of rows) {
+        const payload = { eventId: EVENT_ID, customer: r.who, items: [ r.item ] };
+        try{
+          const res = await jsonp(WEB_APP_URL, { action:'addOrder', payload: JSON.stringify(payload) });
+          if (res && res.ok) success++; else { fail++; msg = res?.error || msg; }
+        }catch(e){ fail++; msg = e?.message || msg; }
       }
+      if (fail === 0) alert(`已送出 ${success} 筆！`);
+      else alert(`成功 ${success} 筆，失敗 ${fail} 筆。${msg?('最後錯誤：'+msg):''}`);
     }
 
-    document.addEventListener('DOMContentLoaded',()=>{
+    document.addEventListener('DOMContentLoaded', async ()=>{
       document.querySelector('#addItem').addEventListener('click',()=>addRow());
       document.querySelector('#submitBtn').addEventListener('click',submitOrder);
       addRow();
+      await ensureEvent();
     });
   </script>
 </body>

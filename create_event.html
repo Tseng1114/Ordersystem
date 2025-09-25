@@ -6,16 +6,9 @@
   <title>建立飲料事件</title>
   <link rel="stylesheet" href="css/order_style.css">
   <style>
-    .wrap{
-      max-width:760px
-    }
-    .hidden{
-      display:none
-    }
-    .hint{
-      color:#666;
-      margin:6px 0 12px
-    }
+    .wrap{ max-width:760px }
+    .hidden{ display:none }
+    .hint{ color:#666; margin:6px 0 12px }
     select.select-like{
       width:100%; height:44px;
       padding:10px 12px;
@@ -84,25 +77,23 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
     const TOKEN_KEY = 'drinksys_token';
 
-    function jsonp(url, params){
-      return new Promise((resolve,reject)=>{
-        const cb='cb_'+Date.now()+Math.random().toString(36).slice(2);
-        params.callback=cb;
-        const s=document.createElement('script');
-        s.src=url+'?'+new URLSearchParams(params).toString();
-        window[cb]=(data)=>{resolve(data);cleanup();};
-        s.onerror=()=>{reject(new Error('JSONP failed'));cleanup();};
-        function cleanup(){delete window[cb]; s.remove();}
-        document.body.appendChild(s);
-      });
+    async function apiGet(params) {
+      const url = new URL(WEB_APP_URL);
+      Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+
+      const res = await fetch(url.toString(), { credentials: 'omit' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      // Apps Script 需回傳 JSON
+      return await res.json();
     }
-    function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
-    function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+
+    function setToken(t){ try { sessionStorage.setItem(TOKEN_KEY, t); } catch(_) {} }
+    function getToken(){ try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch(_) { return ''; } }
 
     const shopSelect = document.querySelector('#shopSelect');
     const otherBox = document.querySelector('#otherBox');
     const shopOther = document.querySelector('#shopOther');
-    shopSelect.addEventListener('change',()=>{
+    shopSelect.addEventListener('change', () => {
       if (shopSelect.value === '__other') {
         otherBox.classList.remove('hidden');
         shopOther.focus();
@@ -115,41 +106,54 @@
     async function login(){
       const pass = document.querySelector('#pass').value.trim();
       if (!pass) return alert('請輸入通關碼');
-      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
-      if (!res.ok) return alert('登入失敗：'+(res.error||''));
-      setToken(res.token);
-      document.querySelector('#loginCard').classList.add('hidden');
-      document.querySelector('#createCard').classList.remove('hidden');
+
+      try{
+        const res = await apiGet({ action: 'login', pass });
+        if (!res.ok) throw new Error(res.error || 'login failed');
+        setToken(res.token || '');
+        document.querySelector('#loginCard').classList.add('hidden');
+        document.querySelector('#createCard').classList.remove('hidden');
+      }catch(err){
+        alert('登入失敗：' + (err.message || err));
+      }
     }
 
     async function createEvent(){
       const sel = shopSelect.value;
       const shop = sel === '__other' ? shopOther.value.trim() : sel.trim();
       const deadline = document.querySelector('#deadline').value;
-
       if (!shop) return alert('請選擇店家或輸入自訂店名');
 
       const token = getToken();
-      const res = await jsonp(WEB_APP_URL, { action:'createEvent', shop, deadline, token });
-      if (!res.ok) return alert('建立失敗：'+(res.error||''));
-      const id = res.id;
+      if (!token) return alert('尚未登入，請先輸入通關碼');
 
-      try { localStorage.setItem('last_event_id', id); } catch(_) {}
+      try{
+        const res = await apiGet({ action:'createEvent', shop, deadline, token });
+        if (!res.ok) throw new Error(res.error || 'create failed');
 
-      const base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
-      const orderLink = `${base}order.html?event=${encodeURIComponent(id)}`;
+        const id = res.id;
+        try { localStorage.setItem('last_event_id', id); } catch(_) {}
 
-      const input = document.querySelector('#shareLink');
-      input.value = orderLink;
-      document.querySelector('#result').style.display='block';
+        const orderURL = new URL('order.html', location.href);
+        orderURL.searchParams.set('event', id);
+        const orderLink = orderURL.toString();
 
-      document.querySelector('#copyBtn').onclick = async ()=>{
-        try{
-          if (navigator.clipboard) await navigator.clipboard.writeText(orderLink);
-          else { input.select(); document.execCommand('copy'); }
-          alert('已複製下單連結');
-        }catch(e){ alert('複製失敗，請手動複製'); }
-      };
+        const input = document.querySelector('#shareLink');
+        input.value = orderLink;
+        document.querySelector('#result').style.display = 'block';
+
+        document.querySelector('#copyBtn').onclick = async () => {
+          try {
+            if (navigator.clipboard) await navigator.clipboard.writeText(orderLink);
+            else { input.select(); document.execCommand('copy'); }
+            alert('已複製下單連結');
+          } catch (e) {
+            alert('複製失敗，請手動複製');
+          }
+        };
+      }catch(err){
+        alert('建立失敗：' + (err.message || err));
+      }
     }
 
     document.querySelector('#loginBtn').addEventListener('click', login);

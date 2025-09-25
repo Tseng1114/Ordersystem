@@ -82,95 +82,135 @@
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
-    const TOKEN_KEY = 'drinksys_token';
-    let EVENT_ID = new URLSearchParams(location.search).get('event')
-                 || localStorage.getItem('last_event_id')
-                 || '';
-    if (EVENT_ID) { try { localStorage.setItem('last_event_id', EVENT_ID); } catch(_) {} }
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
+  const TOKEN_KEY = 'drinksys_token';
 
+  async function apiGet(params) {
+    const url = new URL(WEB_APP_URL);
+    Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+    const res = await fetch(url.toString(), { credentials: 'omit' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  }
 
-    function jsonp(url, params){
-      return new Promise((resolve,reject)=>{
-        const cb='cb_'+Date.now()+Math.random().toString(36).slice(2);
-        params.callback=cb;
-        const s=document.createElement('script');
-        s.src=url+'?'+new URLSearchParams(params).toString();
-        window[cb]=(data)=>{resolve(data);cleanup();};
-        s.onerror=()=>{reject(new Error('JSONP failed'));cleanup();};
-        function cleanup(){delete window[cb]; s.remove();}
-        document.body.appendChild(s);
-      });
+  function getToken() {
+    try {
+      return sessionStorage.getItem(TOKEN_KEY) ||
+             localStorage.getItem(TOKEN_KEY) || '';
+    } catch (_) { return ''; }
+  }
+  function setToken(t) {
+    try {
+      sessionStorage.setItem(TOKEN_KEY, t);
+      localStorage.setItem(TOKEN_KEY, t);
+    } catch (_) {}
+  }
+
+  function esc(s){
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  const $status  = document.querySelector('#status');
+  const $names   = document.querySelector('#names');
+  const $by      = document.querySelector('#byPerson');
+  const $login   = document.querySelector('#adminLogin');
+  const $pass    = document.querySelector('#sumPass');
+  const $btnLog  = document.querySelector('#sumLoginBtn');
+
+  const EVENT_ID = new URL(location.href).searchParams.get('event') || '';
+
+  async function loginAdmin() {
+    const pass = $pass.value.trim();
+    if (!pass) { alert('請輸入通關碼'); return; }
+    try {
+      const r = await apiGet({ action:'login', pass });
+      if (!r.ok) throw new Error(r.error || 'login failed');
+      setToken(r.token || '');
+      $login.style.display = 'none';
+      await loadAll(); // 重新載入
+    } catch (err) {
+      alert('登入失敗：' + (err.message || err));
     }
-    const collator = new Intl.Collator('zh-Hant');
-    const toName = v => (v==null?'':String(v)).trim();
-    const sortNames = arr => arr.sort((a,b)=>collator.compare(a,b));
-    function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
-    function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
+  }
+  $btnLog?.addEventListener('click', loginAdmin);
 
-    async function login(){
-      const pass = document.querySelector('#pass').value.trim();
-      if (!pass) return alert('請輸入通關碼');
-      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
-      if (!res.ok) return alert('登入失敗：'+(res.error||''));
-      setToken(res.token);
-      document.querySelector('#loginCard').classList.add('hidden');
-      document.querySelector('#contentCard').classList.remove('hidden');
-      load();
+  async function loadAll() {
+    if (!EVENT_ID) { alert('缺少 event 參數'); return; }
+
+    try {
+      const info = await apiGet({ action:'getEvent', event: EVENT_ID });
+      const st = (info.status || 'open').toLowerCase();
+      const dl = info.deadline || '';
+      if ($status) {
+        $status.textContent = `狀態：${st}｜截止：${dl || '—'}`;
+      }
+      document.title = `${info.shop || ''} 的彙整`;
+    } catch (err) {
+      console.warn('getEvent error:', err);
     }
 
-    async function load(){
-      const token = getToken();
-      if (!token){ document.querySelector('#loginCard').classList.remove('hidden'); return; }
-      if (!EVENT_ID){ document.querySelector('#error').textContent = '缺少 event 參數'; return; }
+    const token = getToken();
+    if (!token) {
+      $login.style.display = 'block';
+      renderNoOrders('（尚無訂單，或需登入）');
+      return;
+    }
 
-      const $meta=document.querySelector('#meta'), $err=document.querySelector('#error'), $names=document.querySelector('#list'), $by=document.querySelector('#byPerson');
-      $err.textContent=''; $names.innerHTML=''; $by.innerHTML=''; $meta.textContent='讀取中…';
-
-      try{
-        const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
-        if (!info.ok){ $meta.textContent=''; $err.textContent='事件讀取失敗：'+(info.error||''); return; }
-        const ev = info.event;
-        document.title = `彙整 - ${ev.shop||''}`;
-        document.querySelector('.page-title').textContent = `${ev.shop||'飲料事件'} 的彙整`;
-        $meta.textContent = `狀態：${ev.status}${ev.deadline ? `｜截止：${ev.deadline}` : ''}`;
-
-        const res = await jsonp(WEB_APP_URL, { action:'listOrders', eventId: EVENT_ID, token });
-        if (!res.ok){ $err.textContent='訂單讀取失敗：'+(res.error||''); return; }
-        const orders = Array.isArray(res.orders) ? res.orders : [];
-
-        if (!orders.length){ $names.innerHTML = '<div class="pill">（尚無訂單）</div>'; }
-        else{
-          const uniq = [...new Set(orders.map(o=>toName(o.customer)).filter(Boolean))];
-          $names.innerHTML = sortNames(uniq).map(n=>`<div class="pill">${n}</div>`).join('');
+    try {
+      const res = await apiGet({ action:'listOrders', event: EVENT_ID, token });
+      if (!res.ok) {
+        if (/auth|token|denied|forbidden/i.test(res.error || '')) {
+          $login.style.display = 'block';
+          renderNoOrders('（請先登入管理者）');
+          return;
         }
-
-        const map = new Map();
-        for(const o of orders){
-          const k = toName(o.customer); if (!k) continue;
-          (map.get(k) || map.set(k,[]).get(k)).push(o);
-        }
-        const people = sortNames([...map.keys()]);
-        if (!people.length){ $by.innerHTML = '<div class="person">（尚無明細）</div>'; }
-        else{
-          $by.innerHTML = people.map(name=>{
-            const lines = map.get(name).map(o=>{
-              const drink=toName(o.name), sugar=toName(o.sugar)||'—', ice=toName(o.ice)||'—', qty=Number(o.qty||0)||1;
-              return `<li>${drink||'（未填品項）'}／${sugar}／${ice} × ${qty}</li>`;
-            }).join('');
-            return `<div class="person"><h4>${name}</h4><ul>${lines}</ul></div>`;
-          }).join('');
-        }
-      }catch(e){ $meta.textContent=''; $err.textContent='讀取失敗：'+(e?.message||e); }
+        throw new Error(res.error || 'listOrders failed');
+      }
+      renderOrders(res.orders || []);
+    } catch (err) {
+      console.warn('listOrders error:', err);
+      $login.style.display = 'block';
+      renderNoOrders('（讀取失敗，請登入後重試）');
     }
+  }
 
-    document.querySelector('#loginBtn').addEventListener('click', login);
+  function renderNoOrders(msg) {
+    if ($names) $names.innerHTML = `<div class="pill">${esc(msg || '（尚無訂單）')}</div>`;
+    if ($by)    $by.innerHTML    = `<div class="empty">${esc(msg || '（尚無明細）')}</div>`;
+  }
 
-    if (getToken()){
-      document.querySelector('#loginCard').classList.add('hidden');
-      document.querySelector('#contentCard').classList.remove('hidden');
-      load();
+  function renderOrders(list) {
+    if (!list.length) { renderNoOrders('（尚無訂單）'); return; }
+
+    const people = Array.from(new Set(list.map(o => String(o.who || '').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+    if ($names) $names.innerHTML = people.map(n => `<div class="pill">${esc(n)}</div>`).join('');
+
+    const map = new Map();
+    list.forEach(o => {
+      const who = String(o.who || '').trim() || '（未填名）';
+      if (!map.has(who)) map.set(who, []);
+      map.get(who).push(o);
+    });
+
+    if ($by) {
+      const blocks = people.map(name => {
+        const items = (map.get(name) || []).map(o => {
+          const drink = esc(String(o.name || '（未填品項）'));
+          const sugar = esc(String(o.sugar || '—'));
+          const ice   = esc(String(o.ice   || '—'));
+          const qty   = Number(o.qty || 0) || 1;
+          return `<li>${drink}／${sugar}／${ice} × ${qty}</li>`;
+        }).join('');
+        return `<div class="person"><h4>${esc(name)}</h4><ul>${items}</ul></div>`;
+      }).join('');
+      $by.innerHTML = blocks || '<div class="empty">（尚無明細）</div>';
     }
-  </script>
+  }
+
+  loadAll();
+</script>
+
 </body>
 </html>

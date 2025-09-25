@@ -1,102 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>點餐系統</title>
-
-<style>
-  :root{
-    --card-w: 260px;
-    --gap-x: 28px;
-    --gap-y: 22px;
-    --radius: 14px;
-    --bg: #111;
-    --fg: #fff;
-    --logo-size: 44px;
-    --hover-scale: 1.02;
-  }
-  body {
-    margin:0;
-    font-family: Arial, "Noto Sans TC", sans-serif;
-    background:#f9f9f9;
-  }
-
-  .page-wrap {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 16px 60px;
-  }
-
-  .title {
-    text-align:center;
-    margin: 12px 0 24px;
-    font-size: 28px;
-    font-weight: 700;
-  }
-
-  .grid {
-    display:grid;
-    grid-template-columns: repeat(2, var(--card-w));
-    justify-content: center;
-    column-gap: var(--gap-x);
-    row-gap: var(--gap-y);
-  }
-
-  @media (max-width: 640px){
-    .grid{ grid-template-columns: 1fr; }
-  }
-
-  .card {
-    width: var(--card-w);
-    min-height: 68px;
-    display:flex; align-items:center; gap:12px;
-    padding: 10px 12px;
-    background: var(--bg); color: var(--fg);
-    border-radius: var(--radius);
-    text-decoration: none;
-    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
-
-  .card:hover {
-    transform: scale(var(--hover-scale));
-    box-shadow: 0 6px 18px rgba(0,0,0,.24);
-    opacity: .98;
-  }
-
-  .logo {
-    width: var(--logo-size);
-    height: var(--logo-size);
-    object-fit: contain;
-    flex: 0 0 var(--logo-size);
-    border-radius: 8px;
-    background:#fff;
-  }
-
-  .label {
-    flex:1;
-    text-align:center;
-    line-height:1.2;
-  }
-  .label b {
-    display:block;
-    font-size:16px;
-  }
-  .label small {
-    display:block;
-    font-size:12px;
-    opacity:.85;
-    margin-top:3px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>菜單系統</title>
+  <link rel="stylesheet" href="./css/index_style.css">
 </head>
+
 <body>
   <div class="page-wrap">
-    <h1 class="title">選擇飲料店和看菜單</h1>
-      <p style="text-align:center;margin:8px 0 22px;">
-        <a class="btn" href="./order.html">開始下單</a>
-      </p>
+    <h1 class="title">選擇飲料店菜單</h1>
+      <div class="order-btn-container">
+        <a href="./order.html" class="order-btn">開始下單</a>
+      </div>
     <div class="grid">
       <a class="card" href="./all_html/milksha.html">
         <img class="logo" src="./logos/milksha_logo.png" alt="Milksha">
@@ -146,6 +62,11 @@
       <a class="card" href="./all_html/peaktea.html">
         <img class="logo" src="./logos/peaktea_logo.png" alt="Peak Tea">
         <div class="label"><b>青山</b></div>
+      </a>
+
+      <a class="card" href="./all_html/aniceholiday.html">
+        <img class="logo" src="./logos/aniceholiday_logo.jpg" alt="Peak Tea">
+        <div class="label"><b>一沐日</b><small>A NICE HOLIDAY</small></div>
       </a>
     </div>
   </div>

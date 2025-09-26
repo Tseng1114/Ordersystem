@@ -3,36 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>建立飲料事件</title>
-  <link rel="stylesheet" href="css/order_style.css">
-  <style>
-    .wrap{ max-width:760px }
-    .hidden{ display:none }
-    .hint{ color:#666; margin:6px 0 12px }
-    select.select-like{
-      width:100%; height:44px;
-      padding:10px 12px;
-      border:1px solid #d9dde4;
-      border-radius:10px;
-      background:#fff;
-      outline:none;
-    }
-  </style>
+  <title>建立飲料訂單</title>
+  <link rel="stylesheet" href="css/create_event_style.css">
 </head>
 <body>
   <div class="wrap">
-    <h1 class="page-title">建立飲料事件</h1>
-
+    <h1 class="page-title">建立飲料訂單</h1>
     <div id="loginCard" class="card">
-      <label for="pass">管理者通關碼</label>
-      <input id="pass" type="password" placeholder="請輸入通關碼">
+      <label for="pass">管理者密碼</label>
+      <input id="pass" type="password" placeholder="請輸入密碼">
       <div class="actions">
         <a class="back-home" href="index.html">回首頁</a>
         <button class="primary" id="loginBtn" type="button">登入</button>
       </div>
-      <div class="hint">登入成功後即可建立事件。</div>
+      <div class="hint">登入成功後即可建立訂單。</div>
     </div>
-
     <div id="createCard" class="card hidden">
       <label for="shopSelect">店家</label>
       <select id="shopSelect" class="select-like">
@@ -50,19 +35,15 @@
         <option>一沐日</option>
         <option value="__other">其他（自訂）</option>
       </select>
-
       <div id="otherBox" class="hidden" style="margin-top:10px;">
         <input id="shopOther" placeholder="請輸入店家名稱">
       </div>
-
       <label for="deadline" style="margin-top:12px;">截止時間（可留空）</label>
       <input id="deadline" type="datetime-local" />
-
       <div class="actions">
         <a class="back-home" href="index.html">回首頁</a>
-        <button class="primary" id="createBtn" type="button">建立事件</button>
+        <button class="primary" id="createBtn" type="button">建立訂單</button>
       </div>
-
       <div id="result" style="margin-top:16px; display:none;">
         <p>分享這個連結給大家下單：</p>
         <input id="shareLink" readonly style="width:100%;height:44px;padding:10px 12px;border:1px solid #ccc;border-radius:10px;">
@@ -74,7 +55,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzynD4F4AyQioisck6QTeCrfK0Ax_RJ_yqwDsOGGtk44wjEecb5NliKBtp34I7dmT8/exec';
     const TOKEN_KEY = 'drinksys_token';
 
     async function apiGet(params) {
@@ -83,7 +64,6 @@
 
       const res = await fetch(url.toString(), { credentials: 'omit' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      // Apps Script 需回傳 JSON
       return await res.json();
     }
 
@@ -105,7 +85,7 @@
 
     async function login(){
       const pass = document.querySelector('#pass').value.trim();
-      if (!pass) return alert('請輸入通關碼');
+      if (!pass) return alert('請輸入密碼');
 
       try{
         const res = await apiGet({ action: 'login', pass });

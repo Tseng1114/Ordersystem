@@ -6,13 +6,11 @@
   <title>下單</title>
   <link rel="stylesheet" href="css/order_style.css">
 </head>
-
 <body>
   <div class="wrap">
     <h1 class="page-title">下單</h1>
 
     <div class="card">
-
       <table id="itemsTbl">
         <thead>
           <tr>
@@ -21,7 +19,6 @@
         </thead>
         <tbody></tbody>
       </table>
-
       <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
         <button type="button" class="add" id="addItem">＋新增一筆</button>
@@ -29,9 +26,8 @@
       </div>
     </div>
   </div>
-
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzynD4F4AyQioisck6QTeCrfK0Ax_RJ_yqwDsOGGtk44wjEecb5NliKBtp34I7dmT8/exec';
     const EVENT_ID = new URLSearchParams(location.search).get('event');
 
     function jsonp(url, params) {
@@ -94,13 +90,21 @@
         <td>
           <select class="sugar">
             <option value="">—</option>
-            <option>無糖</option><option>一分糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常</option>
+            <option value="無糖">無糖</option>
+            <option value="一分糖">一分糖</option>
+            <option value="微糖">微糖</option>
+            <option value="半糖">半糖</option>
+            <option value="少糖">少糖</option>
+            <option value="全糖">正常</option>
           </select>
         </td>
         <td>
           <select class="ice">
             <option value="">—</option>
-            <option>去冰</option><option>微冰</option><option>少冰</option><option>正常</option>
+            <option>去冰</option>
+            <option>微冰</option>
+            <option>少冰</option>
+            <option>正常</option>
           </select>
         </td>
         <td><input class="qty" type="number" min="1" value="${defaults.qty||1}"></td>

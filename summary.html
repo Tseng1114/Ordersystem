@@ -3,74 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>彙整</title>
-  <link rel="stylesheet" href="css/order_style.css">
-  <style>
-    .meta{
-       color:#666;
-       margin:8px 0 12px
-     }
-    .controls{
-       display:flex;
-       gap:10px;
-       margin:8px 0 12px
-    }
-    .names{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-      gap:10px 14px
-    }
-    .pill{
-      background:#eef1f5;
-      border:1px solid #e0e4ea;
-      padding:10px 12px;
-      border-radius:999px;
-      text-align:center;
-      font-weight:600
-    }
-    .by-person{
-      margin-top:20px;
-      display:grid;
-      gap:12px
-    }
-    .person{
-      padding:12px 14px;
-      border:1px solid #e9edf2;
-      border-radius:12px;
-      background:#fafbfc
-    }
-    .person h4{
-      margin:0 0 8px;
-      font-size:16px
-    }
-    .person ul{
-      margin:0;
-      padding-left:18px
-    }
-    .hidden{
-      display:none
-    }
-    .error{
-      color:#b00020;
-      margin-top:8px
-    }
-  </style>
+  <title>訂單</title>
+  <link rel="stylesheet" href="css/summary_style.css">
 </head>
 <body>
   <div class="wrap">
     <h1 class="page-title">彙整</h1>
 
     <div id="loginCard" class="card">
-      <label for="pass">管理者通關碼</label>
-      <input id="pass" type="password" placeholder="請輸入通關碼">
+      <label for="pass">管理者密碼</label>
+      <input id="pass" type="password" placeholder="請輸入密碼">
       <div class="actions">
         <a class="back-home" href="index.html">回首頁</a>
         <button class="primary" id="loginBtn" type="button">登入</button>
       </div>
     </div>
+
     <div id="contentCard" class="card hidden">
+      <div class="actions" style="margin-bottom:10px;">
+        <a class="back-home" href="index.html">回首頁</a>
+      </div>
+
       <div id="meta" class="meta"></div>
       <div id="error" class="error"></div>
+      <div id="notice" style="margin:8px 0;color:#6b7280;font-size:14px;"></div>
 
       <h3 style="margin:6px 0;">誰有點</h3>
       <div id="list" class="names"></div>
@@ -80,8 +36,8 @@
     </div>
   </div>
 
-  <script>
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-aHee4_Fyo1bsiK_SK6jXK2F0QMwQaqyo-iw1nOGS_Fpmes0LLdEZK3Jl2DDVDLk/exec';
+<script>
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzynD4F4AyQioisck6QTeCrfK0Ax_RJ_yqwDsOGGtk44wjEecb5NliKBtp34I7dmT8/exec';
   const TOKEN_KEY = 'drinksys_token';
   let EVENT_ID = new URLSearchParams(location.search).get('event')
                || localStorage.getItem('last_event_id')
@@ -100,16 +56,29 @@
       document.body.appendChild(s);
     });
   }
-
   const collator = new Intl.Collator('zh-Hant');
   const toName = v => (v==null?'':String(v)).trim();
   const sortNames = arr => arr.sort((a,b)=>collator.compare(a,b));
   function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
   function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
 
+  const cacheKey = (eventId)=>`last_orders_${eventId}`;
+  function saveOrdersToCache(eventId, orders){
+    try{ localStorage.setItem(cacheKey(eventId), JSON.stringify({ ts: Date.now(), orders: orders||[] })); }catch(_){}
+  }
+  function loadOrdersFromCache(eventId){
+    try{
+      const raw = localStorage.getItem(cacheKey(eventId));
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.orders)) return null;
+      return parsed;
+    }catch(_){ return null; }
+  }
+
   async function login(){
     const pass = document.querySelector('#pass').value.trim();
-    if (!pass) return alert('請輸入通關碼');
+    if (!pass) return alert('請輸入密碼');
     const res = await jsonp(WEB_APP_URL, { action:'login', pass });
     if (!res.ok) return alert('登入失敗：'+(res.error||''));
     setToken(res.token);
@@ -126,8 +95,11 @@
     const $meta=document.querySelector('#meta'),
           $err=document.querySelector('#error'),
           $names=document.querySelector('#list'),
-          $by=document.querySelector('#byPerson');
+          $by=document.querySelector('#byPerson'),
+          $notice=document.querySelector('#notice');
+
     $err.textContent=''; $names.innerHTML=''; $by.innerHTML=''; $meta.textContent='讀取中…';
+    if ($notice) $notice.textContent='';
 
     try{
       const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
@@ -137,9 +109,33 @@
       document.querySelector('.page-title').textContent = `${ev.shop||'飲料事件'} 的彙整`;
       $meta.textContent = `狀態：${ev.status}${ev.deadline ? `｜截止：${ev.deadline}` : ''}`;
 
-      const res = await jsonp(WEB_APP_URL, { action:'listOrders', eventId: EVENT_ID, token });
-      if (!res.ok){ $err.textContent='訂單讀取失敗：'+(res.error||''); return; }
-      const orders = Array.isArray(res.orders) ? res.orders : [];
+      const res = await jsonp(WEB_APP_URL, { action:'listOrdersOrLast', eventId: EVENT_ID, token });
+      let orders = Array.isArray(res.orders) ? res.orders : [];
+
+      if ($notice) $notice.textContent = '';
+      if (res.usedFallback) {
+        const s = res.sourceEvent || {};
+        const shopOrTitle = s.shop || s.title || '';
+        const ddl = s.deadline ? `（截止：${s.deadline}）` : '';
+        if ($notice) $notice.textContent = `目前沒有新的訂單，以下顯示「上一個有訂單的事件」${shopOrTitle ? `：${shopOrTitle}` : ''} ${ddl}`;
+      }
+
+      // 沒有新訂單時，退回本機快取
+      if (orders.length > 0){
+        saveOrdersToCache(EVENT_ID, orders);
+      } else {
+        const cached = loadOrdersFromCache(EVENT_ID);
+        if (cached && cached.orders.length){
+          orders = cached.orders;
+          if ($notice){
+            const dt = new Date(cached.ts);
+            const timeText = isFinite(dt.getTime()) ? `（上次快取時間：${dt.toLocaleString()}）` : '';
+            $notice.innerHTML = `目前沒有新的訂單，以下顯示「上次訂單」${timeText}`;
+          }
+        } else {
+          if ($notice) $notice.textContent = '目前沒有新的訂單。';
+        }
+      }
 
       if (!orders.length){
         $names.innerHTML = '<div class="pill">（尚無訂單）</div>';
@@ -148,38 +144,65 @@
         $names.innerHTML = sortNames(uniq).map(n=>`<div class="pill">${n}</div>`).join('');
       }
 
+      const read = (obj, ...keys) => {
+        for (const k of keys) {
+          const v = obj && obj[k];
+          if (v != null && String(v).trim() !== '') return String(v).trim();
+        }
+        return '';
+      };
       const map = new Map();
-      for(const o of orders){
-        const k = toName(o.customer); if (!k) continue;
-        (map.get(k) || map.set(k,[]).get(k)).push(o);
+
+      for (const o of orders) {
+        const person = toName(o.customer);
+        if (!person) continue;
+        const list = map.get(person) || [];
+
+        if (Array.isArray(o.items) && o.items.length) {
+          for (const it of o.items) {
+            list.push({
+              name:  toName(read(it, 'name', '品項', 'drink', '商品')),
+              sugar: toName(read(it, 'sugar', '糖度', 'suger', '甜度')) || '—',
+              ice:   toName(read(it, 'ice', '冰塊', '冰度')) || '—',
+              qty:   Number(read(it, 'qty', '數量')) || 1,
+            });
+          }
+        } else {
+          list.push({
+            name:  toName(read(o, 'name', '品項', 'drink', '商品')),
+            sugar: toName(read(o, 'sugar', '糖度', 'suger', '甜度')) || '—',
+            ice:   toName(read(o, 'ice', '冰塊', '冰度')) || '—',
+            qty:   Number(read(o, 'qty', '數量')) || 1,
+          });
+        }
+        map.set(person, list);
       }
+
       const people = sortNames([...map.keys()]);
       if (!people.length){
         $by.innerHTML = '<div class="person">（尚無明細）</div>';
       } else {
+        const showSugar = (s)=> s === '全糖' ? '正常' : (s || '—'); // 可選：把「全糖」顯示為「正常」
         $by.innerHTML = people.map(name=>{
-          const lines = map.get(name).map(o=>{
-            const drink=toName(o.name), sugar=toName(o.sugar)||'—', ice=toName(o.ice)||'—', qty=Number(o.qty||0)||1;
-            return `<li>${drink||'（未填品項）'}／${sugar}／${ice} × ${qty}</li>`;
+          const lines = (map.get(name) || []).map(it=>{
+            const drink = it.name || '（未填品項）';
+            return `<li>${drink}／${showSugar(it.sugar)}／${it.ice} × ${it.qty}</li>`;
           }).join('');
           return `<div class="person"><h4>${name}</h4><ul>${lines}</ul></div>`;
         }).join('');
       }
     }catch(e){
-      $meta.textContent=''; $err.textContent='讀取失敗：'+(e?.message||e);
+      document.querySelector('#meta').textContent='';
+      document.querySelector('#error').textContent='讀取失敗：'+(e?.message||e);
     }
   }
 
   document.querySelector('#loginBtn').addEventListener('click', login);
-
   if (getToken()){
     document.querySelector('#loginCard').classList.add('hidden');
     document.querySelector('#contentCard').classList.remove('hidden');
     load();
   }
 </script>
-
-
-
 </body>
 </html>

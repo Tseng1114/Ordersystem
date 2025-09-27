@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>下單</title>
   <link rel="stylesheet" href="css/order_style.css">
+  <link rel="stylesheet" href="css/loading.css">
 </head>
 <body>
   <div class="wrap">
@@ -26,9 +27,20 @@
       </div>
     </div>
   </div>
+
+  <div id="loadingOverlay">
+    <div class="spinner-box">
+      <div class="spinner"></div>
+      <div class="spinner-text">處理中，請稍候...</div>
+    </div>
+  </div>
+
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzynD4F4AyQioisck6QTeCrfK0Ax_RJ_yqwDsOGGtk44wjEecb5NliKBtp34I7dmT8/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx7Hz0gVNSWiOZHUXGBThD1wJbNU3mWdrv4JHK9vHJtqoIDZ14mEF6qfbu4gsNLdwg/exec';
     const EVENT_ID = new URLSearchParams(location.search).get('event');
+
+    function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
+    function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
 
     function jsonp(url, params) {
       return new Promise((resolve, reject) => {
@@ -65,20 +77,23 @@
         alert('缺少 event 參數，請從「建立事件」頁面取得分享連結進入。');
         return;
       }
-      const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
-      if (!info.ok) { alert('找不到事件：' + (info.error||'')); return; }
-
-      const ev = info.event;
-      document.title = `${ev.title || '下單'} - ${ev.shop || ''}`;
-      const h1 = document.querySelector('.page-title');
-      if (h1) h1.textContent = `${ev.shop || ev.title || '下單'}`;
-
-      const closed = String(ev.status||'').toLowerCase()==='closed';
-      const expired = (typeof info.expired === 'boolean') ? info.expired : isExpired(ev.deadline);
-      if (closed || expired){
-        document.querySelector('#addItem').disabled = true;
-        document.querySelector('#submitBtn').disabled = true;
-        alert(expired ? '已過截止時間，無法再下單。' : '此事件已結單。');
+      showLoading();
+      try{
+        const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
+        if (!info.ok) { alert('找不到事件：' + (info.error||'')); return; }
+        const ev = info.event;
+        document.title = `${ev.title || '下單'} - ${ev.shop || ''}`;
+        const h1 = document.querySelector('.page-title');
+        if (h1) h1.textContent = `${ev.shop || ev.title || '下單'}`;
+        const closed = String(ev.status||'').toLowerCase()==='closed';
+        const expired = (typeof info.expired === 'boolean') ? info.expired : isExpired(ev.deadline);
+        if (closed || expired){
+          document.querySelector('#addItem').disabled = true;
+          document.querySelector('#submitBtn').disabled = true;
+          alert(expired ? '已過截止時間，無法再下單。' : '此事件已結單。');
+        }
+      }finally{
+        hideLoading();
       }
     }
 
@@ -132,17 +147,21 @@
       ev?.preventDefault();
       const { ok, rows, error } = collectRows();
       if (!ok) return alert(error || '請檢查每筆資料');
-
-      let success = 0, fail = 0, msg = '';
-      for (const r of rows) {
-        const payload = { eventId: EVENT_ID, customer: r.who, items: [ r.item ] };
-        try{
-          const res = await jsonp(WEB_APP_URL, { action:'addOrder', payload: JSON.stringify(payload) });
-          if (res && res.ok) success++; else { fail++; msg = res?.error || msg; }
-        }catch(e){ fail++; msg = e?.message || msg; }
+      showLoading();
+      try{
+        let success = 0, fail = 0, msg = '';
+        for (const r of rows) {
+          const payload = { eventId: EVENT_ID, customer: r.who, items: [ r.item ] };
+          try{
+            const res = await jsonp(WEB_APP_URL, { action:'addOrder', payload: JSON.stringify(payload) });
+            if (res && res.ok) success++; else { fail++; msg = res?.error || msg; }
+          }catch(e){ fail++; msg = e?.message || msg; }
+        }
+        if (fail === 0) alert(`已送出 ${success} 筆！`);
+        else alert(`成功 ${success} 筆，失敗 ${fail} 筆。${msg?('最後錯誤：'+msg):''}`);
+      }finally{
+        hideLoading();
       }
-      if (fail === 0) alert(`已送出 ${success} 筆！`);
-      else alert(`成功 ${success} 筆，失敗 ${fail} 筆。${msg?('最後錯誤：'+msg):''}`);
     }
 
     document.addEventListener('DOMContentLoaded', async ()=>{

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>訂單</title>
   <link rel="stylesheet" href="css/summary_style.css">
+  <link rel="stylesheet" href="css/loading.css">
 </head>
 <body>
   <div class="wrap">
@@ -25,6 +26,7 @@
       </div>
 
       <div id="meta" class="meta"></div>
+      <div id="deadlineBox" class="timestamp-box"></div>
       <div id="error" class="error"></div>
       <div id="notice" style="margin:8px 0;color:#6b7280;font-size:14px;"></div>
 
@@ -36,13 +38,23 @@
     </div>
   </div>
 
+  <div id="loadingOverlay">
+    <div class="spinner-box">
+      <div class="spinner"></div>
+      <div class="spinner-text">處理中，請稍候...</div>
+    </div>
+  </div>
+
 <script>
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzynD4F4AyQioisck6QTeCrfK0Ax_RJ_yqwDsOGGtk44wjEecb5NliKBtp34I7dmT8/exec';
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx7Hz0gVNSWiOZHUXGBThD1wJbNU3mWdrv4JHK9vHJtqoIDZ14mEF6qfbu4gsNLdwg/exec';
   const TOKEN_KEY = 'drinksys_token';
   let EVENT_ID = new URLSearchParams(location.search).get('event')
                || localStorage.getItem('last_event_id')
                || '';
   if (EVENT_ID) { try { localStorage.setItem('last_event_id', EVENT_ID); } catch(_) {} }
+
+  function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
+  function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
 
   function jsonp(url, params){
     return new Promise((resolve,reject)=>{
@@ -79,12 +91,17 @@
   async function login(){
     const pass = document.querySelector('#pass').value.trim();
     if (!pass) return alert('請輸入密碼');
-    const res = await jsonp(WEB_APP_URL, { action:'login', pass });
-    if (!res.ok) return alert('登入失敗：'+(res.error||''));
-    setToken(res.token);
-    document.querySelector('#loginCard').classList.add('hidden');
-    document.querySelector('#contentCard').classList.remove('hidden');
-    load();
+    showLoading();
+    try{
+      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
+      if (!res.ok) return alert('登入失敗：'+(res.error||''));
+      setToken(res.token);
+      document.querySelector('#loginCard').classList.add('hidden');
+      document.querySelector('#contentCard').classList.remove('hidden');
+      load();
+    }finally{
+      hideLoading();
+    }
   }
 
   async function load(){
@@ -101,6 +118,7 @@
     $err.textContent=''; $names.innerHTML=''; $by.innerHTML=''; $meta.textContent='讀取中…';
     if ($notice) $notice.textContent='';
 
+    showLoading();
     try{
       const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
       if (!info.ok){ $meta.textContent=''; $err.textContent='事件讀取失敗：'+(info.error||''); return; }
@@ -120,7 +138,6 @@
         if ($notice) $notice.textContent = `目前沒有新的訂單，以下顯示「上一個有訂單的事件」${shopOrTitle ? `：${shopOrTitle}` : ''} ${ddl}`;
       }
 
-      // 沒有新訂單時，退回本機快取
       if (orders.length > 0){
         saveOrdersToCache(EVENT_ID, orders);
       } else {
@@ -182,7 +199,7 @@
       if (!people.length){
         $by.innerHTML = '<div class="person">（尚無明細）</div>';
       } else {
-        const showSugar = (s)=> s === '全糖' ? '正常' : (s || '—'); // 可選：把「全糖」顯示為「正常」
+        const showSugar = (s)=> s === '全糖' ? '正常' : (s || '—');
         $by.innerHTML = people.map(name=>{
           const lines = (map.get(name) || []).map(it=>{
             const drink = it.name || '（未填品項）';
@@ -191,9 +208,28 @@
           return `<div class="person"><h4>${name}</h4><ul>${lines}</ul></div>`;
         }).join('');
       }
-    }catch(e){
-      document.querySelector('#meta').textContent='';
-      document.querySelector('#error').textContent='讀取失敗：'+(e?.message||e);
+
+      const deadlineBox = document.getElementById('deadlineBox');
+      if (deadlineBox){
+        if (ev.deadline){
+          const dt = new Date(ev.deadline);
+          const fmt = new Intl.DateTimeFormat('zh-TW', {
+            timeZone: 'Asia/Taipei',
+            month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit',
+            hour12: false
+          }).format(dt);
+          const [md, hm] = fmt.split(' ');
+          const [mm, dd] = md.split('/');
+          deadlineBox.textContent = `訂單截止時間：${mm}月${dd}日 ${hm}`;
+          deadlineBox.style.display = '';
+        } else {
+          deadlineBox.textContent = '';
+          deadlineBox.style.display = 'none';
+        }
+      }
+    }finally{
+      hideLoading();
     }
   }
 

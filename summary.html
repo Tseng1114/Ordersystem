@@ -1,244 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>訂單</title>
+  <meta charset="UTF-8" />
+  <title>訂單彙整</title>
   <link rel="stylesheet" href="css/summary_style.css">
   <link rel="stylesheet" href="css/loading.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-  <div class="wrap">
-    <h1 class="page-title">彙整</h1>
-
-    <div id="loginCard" class="card">
-      <label for="pass">管理者密碼</label>
-      <input id="pass" type="password" placeholder="請輸入密碼">
-      <div class="actions">
-        <a class="back-home" href="index.html">回首頁</a>
-        <button class="primary" id="loginBtn" type="button">登入</button>
-      </div>
-    </div>
-
-    <div id="contentCard" class="card hidden">
-      <div class="actions" style="margin-bottom:10px;">
-        <a class="back-home" href="index.html">回首頁</a>
-      </div>
-
-      <div id="meta" class="meta"></div>
-      <div id="deadlineBox" class="timestamp-box"></div>
-      <div id="error" class="error"></div>
-      <div id="notice" style="margin:8px 0;color:#6b7280;font-size:14px;"></div>
-
-      <h3 style="margin:6px 0;">誰有點</h3>
-      <div id="list" class="names"></div>
-
-      <h3 style="margin:20px 0 6px;">誰點什麼</h3>
-      <div id="byPerson" class="by-person"></div>
-    </div>
-  </div>
-
   <div id="loadingOverlay">
     <div class="spinner-box">
       <div class="spinner"></div>
-      <div class="spinner-text">處理中，請稍候...</div>
+      <div style="margin-top:10px;">處理中，請稍候...</div>
     </div>
   </div>
 
-<script>
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx7Hz0gVNSWiOZHUXGBThD1wJbNU3mWdrv4JHK9vHJtqoIDZ14mEF6qfbu4gsNLdwg/exec';
-  const TOKEN_KEY = 'drinksys_token';
-  let EVENT_ID = new URLSearchParams(location.search).get('event')
-               || localStorage.getItem('last_event_id')
-               || '';
-  if (EVENT_ID) { try { localStorage.setItem('last_event_id', EVENT_ID); } catch(_) {} }
+  <div class="wrap">
+    <div class="card">
+      <h1 class="page-title">訂單彙整</h1>
 
-  function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
-  function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
+      <div id="eventInfo" class="meta"></div>
+      <div id="error" class="error"></div>
 
-  function jsonp(url, params){
-    return new Promise((resolve,reject)=>{
-      const cb='cb_'+Date.now()+Math.random().toString(36).slice(2);
-      params.callback=cb;
-      const s=document.createElement('script');
-      s.src=url+'?'+new URLSearchParams(params).toString();
-      window[cb]=(data)=>{resolve(data);cleanup();};
-      s.onerror=()=>{reject(new Error('JSONP failed'));cleanup();};
-      function cleanup(){delete window[cb]; s.remove();}
-      document.body.appendChild(s);
-    });
-  }
-  const collator = new Intl.Collator('zh-Hant');
-  const toName = v => (v==null?'':String(v)).trim();
-  const sortNames = arr => arr.sort((a,b)=>collator.compare(a,b));
-  function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
-  function setToken(t){ localStorage.setItem(TOKEN_KEY,t); }
+      <div id="byPersonBox" class="by-person hidden">
+        <h3 style="margin:18px 0 8px;">依人統計</h3>
+        <div id="byPersonList"></div>
+        <div id="byPersonEmpty" class="hidden" style="color:#777;text-align:center;margin-top:8px;">目前沒有任何訂單。</div>
+      </div>
 
-  const cacheKey = (eventId)=>`last_orders_${eventId}`;
-  function saveOrdersToCache(eventId, orders){
-    try{ localStorage.setItem(cacheKey(eventId), JSON.stringify({ ts: Date.now(), orders: orders||[] })); }catch(_){}
-  }
-  function loadOrdersFromCache(eventId){
-    try{
-      const raw = localStorage.getItem(cacheKey(eventId));
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || !Array.isArray(parsed.orders)) return null;
-      return parsed;
-    }catch(_){ return null; }
-  }
+      <div class="actions">
+        <a href="index.html" class="back-home">回首頁</a>
+      </div>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script>
+    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
+    const params = new URLSearchParams(location.search);
+    const EVENT_ID = params.get("event");
 
-  async function login(){
-    const pass = document.querySelector('#pass').value.trim();
-    if (!pass) return alert('請輸入密碼');
-    showLoading();
-    try{
-      const res = await jsonp(WEB_APP_URL, { action:'login', pass });
-      if (!res.ok) return alert('登入失敗：'+(res.error||''));
-      setToken(res.token);
-      document.querySelector('#loginCard').classList.add('hidden');
-      document.querySelector('#contentCard').classList.remove('hidden');
-      load();
-    }finally{
-      hideLoading();
+    function showLoadingOverlay(show){
+      const el = document.getElementById("loadingOverlay");
+      if (!el) return;
+      el.style.display = show ? "block" : "none";
     }
-  }
-
-  async function load(){
-    const token = getToken();
-    if (!token){ document.querySelector('#loginCard').classList.remove('hidden'); return; }
-    if (!EVENT_ID){ document.querySelector('#error').textContent = '缺少 event 參數'; return; }
-
-    const $meta=document.querySelector('#meta'),
-          $err=document.querySelector('#error'),
-          $names=document.querySelector('#list'),
-          $by=document.querySelector('#byPerson'),
-          $notice=document.querySelector('#notice');
-
-    $err.textContent=''; $names.innerHTML=''; $by.innerHTML=''; $meta.textContent='讀取中…';
-    if ($notice) $notice.textContent='';
-
-    showLoading();
-    try{
-      const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
-      if (!info.ok){ $meta.textContent=''; $err.textContent='事件讀取失敗：'+(info.error||''); return; }
-      const ev = info.event;
-      document.title = `彙整 - ${ev.shop||''}`;
-      document.querySelector('.page-title').textContent = `${ev.shop||'飲料事件'} 的彙整`;
-      $meta.textContent = `狀態：${ev.status}${ev.deadline ? `｜截止：${ev.deadline}` : ''}`;
-
-      const res = await jsonp(WEB_APP_URL, { action:'listOrdersOrLast', eventId: EVENT_ID, token });
-      let orders = Array.isArray(res.orders) ? res.orders : [];
-
-      if ($notice) $notice.textContent = '';
-      if (res.usedFallback) {
-        const s = res.sourceEvent || {};
-        const shopOrTitle = s.shop || s.title || '';
-        const ddl = s.deadline ? `（截止：${s.deadline}）` : '';
-        if ($notice) $notice.textContent = `目前沒有新的訂單，以下顯示「上一個有訂單的事件」${shopOrTitle ? `：${shopOrTitle}` : ''} ${ddl}`;
-      }
-
-      if (orders.length > 0){
-        saveOrdersToCache(EVENT_ID, orders);
-      } else {
-        const cached = loadOrdersFromCache(EVENT_ID);
-        if (cached && cached.orders.length){
-          orders = cached.orders;
-          if ($notice){
-            const dt = new Date(cached.ts);
-            const timeText = isFinite(dt.getTime()) ? `（上次快取時間：${dt.toLocaleString()}）` : '';
-            $notice.innerHTML = `目前沒有新的訂單，以下顯示「上次訂單」${timeText}`;
-          }
-        } else {
-          if ($notice) $notice.textContent = '目前沒有新的訂單。';
-        }
-      }
-
-      if (!orders.length){
-        $names.innerHTML = '<div class="pill">（尚無訂單）</div>';
-      } else {
-        const uniq = [...new Set(orders.map(o=>toName(o.customer)).filter(Boolean))];
-        $names.innerHTML = sortNames(uniq).map(n=>`<div class="pill">${n}</div>`).join('');
-      }
-
-      const read = (obj, ...keys) => {
-        for (const k of keys) {
-          const v = obj && obj[k];
-          if (v != null && String(v).trim() !== '') return String(v).trim();
-        }
-        return '';
-      };
-      const map = new Map();
-
-      for (const o of orders) {
-        const person = toName(o.customer);
-        if (!person) continue;
-        const list = map.get(person) || [];
-
-        if (Array.isArray(o.items) && o.items.length) {
-          for (const it of o.items) {
-            list.push({
-              name:  toName(read(it, 'name', '品項', 'drink', '商品')),
-              sugar: toName(read(it, 'sugar', '糖度', 'suger', '甜度')) || '—',
-              ice:   toName(read(it, 'ice', '冰塊', '冰度')) || '—',
-              qty:   Number(read(it, 'qty', '數量')) || 1,
-            });
-          }
-        } else {
-          list.push({
-            name:  toName(read(o, 'name', '品項', 'drink', '商品')),
-            sugar: toName(read(o, 'sugar', '糖度', 'suger', '甜度')) || '—',
-            ice:   toName(read(o, 'ice', '冰塊', '冰度')) || '—',
-            qty:   Number(read(o, 'qty', '數量')) || 1,
-          });
-        }
-        map.set(person, list);
-      }
-
-      const people = sortNames([...map.keys()]);
-      if (!people.length){
-        $by.innerHTML = '<div class="person">（尚無明細）</div>';
-      } else {
-        const showSugar = (s)=> s === '全糖' ? '正常' : (s || '—');
-        $by.innerHTML = people.map(name=>{
-          const lines = (map.get(name) || []).map(it=>{
-            const drink = it.name || '（未填品項）';
-            return `<li>${drink}／${showSugar(it.sugar)}／${it.ice} × ${it.qty}</li>`;
-          }).join('');
-          return `<div class="person"><h4>${name}</h4><ul>${lines}</ul></div>`;
-        }).join('');
-      }
-
-      const deadlineBox = document.getElementById('deadlineBox');
-      if (deadlineBox){
-        if (ev.deadline){
-          const dt = new Date(ev.deadline);
-          const fmt = new Intl.DateTimeFormat('zh-TW', {
-            timeZone: 'Asia/Taipei',
-            month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit',
-            hour12: false
-          }).format(dt);
-          const [md, hm] = fmt.split(' ');
-          const [mm, dd] = md.split('/');
-          deadlineBox.textContent = `訂單截止時間：${mm}月${dd}日 ${hm}`;
-          deadlineBox.style.display = '';
-        } else {
-          deadlineBox.textContent = '';
-          deadlineBox.style.display = 'none';
-        }
-      }
-    }finally{
-      hideLoading();
+    function getToken(){
+      try {
+        return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || "";
+      } catch { return ""; }
     }
-  }
+    function jsonp(url, params) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Date.now() + Math.random().toString(36).slice(2);
+        params.callback = cb;
+        const qs = new URLSearchParams(params).toString();
+        const s = document.createElement("script");
+        s.src = url + "?" + qs;
+        window[cb] = (data) => { resolve(data); cleanup(); };
+        s.onerror = () => { reject(new Error("JSONP failed")); cleanup(); };
+        function cleanup(){ delete window[cb]; s.remove(); }
+        document.body.appendChild(s);
+      });
+    }
+    function pick(...candidates){
+      for (const v of candidates) if (v !== undefined && v !== null && String(v).trim() !== "") return String(v);
+      return "";
+    }
+    function fmt(value, fallback){ return (value && String(value).trim() !== "") ? value : fallback; }
 
-  document.querySelector('#loginBtn').addEventListener('click', login);
-  if (getToken()){
-    document.querySelector('#loginCard').classList.add('hidden');
-    document.querySelector('#contentCard').classList.remove('hidden');
+    async function load() {
+      const errorEl = document.getElementById("error");
+      const byPersonBox = document.getElementById("byPersonBox");
+      showLoadingOverlay(true);
+
+      if (!EVENT_ID) {
+        showLoadingOverlay(false);
+        errorEl.textContent = "缺少 event 參數，請從活動頁正確進入。";
+        return;
+      }
+      const token = getToken();
+      if (!token) {
+        showLoadingOverlay(false);
+        errorEl.textContent = "尚未登入（缺少 token）。請先到「建立飲料訂單」頁登入再回來。";
+        return;
+      }
+
+      try {
+        const data = await jsonp(WEB_APP_URL, {
+          action: "aggregate",
+          eventId: EVENT_ID,
+          token,
+          _ts: Date.now()
+        });
+
+        document.getElementById("eventInfo").textContent = `近期訂單：${EVENT_ID}`;
+        if (!data || !data.ok) {
+          showLoadingOverlay(false);
+          errorEl.textContent = "無法載入資料：" + (data && data.error ? data.error : "未知錯誤");
+          return;
+        }
+
+        const byPerson = data.byPerson || {};
+        const people = Object.keys(byPerson);
+        byPersonBox.classList.remove("hidden");
+
+        const list = document.getElementById("byPersonList");
+        list.innerHTML = "";
+
+        if (people.length === 0) {
+          document.getElementById("byPersonEmpty").classList.remove("hidden");
+          showLoadingOverlay(false);
+          return;
+        }
+        document.getElementById("byPersonEmpty").classList.add("hidden");
+
+        people.sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+        people.forEach(name => {
+          const orders = byPerson[name] || [];
+          const box = document.createElement("div");
+          box.className = "person";
+          const items = orders.map(o => {
+            const sugar = pick(o.sugar, o.sweet, o.suger);
+            const ice   = pick(o.ice, o.iceLevel);
+            const qty   = Number(o.qty || 1);
+            const sugarText = "／" + fmt(sugar, "未選甜度");
+            const iceText   = "／" + fmt(ice, "未選冰量");
+            const notesText = o.notes ? `（${o.notes}）` : "";
+            return `<li>${fmt(o.name, "未填品項")}${sugarText}${iceText} × ${qty}${notesText}</li>`;
+          }).join("");
+          box.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
+          list.appendChild(box);
+        });
+
+        showLoadingOverlay(false);
+      } catch (err) {
+        showLoadingOverlay(false);
+        errorEl.textContent = "載入失敗：" + (err && err.message ? err.message : err);
+      }
+    }
+
     load();
-  }
-</script>
+  </script>
 </body>
 </html>

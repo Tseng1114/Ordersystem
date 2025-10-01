@@ -62,11 +62,9 @@
       <div class="spinner-text">處理中，請稍候...</div>
     </div>
   </div>
-
+  <script src="config.js"></script>
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx7Hz0gVNSWiOZHUXGBThD1wJbNU3mWdrv4JHK9vHJtqoIDZ14mEF6qfbu4gsNLdwg/exec';
-    const TOKEN_KEY = 'drinksys_token';
-
+    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
     function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
     function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
 
@@ -117,7 +115,7 @@
       const deadline = document.querySelector('#deadline').value;
       if (!shop) return alert('請選擇店家或輸入自訂店名');
       const token = getToken();
-      if (!token) return alert('尚未登入，請先輸入通關碼');
+      if (!token) return alert('尚未登入，請先輸入密碼');
       showLoading();
       try{
         const res = await apiGet({ action:'createEvent', shop, deadline, token });

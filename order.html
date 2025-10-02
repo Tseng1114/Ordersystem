@@ -44,10 +44,7 @@
 
   <script src="config.js"></script>
   <script>
-    const CFG = window.APP_CONFIG || {};
-    const WEB_APP_URL = CFG.WEB_APP_URL || "";
-    const TOKEN_KEY   = CFG.TOKEN_KEY   || "drinksys_token";
-
+    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
     const EVENT_ID = new URLSearchParams(location.search).get("event");
 
     function showLoading(){ const el = document.getElementById('loadingOverlay'); if (el) el.style.display='block'; }

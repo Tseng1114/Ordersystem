@@ -33,11 +33,11 @@
       </div>
     </div>
   </div>
+
   <script src="config.js"></script>
   <script>
     const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
     const params = new URLSearchParams(location.search);
-    const EVENT_ID = params.get("event");
 
     function showLoadingOverlay(show){
       const el = document.getElementById("loadingOverlay");
@@ -68,43 +68,44 @@
     }
     function fmt(value, fallback){ return (value && String(value).trim() !== "") ? value : fallback; }
 
+    async function ensureEventParam(){
+      let eventId = params.get("event");
+      if (eventId && eventId.trim()) return eventId;
+
+      const res = await jsonp(WEB_APP_URL, { action: "latestEvent", _ts: Date.now() });
+      if (!res || !res.ok) throw new Error(res && res.error ? res.error : "latestEvent 失敗");
+      if (!res.id) throw new Error("目前沒有任何活動可顯示");
+      eventId = res.id;
+      location.replace(location.pathname + "?event=" + encodeURIComponent(eventId));
+      return null;
+    }
+
     async function load() {
+      showLoadingOverlay(true);
       const errorEl = document.getElementById("error");
       const byPersonBox = document.getElementById("byPersonBox");
-      showLoadingOverlay(true);
+      const list = document.getElementById("byPersonList");
 
-      if (!EVENT_ID) {
-        showLoadingOverlay(false);
-        errorEl.textContent = "缺少 event 參數，請從活動頁正確進入。";
-        return;
-      }
-      const token = getToken();
-      if (!token) {
-        showLoadingOverlay(false);
-        errorEl.textContent = "尚未登入（缺少 token）。請先到「建立飲料訂單」頁登入再回來。";
-        return;
-      }
+      try{
+        const eventId = params.get("event") || await ensureEventParam();
+        if (!eventId) return;
 
-      try {
-        const data = await jsonp(WEB_APP_URL, {
-          action: "aggregate",
-          eventId: EVENT_ID,
-          token,
-          _ts: Date.now()
-        });
+        document.getElementById("eventInfo").textContent = `近期訂單：${eventId}`;
 
-        document.getElementById("eventInfo").textContent = `近期訂單：${EVENT_ID}`;
-        if (!data || !data.ok) {
-          showLoadingOverlay(false);
-          errorEl.textContent = "無法載入資料：" + (data && data.error ? data.error : "未知錯誤");
-          return;
+        let data;
+        const token = getToken();
+        if (token) {
+          data = await jsonp(WEB_APP_URL, { action: "aggregate", eventId, token, _ts: Date.now() });
+          if (!data || data.ok !== true) data = null;
         }
+        if (!data) {
+          data = await jsonp(WEB_APP_URL, { action: "aggregatePublic", eventId, _ts: Date.now() });
+        }
+        if (!data || data.ok !== true) throw new Error(data && data.error ? data.error : "無法載入資料");
 
         const byPerson = data.byPerson || {};
         const people = Object.keys(byPerson);
         byPersonBox.classList.remove("hidden");
-
-        const list = document.getElementById("byPersonList");
         list.innerHTML = "";
 
         if (people.length === 0) {
@@ -138,7 +139,6 @@
         errorEl.textContent = "載入失敗：" + (err && err.message ? err.message : err);
       }
     }
-
     load();
   </script>
 </body>

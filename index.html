@@ -14,17 +14,6 @@
     <div class="order-btn-container">
       <a href="create_event.html" class="order-btn">建立飲料訂單</a>
       <a id="summaryLink" href="summary.html" class="order-btn">查看訂單</a>
-      <script>
-        (() => {
-          try {
-            const id = localStorage.getItem('last_event_id');
-            if (id) {
-              document.getElementById('summaryLink').href =
-                'summary.html?event=' + encodeURIComponent(id);
-            }
-          } catch (e) {}
-        })();
-      </script>
     </div>
 
     <div class="grid">
@@ -89,5 +78,55 @@
       </a>
     </div>
   </div>
+
+  <script src="config.js"></script>
+  <script>
+    (function () {
+      const { WEB_APP_URL } = window.APP_CONFIG || {};
+      const summaryLink = document.getElementById("summaryLink");
+
+      function uiMessage(html) {
+        const box = document.createElement("div");
+        box.style.cssText = "margin:12px;padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;color:#92400e";
+        box.innerHTML = html;
+        document.body.prepend(box);
+      }
+      function jsonp(url, params) {
+        return new Promise((resolve, reject) => {
+          const cb = "cb_" + Date.now() + Math.random().toString(36).slice(2);
+          params = params || {}; params.callback = cb;
+          const s = document.createElement("script");
+          s.src = url + "?" + new URLSearchParams(params).toString();
+          window[cb] = (data)=>{ cleanup(); resolve(data); };
+          s.onerror = ()=>{ cleanup(); reject(new Error("JSONP failed")); };
+          function cleanup(){ try{ delete window[cb]; }catch{} try{s.remove();}catch{} }
+          document.body.appendChild(s);
+        });
+      }
+
+      async function initLink(){
+        let id = null;
+        try { id = localStorage.getItem("last_event_id") || null; } catch(_){}
+        if (!id) {
+          if (!WEB_APP_URL) { uiMessage("尚未設定 <b>WEB_APP_URL</b>"); return; }
+          try {
+            const res = await jsonp(WEB_APP_URL, { action:"latestEvent", _ts: Date.now() });
+            if (res && res.ok && res.id) {
+              id = res.id;
+              try { localStorage.setItem("last_event_id", id); } catch(_){}
+            } else {
+              uiMessage("目前沒有活動可顯示，請先建立一筆。");
+              return;
+            }
+          } catch (err) {
+            uiMessage("取得最後一筆活動失敗：" + String(err).replace(/</g,"&lt;"));
+            return;
+          }
+        }
+        if (summaryLink) summaryLink.href = "summary.html?event=" + encodeURIComponent(id);
+      }
+      document.addEventListener("DOMContentLoaded", initLink, { once:true });
+    })();
+  </script>
 </body>
 </html>

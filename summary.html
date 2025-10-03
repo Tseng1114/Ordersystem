@@ -14,20 +14,16 @@
       <div style="margin-top:10px;">處理中，請稍候...</div>
     </div>
   </div>
-
   <div class="wrap">
     <div class="card">
       <h1 class="page-title">訂單彙整</h1>
-
       <div id="eventInfo" class="meta"></div>
       <div id="error" class="error"></div>
-
       <div id="byPersonBox" class="by-person hidden">
-        <h3 style="margin:18px 0 8px;">依人統計</h3>
+        <h3 class="section-title">依人統計</h3>
         <div id="byPersonList"></div>
-        <div id="byPersonEmpty" class="hidden" style="color:#777;text-align:center;margin-top:8px;">目前沒有任何訂單。</div>
+        <div id="byPersonEmpty" class="hidden empty-hint">目前沒有任何訂單。</div>
       </div>
-
       <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
       </div>
@@ -58,25 +54,33 @@
         s.src = url + "?" + qs;
         window[cb] = (data) => { resolve(data); cleanup(); };
         s.onerror = () => { reject(new Error("JSONP failed")); cleanup(); };
-        function cleanup(){ delete window[cb]; s.remove(); }
+        function cleanup(){ try{ delete window[cb]; }catch{} try{ s.remove(); }catch{} }
         document.body.appendChild(s);
       });
     }
-    function pick(...candidates){
-      for (const v of candidates) if (v !== undefined && v !== null && String(v).trim() !== "") return String(v);
-      return "";
+    function escapeHtml(str){
+      return String(str||"").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
-    function fmt(value, fallback){ return (value && String(value).trim() !== "") ? value : fallback; }
+    function toDate(v){
+      if (!v && v!==0) return null;
+      if (v instanceof Date) return isNaN(v) ? null : v;
+      const d = new Date(String(v));
+      return isNaN(d) ? null : d;
+    }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function fmtTs(d){
+      if (!d) return '-';
+      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) +
+             ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
 
     async function ensureEventParam(){
       let eventId = params.get("event");
       if (eventId && eventId.trim()) return eventId;
-
       const res = await jsonp(WEB_APP_URL, { action: "latestEvent", _ts: Date.now() });
       if (!res || !res.ok) throw new Error(res && res.error ? res.error : "latestEvent 失敗");
-      if (!res.id) throw new Error("目前沒有任何活動可顯示");
-      eventId = res.id;
-      location.replace(location.pathname + "?event=" + encodeURIComponent(eventId));
+      if (!res.id) throw new Error("目前沒有任何訂單可顯示");
+      location.replace(location.pathname + "?event=" + encodeURIComponent(res.id));
       return null;
     }
 
@@ -85,22 +89,39 @@
       const errorEl = document.getElementById("error");
       const byPersonBox = document.getElementById("byPersonBox");
       const list = document.getElementById("byPersonList");
+      const eventInfoEl = document.getElementById("eventInfo");
 
       try{
         const eventId = params.get("event") || await ensureEventParam();
         if (!eventId) return;
 
-        document.getElementById("eventInfo").textContent = `近期訂單：${eventId}`;
+        const evRes = await jsonp(WEB_APP_URL, { action:"getEvent", eventId, _ts: Date.now() });
+        if (!evRes || evRes.ok !== true) throw new Error(evRes && evRes.error ? evRes.error : "getEvent 失敗");
+
+        const ev = evRes.event || {};
+        const closed = evRes.effectiveStatus === 'closed';
+        const statusText = closed ? '已過期' : '開放中';
+        const statusClass = closed ? 'is-closed' : 'is-open';
+
+        let deadlineTs = fmtTs(toDate(ev.deadline));
+        if (deadlineTs === '-') deadlineTs = escapeHtml(ev.deadline || '-');
+
+        eventInfoEl.innerHTML = `
+          <h2 class="event-title">${escapeHtml(ev.title || eventId)}</h2>
+          <div class="info-bar">
+            <span class="chip shop-chip"><span class="label">店家</span><b>${escapeHtml(ev.shop || '-')}</b></span>
+            <span class="chip deadline-badge"><span class="label">截止</span><b>${deadlineTs}</b></span>
+            <span class="status-badge ${statusClass}">${escapeHtml(statusText)}</span>
+          </div>
+        `;
 
         let data;
         const token = getToken();
         if (token) {
-          data = await jsonp(WEB_APP_URL, { action: "aggregate", eventId, token, _ts: Date.now() });
-          if (!data || data.ok !== true) data = null;
+          const tryAdmin = await jsonp(WEB_APP_URL, { action:"aggregate", eventId, token, _ts: Date.now() });
+          if (tryAdmin && tryAdmin.ok === true) data = tryAdmin;
         }
-        if (!data) {
-          data = await jsonp(WEB_APP_URL, { action: "aggregatePublic", eventId, _ts: Date.now() });
-        }
+        if (!data) data = await jsonp(WEB_APP_URL, { action:"aggregatePublic", eventId, _ts: Date.now() });
         if (!data || data.ok !== true) throw new Error(data && data.error ? data.error : "無法載入資料");
 
         const byPerson = data.byPerson || {};
@@ -121,15 +142,15 @@
           const box = document.createElement("div");
           box.className = "person";
           const items = orders.map(o => {
-            const sugar = pick(o.sugar, o.sweet, o.suger);
-            const ice   = pick(o.ice, o.iceLevel);
+            const sugar = (o.sugar || o.sweet || o.suger || '').trim();
+            const ice   = (o.ice   || o.iceLevel || '').trim();
             const qty   = Number(o.qty || 1);
-            const sugarText = "／" + fmt(sugar, "未選甜度");
-            const iceText   = "／" + fmt(ice, "未選冰量");
-            const notesText = o.notes ? `（${o.notes}）` : "";
-            return `<li>${fmt(o.name, "未填品項")}${sugarText}${iceText} × ${qty}${notesText}</li>`;
+            const sugarText = sugar ? `／${escapeHtml(sugar)}` : '';
+            const iceText   = ice   ? `／${escapeHtml(ice)}`   : '';
+            const notesText = o.notes ? `（${escapeHtml(o.notes)}）` : "";
+            return `<li>${escapeHtml(o.name || "未填品項")}${sugarText}${iceText} × ${qty}${notesText}</li>`;
           }).join("");
-          box.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
+          box.innerHTML = `<h4>${escapeHtml(name)}</h4><ul>${items}</ul>`;
           list.appendChild(box);
         });
 

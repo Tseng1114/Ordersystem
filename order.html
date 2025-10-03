@@ -4,14 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>下單</title>
-
   <link rel="stylesheet" href="css/order_style.css">
   <link rel="stylesheet" href="css/loading.css">
 </head>
 <body>
   <div class="wrap">
     <h1 class="page-title">下單</h1>
-
     <div class="card">
       <table id="itemsTbl">
         <thead>
@@ -80,7 +78,6 @@
       return Date.now() > d.getTime();
     }
 
-    /***** UI *****/
     function addRow(defaults={}) {
       const tr = document.createElement('tr');
       tr.innerHTML = `

@@ -3,31 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <title>訂單彙整</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 你的樣式檔如果已有 loading 的 spinner 樣式，保留就好；沒有可自行增補 -->
   <link rel="stylesheet" href="css/summary_style.css">
   <link rel="stylesheet" href="css/loading.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- 盡力抑制靜態快取 -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
 </head>
 <body>
+  <!-- ✅ 載入畫面（依你提供的結構） -->
   <div id="loadingOverlay">
     <div class="spinner-box">
       <div class="spinner"></div>
-      <div style="margin-top:10px;">處理中，請稍候...</div>
+      <div class="spinner-text">處理中，請稍候...</div>
     </div>
   </div>
+
   <div class="wrap">
     <div class="card">
       <h1 class="page-title">訂單彙整</h1>
       <div id="eventInfo" class="meta"></div>
-      <div id="error" class="error"></div>
+      <div id="error" class="error" style="color:#c00"></div>
+
       <div id="byPersonBox" class="by-person hidden">
         <h3 class="section-title">依人統計</h3>
         <div id="byPersonList"></div>
         <div id="byPersonEmpty" class="hidden empty-hint">目前沒有任何訂單。</div>
       </div>
+
       <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
         <button id="btnReload" type="button" class="back-home" style="margin-left:8px;">重新整理</button>
@@ -35,19 +36,49 @@
     </div>
   </div>
 
-  <script src="config.js?v="></script>
+  <script src="config.js"></script>
   <script>
-    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG || {};
-    const params = new URLSearchParams(location.search);
+    const { WEB_APP_URL } = (window.APP_CONFIG || {});
+    const urlParams = new URLSearchParams(location.search);
 
-    function showLoadingOverlay(show){
-      const el = document.getElementById("loadingOverlay");
-      if (el) el.style.display = show ? "block" : "none";
+    function showLoading(show) {
+      const el = document.getElementById('loadingOverlay');
+      if (!el) return;
+      el.style.display = show ? 'flex' : 'none';
     }
-    function getToken(){
-      try { return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || ""; }
-      catch { return ""; }
+
+    showLoading(true);
+
+    function jsonp(action, params = {}, timeoutMs = 15000) {
+      return new Promise((resolve, reject) => {
+        if (!WEB_APP_URL) return reject(new Error('缺少 WEB_APP_URL（請在 config.js 設定）'));
+
+        const cb = '__jp_' + Math.random().toString(36).slice(2);
+        window[cb] = (data) => { cleanup(); resolve(data); };
+
+        const q = new URLSearchParams({ action, callback: cb, ts: Date.now() });
+        for (const [k, v] of Object.entries(params)) {
+          if (v === undefined || v === null) continue;
+          q.append(k, String(v));
+        }
+
+        const s = document.createElement('script');
+        s.src = WEB_APP_URL + '?' + q.toString();
+        s.async = true;
+
+        const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP 請求逾時：' + s.src)); }, timeoutMs);
+
+        function cleanup() {
+          clearTimeout(timer);
+          if (s.parentNode) s.parentNode.removeChild(s);
+          try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+        }
+
+        s.onerror = () => { cleanup(); reject(new Error('JSONP 載入失敗：' + s.src)); };
+        document.head.appendChild(s);
+      });
     }
+
     function escapeHtml(str){
       return String(str||"").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
@@ -71,60 +102,38 @@
     const getSugar = o => firstNonEmpty([o.sugar, o.sweet, o.suger]);
     const getIce   = o => firstNonEmpty([o.ice, o.iceLevel]);
 
-    function jsonp(url, query){
-      return new Promise((resolve, reject) => {
-        const cb = "cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-        const nonce = Math.random().toString(36).slice(2);
-        const q = new URLSearchParams({ ...query, callback: cb, _ts: Date.now() + "-" + Math.random(), _nonce: nonce }).toString();
-        const s = document.createElement("script");
-        s.src = url + "?" + q;
+    async function ensureEventId() {
+      const eid = urlParams.get('event');
+      if (eid && eid.trim()) return eid;
 
-        let done = false;
-        window[cb] = d => { if (done) return; done = true; resolve(d); cleanup(); };
-        s.onerror = () => { if (done) return; done = true; reject(new Error("JSONP failed")); cleanup(); };
+      const r = await jsonp('latestEvent');
+      if (!r || r.ok !== true || !r.id) throw new Error((r && r.error) || '目前沒有活動');
 
-        function cleanup(){ try{delete window[cb]}catch{}; try{s.remove()}catch{}; }
-
-        setTimeout(() => {
-          if (!done) { done = true; reject(new Error("JSONP timeout")); cleanup(); }
-        }, 15000);
-
-        document.body.appendChild(s);
-      });
-    }
-
-    async function ensureEventParam(){
-      let eventId = params.get("event");
-      if (eventId && eventId.trim()) return eventId;
-      const res = await jsonp(WEB_APP_URL, { action: "latestEvent" });
-      if (!res || res.ok !== true) throw new Error(res && res.error ? res.error : "latestEvent 失敗");
-      if (!res.id) throw new Error("目前沒有任何訂單可顯示");
-      location.replace(location.pathname + "?event=" + encodeURIComponent(res.id) + "&r=" + Date.now());
+      const url = location.pathname + '?event=' + encodeURIComponent(r.id) + '&r=' + Date.now();
+      location.replace(url);
       return null;
     }
 
-    let _renderKey = "";
-    let _loading = false;
+    async function load() {
+      const errorEl = document.getElementById('error');
+      const eventInfoEl = document.getElementById('eventInfo');
+      const byPersonBox = document.getElementById('byPersonBox');
+      const byPersonList = document.getElementById('byPersonList');
+      const byPersonEmpty = document.getElementById('byPersonEmpty');
 
-    async function load(force){
-      if (_loading) return;
-      _loading = true;
-      showLoadingOverlay(true);
+      try {
+        showLoading(true);
+        errorEl.textContent = '';
+        byPersonBox.classList.add('hidden');
+        byPersonList.innerHTML = '';
 
-      const errorEl = document.getElementById("error");
-      const eventInfoEl = document.getElementById("eventInfo");
-      const byPersonBox = document.getElementById("byPersonBox");
-      const byPersonList = document.getElementById("byPersonList");
-      const byPersonEmpty = document.getElementById("byPersonEmpty");
+        const eventId = urlParams.get('event') || await ensureEventId();
+        if (!eventId) return;
 
-      try{
-        const eventId = params.get("event") || await ensureEventParam();
-        if (!eventId) { _loading = false; return; }
-
-        const evRes = await jsonp(WEB_APP_URL, { action:"getEvent", eventId });
-        if (!evRes || evRes.ok !== true) throw new Error(evRes && evRes.error ? evRes.error : "getEvent 失敗");
-
+        const evRes = await jsonp('getEvent', { eventId });
+        if (!evRes || evRes.ok !== true) throw new Error((evRes && evRes.error) || 'getEvent 失敗');
         const ev = evRes.event || {};
+
         let deadlineText = fmtTs(toDate(ev.deadline));
         if (deadlineText === '-') deadlineText = escapeHtml(ev.deadline || '-');
 
@@ -136,73 +145,51 @@
           </div>
         `;
 
-        let data;
-        const token = getToken();
-        if (token) {
-          const tryAdmin = await jsonp(WEB_APP_URL, { action:"aggregate", eventId, token });
-          if (tryAdmin && tryAdmin.ok === true) data = tryAdmin;
-        }
-        if (!data) data = await jsonp(WEB_APP_URL, { action:"aggregatePublic", eventId });
-        if (!data || data.ok !== true) throw new Error(data && data.error ? data.error : "無法載入資料");
+        const agg = await jsonp('aggregatePublic', { eventId });
+        if (!agg || agg.ok !== true) throw new Error((agg && agg.error) || 'aggregatePublic 失敗');
 
-        const byPerson = data.byPerson || {};
+        const byPerson = agg.byPerson || {};
         const people = Object.keys(byPerson).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
 
-        const peopleCounts = people.map(p => (byPerson[p]||[]).length).join(',');
-        const key = [eventId, people.length, peopleCounts].join('|');
+        byPersonBox.classList.remove('hidden');
 
-        if (key === _renderKey && !force) {
-          showLoadingOverlay(false);
-          _loading = false;
+        if (!people.length) {
+          byPersonEmpty.classList.remove('hidden');
+          showLoading(false);
           return;
         }
-        _renderKey = key;
+        byPersonEmpty.classList.add('hidden');
 
-        byPersonBox.classList.remove("hidden");
-        byPersonList.innerHTML = "";
-
-        if (!people.length){
-          byPersonEmpty.classList.remove("hidden");
-          showLoadingOverlay(false);
-          _loading = false;
-          return;
-        }
-        byPersonEmpty.classList.add("hidden");
-
-        people.forEach(name=>{
-          const orders = (byPerson[name] || []).slice().sort((a,b)=>{
-            return String(a.name||'').localeCompare(String(b.name||''),'zh-Hant');
-          });
+        people.forEach(name => {
+          const orders = (byPerson[name] || []).slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'zh-Hant'));
           const items = orders.map(o=>{
             const sugar = getSugar(o);
             const ice   = getIce(o);
-            const sugarSeg = `／${escapeHtml(sugar || '-')}`;
-            const iceSeg   = `／${escapeHtml(ice   || '-')}`;
             const qty = Number(o.qty || 1);
             const note = o.notes ? `（${escapeHtml(o.notes)}）` : '';
-            return `<li>${escapeHtml(o.name || '未填品項')}${sugarSeg}${iceSeg} × ${qty}${note}</li>`;
-          }).join("");
-          const box = document.createElement("div");
-          box.className = "person";
+            return `<li>${escapeHtml(o.name || '未填品項')}／${escapeHtml(sugar || '-')}／${escapeHtml(ice || '-')} × ${qty}${note}</li>`;
+          }).join('');
+          const box = document.createElement('div');
+          box.className = 'person';
           box.innerHTML = `<h4>${escapeHtml(name)}</h4><ul>${items}</ul>`;
           byPersonList.appendChild(box);
         });
 
-        showLoadingOverlay(false);
-        _loading = false;
-      }catch(err){
-        showLoadingOverlay(false);
-        _loading = false;
-        if (errorEl) errorEl.textContent = "載入失敗：" + (err && err.message ? err.message : err);
+        showLoading(false);
+      } catch (err) {
+        showLoading(false);
+        const errorEl = document.getElementById('error');
+        errorEl.textContent = '載入失敗：' + (err && err.message ? err.message : err);
         console.error(err);
       }
     }
 
-    function forceReload(){
-      _renderKey = "";
-      load(true);
-    }
-    document.getElementById("btnReload")?.addEventListener("click", forceReload);
+    document.getElementById('btnReload')?.addEventListener('click', () => {
+      showLoading(true);
+      const u = new URL(location.href);
+      u.searchParams.set('r', Date.now());
+      location.replace(u.toString());
+    });
 
     load();
   </script>

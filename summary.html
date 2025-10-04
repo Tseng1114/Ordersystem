@@ -6,6 +6,10 @@
   <link rel="stylesheet" href="css/summary_style.css">
   <link rel="stylesheet" href="css/loading.css">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 盡力抑制靜態快取 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 </head>
 <body>
   <div id="loadingOverlay">
@@ -26,148 +30,181 @@
       </div>
       <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
+        <button id="btnReload" type="button" class="back-home" style="margin-left:8px;">重新整理</button>
       </div>
     </div>
   </div>
 
-<script src="config.js"></script>
-<script>
-  const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
-  const params = new URLSearchParams(location.search);
+  <script src="config.js?v="></script>
+  <script>
+    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG || {};
+    const params = new URLSearchParams(location.search);
 
-  function showLoadingOverlay(show){
-    const el = document.getElementById("loadingOverlay");
-    if (el) el.style.display = show ? "block" : "none";
-  }
-  function getToken(){
-    try { return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || ""; }
-    catch { return ""; }
-  }
-  function jsonp(url, query){
-    return new Promise((resolve, reject) => {
-      const cb = "cb_" + Date.now() + Math.random().toString(36).slice(2);
-      const q = new URLSearchParams({ ...query, callback: cb }).toString();
-      const s = document.createElement("script");
-      s.src = url + "?" + q;
-      window[cb] = d => { resolve(d); cleanup(); };
-      s.onerror = () => { reject(new Error("JSONP failed")); cleanup(); };
-      function cleanup(){ try{delete window[cb]}catch{}; try{s.remove()}catch{}; }
-      document.body.appendChild(s);
-    });
-  }
-  function escapeHtml(str){
-    return String(str||"").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-  }
-  function toDate(v){
-    if (!v && v!==0) return null;
-    if (v instanceof Date) return isNaN(v) ? null : v;
-    const d = new Date(String(v)); return isNaN(d) ? null : d;
-  }
-  const pad = n => String(n).padStart(2,'0');
-  function fmtTs(d){
-    if (!d) return '-';
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-
-  function firstNonEmpty(list){
-    for (const v of list){
-      const s = (v == null ? '' : String(v)).trim();
-      if (s) return s;
+    function showLoadingOverlay(show){
+      const el = document.getElementById("loadingOverlay");
+      if (el) el.style.display = show ? "block" : "none";
     }
-    return '';
-  }
-  function getSugar(o){
-    return firstNonEmpty([o.sugar, o.sweet, o.suger]);
-  }
-  function getIce(o){
-    return firstNonEmpty([o.ice, o.iceLevel]);
-  }
-
-  async function ensureEventParam(){
-    let eventId = params.get("event");
-    if (eventId && eventId.trim()) return eventId;
-    const res = await jsonp(WEB_APP_URL, { action: "latestEvent", _ts: Date.now() });
-    if (!res || !res.ok) throw new Error(res && res.error ? res.error : "latestEvent 失敗");
-    if (!res.id) throw new Error("目前沒有任何訂單可顯示");
-    location.replace(location.pathname + "?event=" + encodeURIComponent(res.id));
-    return null;
-  }
-
-  async function load(){
-    showLoadingOverlay(true);
-    const errorEl = document.getElementById("error");
-    const eventInfoEl = document.getElementById("eventInfo");
-    const byPersonBox = document.getElementById("byPersonBox");
-    const byPersonList = document.getElementById("byPersonList");
-
-    try{
-      const eventId = params.get("event") || await ensureEventParam();
-      if (!eventId) return;
-
-      const evRes = await jsonp(WEB_APP_URL, { action:"getEvent", eventId, _ts: Date.now() });
-      if (!evRes || evRes.ok !== true) throw new Error(evRes && evRes.error ? evRes.error : "getEvent 失敗");
-      const ev = evRes.event || {};
-      let deadlineText = fmtTs(toDate(ev.deadline));
-      if (deadlineText === '-') deadlineText = escapeHtml(ev.deadline || '-');
-
-      eventInfoEl.innerHTML = `
-        <h2 class="event-title">${escapeHtml(ev.title || eventId)}</h2>
-        <div class="info-bar">
-          <span class="chip shop-chip"><span class="label">店家</span><b>${escapeHtml(ev.shop || '-')}</b></span>
-          <span class="chip deadline-badge"><span class="label">截止</span><b>${deadlineText}</b></span>
-        </div>
-      `;
-
-      let data;
-      const token = getToken();
-      if (token) {
-        const tryAdmin = await jsonp(WEB_APP_URL, { action:"aggregate", eventId, token, _ts: Date.now() });
-        if (tryAdmin && tryAdmin.ok === true) data = tryAdmin;
+    function getToken(){
+      try { return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || ""; }
+      catch { return ""; }
+    }
+    function escapeHtml(str){
+      return String(str||"").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+    function toDate(v){
+      if (!v && v!==0) return null;
+      if (v instanceof Date) return isNaN(v) ? null : v;
+      const d = new Date(String(v)); return isNaN(d) ? null : d;
+    }
+    const pad = n => String(n).padStart(2,'0');
+    function fmtTs(d){
+      if (!d) return '-';
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+    function firstNonEmpty(list){
+      for (const v of list){
+        const s = (v == null ? '' : String(v)).trim();
+        if (s) return s;
       }
-      if (!data) data = await jsonp(WEB_APP_URL, { action:"aggregatePublic", eventId, _ts: Date.now() });
-      if (!data || data.ok !== true) throw new Error(data && data.error ? data.error : "無法載入資料");
+      return '';
+    }
+    const getSugar = o => firstNonEmpty([o.sugar, o.sweet, o.suger]);
+    const getIce   = o => firstNonEmpty([o.ice, o.iceLevel]);
 
-      const byPerson = data.byPerson || {};
-      const people = Object.keys(byPerson).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+    function jsonp(url, query){
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        const nonce = Math.random().toString(36).slice(2);
+        const q = new URLSearchParams({ ...query, callback: cb, _ts: Date.now() + "-" + Math.random(), _nonce: nonce }).toString();
+        const s = document.createElement("script");
+        s.src = url + "?" + q;
 
-      byPersonBox.classList.remove("hidden");
-      byPersonList.innerHTML = "";
+        let done = false;
+        window[cb] = d => { if (done) return; done = true; resolve(d); cleanup(); };
+        s.onerror = () => { if (done) return; done = true; reject(new Error("JSONP failed")); cleanup(); };
 
-      if (!people.length){
-        document.getElementById("byPersonEmpty").classList.remove("hidden");
-        showLoadingOverlay(false);
-        return;
-      }
-      document.getElementById("byPersonEmpty").classList.add("hidden");
+        function cleanup(){ try{delete window[cb]}catch{}; try{s.remove()}catch{}; }
 
-      people.forEach(name=>{
-        const orders = (byPerson[name] || []).slice().sort((a,b)=>{
-          return String(a.name||'').localeCompare(String(b.name||''),'zh-Hant');
-        });
-      const items = orders.map(o=>{
-        const sugar = getSugar(o);
-        const ice   = getIce(o);
-        const sugarSeg = `／${escapeHtml(sugar || '-')}`;
-        const iceSeg   = `／${escapeHtml(ice   || '-')}`;
-        const qty = Number(o.qty || 1);
-        const note = o.notes ? `（${escapeHtml(o.notes)}）` : '';
-        return `<li>${escapeHtml(o.name || '未填品項')}${sugarSeg}${iceSeg} × ${qty}${note}</li>`;
-      }).join("");
-        const box = document.createElement("div");
-        box.className = "person";
-        box.innerHTML = `<h4>${escapeHtml(name)}</h4><ul>${items}</ul>`;
-        byPersonList.appendChild(box);
+        setTimeout(() => {
+          if (!done) { done = true; reject(new Error("JSONP timeout")); cleanup(); }
+        }, 15000);
+
+        document.body.appendChild(s);
       });
-
-      showLoadingOverlay(false);
-    }catch(err){
-      showLoadingOverlay(false);
-      if (errorEl) errorEl.textContent = "載入失敗：" + (err && err.message ? err.message : err);
-      console.error(err);
     }
-  }
 
-  load();
-</script>
+    async function ensureEventParam(){
+      let eventId = params.get("event");
+      if (eventId && eventId.trim()) return eventId;
+      const res = await jsonp(WEB_APP_URL, { action: "latestEvent" });
+      if (!res || res.ok !== true) throw new Error(res && res.error ? res.error : "latestEvent 失敗");
+      if (!res.id) throw new Error("目前沒有任何訂單可顯示");
+      location.replace(location.pathname + "?event=" + encodeURIComponent(res.id) + "&r=" + Date.now());
+      return null;
+    }
+
+    let _renderKey = "";
+    let _loading = false;
+
+    async function load(force){
+      if (_loading) return;
+      _loading = true;
+      showLoadingOverlay(true);
+
+      const errorEl = document.getElementById("error");
+      const eventInfoEl = document.getElementById("eventInfo");
+      const byPersonBox = document.getElementById("byPersonBox");
+      const byPersonList = document.getElementById("byPersonList");
+      const byPersonEmpty = document.getElementById("byPersonEmpty");
+
+      try{
+        const eventId = params.get("event") || await ensureEventParam();
+        if (!eventId) { _loading = false; return; }
+
+        const evRes = await jsonp(WEB_APP_URL, { action:"getEvent", eventId });
+        if (!evRes || evRes.ok !== true) throw new Error(evRes && evRes.error ? evRes.error : "getEvent 失敗");
+
+        const ev = evRes.event || {};
+        let deadlineText = fmtTs(toDate(ev.deadline));
+        if (deadlineText === '-') deadlineText = escapeHtml(ev.deadline || '-');
+
+        eventInfoEl.innerHTML = `
+          <h2 class="event-title">${escapeHtml(ev.title || eventId)}</h2>
+          <div class="info-bar">
+            <span class="chip shop-chip"><span class="label">店家</span><b>${escapeHtml(ev.shop || '-')}</b></span>
+            <span class="chip deadline-badge"><span class="label">截止</span><b>${deadlineText}</b></span>
+          </div>
+        `;
+
+        let data;
+        const token = getToken();
+        if (token) {
+          const tryAdmin = await jsonp(WEB_APP_URL, { action:"aggregate", eventId, token });
+          if (tryAdmin && tryAdmin.ok === true) data = tryAdmin;
+        }
+        if (!data) data = await jsonp(WEB_APP_URL, { action:"aggregatePublic", eventId });
+        if (!data || data.ok !== true) throw new Error(data && data.error ? data.error : "無法載入資料");
+
+        const byPerson = data.byPerson || {};
+        const people = Object.keys(byPerson).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+
+        const peopleCounts = people.map(p => (byPerson[p]||[]).length).join(',');
+        const key = [eventId, people.length, peopleCounts].join('|');
+
+        if (key === _renderKey && !force) {
+          showLoadingOverlay(false);
+          _loading = false;
+          return;
+        }
+        _renderKey = key;
+
+        byPersonBox.classList.remove("hidden");
+        byPersonList.innerHTML = "";
+
+        if (!people.length){
+          byPersonEmpty.classList.remove("hidden");
+          showLoadingOverlay(false);
+          _loading = false;
+          return;
+        }
+        byPersonEmpty.classList.add("hidden");
+
+        people.forEach(name=>{
+          const orders = (byPerson[name] || []).slice().sort((a,b)=>{
+            return String(a.name||'').localeCompare(String(b.name||''),'zh-Hant');
+          });
+          const items = orders.map(o=>{
+            const sugar = getSugar(o);
+            const ice   = getIce(o);
+            const sugarSeg = `／${escapeHtml(sugar || '-')}`;
+            const iceSeg   = `／${escapeHtml(ice   || '-')}`;
+            const qty = Number(o.qty || 1);
+            const note = o.notes ? `（${escapeHtml(o.notes)}）` : '';
+            return `<li>${escapeHtml(o.name || '未填品項')}${sugarSeg}${iceSeg} × ${qty}${note}</li>`;
+          }).join("");
+          const box = document.createElement("div");
+          box.className = "person";
+          box.innerHTML = `<h4>${escapeHtml(name)}</h4><ul>${items}</ul>`;
+          byPersonList.appendChild(box);
+        });
+
+        showLoadingOverlay(false);
+        _loading = false;
+      }catch(err){
+        showLoadingOverlay(false);
+        _loading = false;
+        if (errorEl) errorEl.textContent = "載入失敗：" + (err && err.message ? err.message : err);
+        console.error(err);
+      }
+    }
+
+    function forceReload(){
+      _renderKey = "";
+      load(true);
+    }
+    document.getElementById("btnReload")?.addEventListener("click", forceReload);
+
+    load();
+  </script>
 </body>
 </html>

@@ -1,65 +1,65 @@
-:root{
-  --loading-bg: rgba(255, 253, 247, 0.75);
-  --loading-ink: #2b2a28;
-  --loading-ring: #ebe2cf;
-  --loading-accent: #d1c1a1;
+:root {
+  --loading-bg: rgba(255, 255, 255, 0.9);
+  --loading-accent: #1e293b; /* 統一深藍色 */
 }
 
+/* 1. 外層容器：鎖定全螢幕且預設隱藏 */
 #loadingOverlay {
-  display: none;
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
   background: var(--loading-bg);
-  z-index: 9999;
-  text-align: center;
-  font-size: 16px;
-  color: var(--loading-ink);
-  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(4px);
+  z-index: 999999;
+
+  /* 預設隱藏 */
+  display: none;
 }
 
-#loadingOverlay .spinner-box {
+/* 2. 當 JS 設定 display: flex 或 block 時觸發置中 */
+#loadingOverlay[style*="display: flex"],
+#loadingOverlay[style*="display: block"],
+#loadingOverlay.active {
+  display: block !important; /* 改用 block 配合內層絕對定位 */
+}
+
+/* 3. 內層盒子：使用絕對定位達成「真」置中 */
+.spinner-box {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  justify-content: center;
+  width: 200px;
 }
 
-#loadingOverlay .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--loading-ring);
+/* 4. 動畫效果 */
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e2e8f0;
   border-top-color: var(--loading-accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
-#loadingOverlay .spinner-text {
-  margin: 0;
-  line-height: 1.4;
-  color: var(--loading-ink);
-}
-
-@media (prefers-reduced-motion: reduce){
-  #loadingOverlay .spinner {
-    animation: none;
-  }
-}
-
-@media (prefers-color-scheme: dark){
-  :root{
-    --loading-bg: rgba(22, 20, 18, 0.55);
-    --loading-ink: #f1ece3;
-    --loading-ring: #6e6356;
-    --loading-accent: #d1c1a1;
-  }
+.spinner-text {
+  margin-top: 16px;
+  color: var(--loading-accent);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-align: center;
+  white-space: nowrap;
 }
 
 @keyframes spin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

@@ -1,206 +1,95 @@
-:root{
-  --page-max: 860px;
-  --paper: #fffdf7;
-  --paper-2: #fbf7ed;
-  --ink: #1c1a19;
-  --muted: #6b6257;
-  --edge: #e7dcc8;
-  --rule: #e8e0ce;
-  --shadow: 0 10px 28px rgba(24,17,5,.08), 0 3px 10px rgba(24,17,5,.06);
-  --accent-soft: #f7efe0;
-  --accent-line: #d8c9ac;
-  --radius: 12px;
-  --radius-sm: 10px;
+:root {
+  --bg-body: #f7f9fc;
+  --text-primary: #1e293b;
+  --radius: 16px;
 }
 
-*{ box-sizing:border-box }
-html,body{
-  height:100%
-}
-body{
-  margin:0;
-  font-family: "Noto Serif TC","Noto Sans TC",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--ink);
-  background:
-    radial-gradient(1200px 600px at 50% -10%, #fff 20%, #f7f4ec 60%, #f3efe5 100%),
-    var(--paper-2);
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", sans-serif;
+  background-color: var(--bg-body);
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--text-primary);
+  padding: 40px 20px;
 }
 
-.wrap{
-  max-width:var(--page-max);
-  margin:56px auto;
-  padding:0 18px
-}
-.card{
-  background: linear-gradient(180deg, var(--paper), #fff 40%, var(--paper) 100%);
-  border:1px solid var(--edge);
+.card {
+  background: #fff;
+  border: 1.5px solid var(--text-primary);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 24px 24px 20px;
-  margin-bottom: 16px;
+  box-shadow: 6px 6px 0px var(--text-primary);
+  padding: 30px;
+  max-width: 500px;
+  margin: 0 auto 24px;
 }
 
-.page-title{
-  text-align:center;
-  margin:0 0 16px;
-  font-size:26px;
-  font-weight:800;
-  color:#0f172a
+h2, h3 { margin-top: 0; font-weight: 800; }
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 20px;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 8px;
+  font-size: 16px;
+  background: #fff;
 }
 
-.actions{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-top:14px
-}
-button, .back-home{
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  font-size:15px;
-  font-weight:800;
-  cursor:pointer;
-  transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
-}
-button:active, .back-home:active{ transform: translateY(1px) }
-.primary{
-  background:#e7d8bd;
-  color:#1f1d1a; border:1px solid #d1c1a1;
-  box-shadow: 0 6px 16px rgba(48,36,12,.12);
-}
-.primary:hover{ background:#ddcda9 }
-.back-home{
-  display:inline-block;
-  text-decoration:none;
-  background:#f1ede3;
-  color:#2b2a28;
-  border:1px solid var(--edge);
-}
-.back-home:hover{ background:#ece5d7 }
+input:focus { background: #f8fafc; outline: none; }
 
-label{
-  display:inline-flex; align-items:center;
-  height:36px;
-  padding:0 12px;
-  margin:0;
-  border:1px solid var(--accent-line);
-  background:var(--accent-soft);
-  border-radius:999px;
-  font-weight:800;
-  color:#78664a;
-}
-input, select{
-  height:46px; padding:10px 14px;
-  font-size:15px;
-  border:1px solid var(--edge);
-  border-radius: var(--radius-sm);
-  background:#fff;
-  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
-  appearance: none;
-}
-input::placeholder{
-  color:#9a9186
-}
-input:focus, select:focus{
-  outline:none; border-color:#d1c1a1;
-  box-shadow:0 0 0 3px rgba(187,163,122,.18);
-  background:#fffef9;
+.actions { display: flex; gap: 12px; }
+
+button.primary {
+  flex: 2;
+  background: var(--text-primary);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
 }
 
-#loginCard{
-  display:grid;
-  grid-template-columns: auto minmax(260px, 1fr) auto;
-  align-items:center;
-  column-gap:12px; row-gap:12px;
-}
-#loginCard label{ justify-self:end }
-#loginCard input{ width:100% }
-#loginCard .actions{ grid-column: 1 / -1; }
+button.primary:active { transform: scale(0.98); }
 
-#createCard{
-  display:grid;
-  grid-template-columns: auto minmax(260px, 1fr) 28px auto minmax(260px, 1fr);
-  align-items:center;
-  column-gap:12px; row-gap:12px;
+.back-home {
+  flex: 1;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1.5px solid var(--text-primary);
+  padding: 12px;
+  border-radius: 50px;
+  font-weight: 600;
 }
 
-#createCard label[for="shopSelect"]{
-  grid-column: 1 / 2;
-  justify-self:end;
-}
-#createCard #shopSelect{
-  grid-column: 2 / 3;
-  width:100%;
-}
-#createCard label[for="deadline"]{
-  grid-column: 4 / 5;
-  justify-self:end;
-}
-#createCard #deadline{
-  grid-column: 5 / 6;
-  width:100%;
+.hidden { display: none !important; }
+
+.page-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
-#createCard #otherBox{
-  grid-column: 1 / -1;
-}
-#createCard #otherBox input{
-  width:100%;
-}
-
-#createCard .actions{
-  grid-column: 1 / -1;
-}
-#createCard #result{
-  grid-column: 1 / -1;
+.card label {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-#shareLink{
-  width:100%;
-  height:44px;
-  padding:10px 12px;
-  border:1px solid var(--edge); border-radius:10px; background:#fff;
+.hint {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #64748b;
 }
 
-.hidden{
-  display:none !important
+#result p {
+  text-align: center;
+  font-weight: 600;
 }
-
-@media (max-width: 820px){
-  .wrap{
-    margin:40px auto;
-    padding:0 14px
-    }
-  .page-title{
-    font-size:24px
-  }
-
-
-  #loginCard{
-    grid-template-columns: 1fr;
-  }
-  #loginCard label{
-    justify-self:start
-  }
-  #loginCard .actions{
-    justify-content:center
-  }
-
-  #createCard{
-    grid-template-columns: 1fr;
-  }
-  #createCard label{
-    justify-self:start
-  }
-  #createCard #shopSelect,
-  #createCard #deadline{
-    width:100%
-  }
-}
-
-
-@media (prefers-reduced-motion: reduce){
-  *{ transition: none !important; }
-}
-

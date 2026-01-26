@@ -58,7 +58,6 @@
   <script src="config.js"></script>
   <script>
     const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
-
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
@@ -96,10 +95,12 @@
               status: 'open'
             }
           ])
-          .select(); // 使用 select() 獲取剛建立的資料（包含 ID）
+          .select();
 
         if (error) throw error;
-
+            if (!data || data.length === 0) {
+              throw new Error("資料已寫入但無法讀取回傳值，請確認資料庫 RLS 設定。");
+            }
         const newEvent = data[0];
         const id = newEvent.id;
 

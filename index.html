@@ -3,22 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>菜單系統</title>
-
+  <title>訂餐系統</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="css/index_style.css">
 </head>
-
 <body>
   <div class="page-wrap">
-    <h1 class="title">選擇飲料店菜單</h1>
+    <h1 class="title">曾可愛家族訂單系統</h1>
 
     <div class="order-btn-container">
-      <a href="create_event.html" class="order-btn">建立飲料訂單</a>
-      <a id="summaryLink" href="summary.html" class="order-btn">查看訂單</a>
+      <a href="create_event.html" class="order-btn">建立訂單</a>
+    </div>
+
+    <div class="search-card">
+      <h3>查詢過往訂單</h3>
+      <div class="search-group">
+        <input id="searchEventId" type="text" placeholder="請貼上訂單編號" class="search-input">
+        <button id="searchBtn" class="search-btn">立即查詢</button>
+      </div>
     </div>
 
     <div class="grid">
@@ -84,80 +88,23 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
   <script>
     (function () {
-      const { WEB_APP_URL } = window.APP_CONFIG || {};
-      const summaryLink = document.getElementById("summaryLink");
+      const searchBtn = document.getElementById("searchBtn");
+      const searchInput = document.getElementById("searchEventId");
 
-      // 修改後的 UI Message 樣式，符合現代風格
-      function uiMessage(html) {
-        const box = document.createElement("div");
-        // 使用 Flexbox 置中，加上陰影與圓角
-        box.style.cssText = `
-          position: fixed;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 9999;
-          padding: 12px 20px;
-          background: #fff;
-          border-left: 4px solid #f59e0b;
-          border-radius: 8px;
-          color: #333;
-          font-size: 14px;
-          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        `;
-        box.innerHTML = html;
-        document.body.appendChild(box);
-
-        // 3秒後自動消失 (Optional，增強體驗)
-        setTimeout(() => {
-            box.style.transition = "opacity 0.5s ease";
-            box.style.opacity = "0";
-            setTimeout(() => box.remove(), 500);
-        }, 4000);
+      if (searchBtn) {
+        searchBtn.onclick = () => {
+          const id = searchInput.value.trim();
+          if (!id) return alert("請輸入編號");
+          // 導向 summary.html 並帶入 UUID 參數
+          location.href = "summary.html?event=" + encodeURIComponent(id);
+        };
       }
 
-      function jsonp(url, params) {
-        return new Promise((resolve, reject) => {
-          const cb = "cb_" + Date.now() + Math.random().toString(36).slice(2);
-          params = params || {}; params.callback = cb;
-          const s = document.createElement("script");
-          s.src = url + "?" + new URLSearchParams(params).toString();
-          window[cb] = (data)=>{ cleanup(); resolve(data); };
-          s.onerror = ()=>{ cleanup(); reject(new Error("JSONP failed")); };
-          function cleanup(){ try{ delete window[cb]; }catch{} try{s.remove();}catch{} }
-          document.body.appendChild(s);
-        });
-      }
-
-      async function initLink(){
-        let id = null;
-        try { id = localStorage.getItem("last_event_id") || null; } catch(_){}
-        if (!id) {
-          if (!WEB_APP_URL) { uiMessage("尚未設定 <b>WEB_APP_URL</b>"); return; }
-          try {
-            const res = await jsonp(WEB_APP_URL, { action:"latestEvent", _ts: Date.now() });
-            if (res && res.ok && res.id) {
-              id = res.id;
-              try { localStorage.setItem("last_event_id", id); } catch(_){}
-            } else {
-              uiMessage("目前沒有活動可顯示，請先建立一筆。");
-              return;
-            }
-          } catch (err) {
-            uiMessage("取得最後一筆活動失敗：" + String(err).replace(/</g,"&lt;"));
-            return;
-          }
-        }
-        if (summaryLink) summaryLink.href = "summary.html?event=" + encodeURIComponent(id);
-      }
-      document.addEventListener("DOMContentLoaded", initLink, { once:true });
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") searchBtn.click();
+      });
     })();
   </script>
 </body>

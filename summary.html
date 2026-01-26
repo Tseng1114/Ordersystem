@@ -6,16 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/summary_style.css">
   <link rel="stylesheet" href="css/loading.css">
-  <style>
-    /* 這裡放一些關鍵的強制修正規範，確保 Bug 不再出現 */
-    .hidden { display: none !important; }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div id="loadingOverlay">
     <div class="spinner-box">
       <div class="spinner"></div>
-      <div class="spinner-text">處理中，請稍候...</div>
+      <div class="spinner-text">正在讀取該訂單...</div>
     </div>
   </div>
 
@@ -25,149 +22,123 @@
 
       <div id="eventInfo"></div>
 
-      <div id="error" class="error" style="color:#c00; text-align:center; margin:10px 0;"></div>
-
-      <div id="byPersonBox" class="by-person hidden">
-        <h3 class="section-title">依人統計</h3>
+      <div id="byPersonBox" class="by-person">
+        <h3 class="section-title">依人統計清單</h3>
         <div id="byPersonList"></div>
-        <div id="byPersonEmpty" class="hidden empty-hint" style="text-align:center; padding:20px; color:#64748b;">目前沒有任何訂單。</div>
       </div>
 
       <div class="actions">
         <a href="index.html" class="back-home">回首頁</a>
-        <button id="btnReload" type="button" class="back-home" style="margin-left:8px;">重新整理</button>
+        <button id="btnReload" type="button" class="back-home">重新整理資料</button>
       </div>
     </div>
   </div>
 
   <script src="config.js"></script>
   <script>
-    const { WEB_APP_URL } = (window.APP_CONFIG || {});
-    const urlParams = new URLSearchParams(location.search);
+    const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const eventId = new URLSearchParams(location.search).get('event');
 
     function showLoading(show) {
-      const el = document.getElementById('loadingOverlay');
-      if (el) el.style.display = show ? 'flex' : 'none';
+      document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
     }
 
-    function jsonp(action, params = {}, timeoutMs = 15000) {
-      return new Promise((resolve, reject) => {
-        if (!WEB_APP_URL) return reject(new Error('缺少 WEB_APP_URL'));
-        const cb = '__jp_' + Math.random().toString(36).slice(2);
-        window[cb] = (data) => { cleanup(); resolve(data); };
-        const q = new URLSearchParams({ action, callback: cb, ts: Date.now() });
-        for (const [k, v] of Object.entries(params)) {
-          if (v !== undefined && v !== null) q.append(k, String(v));
-        }
-        const s = document.createElement('script');
-        s.src = WEB_APP_URL + '?' + q.toString();
-        s.async = true;
-        const timer = setTimeout(() => { cleanup(); reject(new Error('請求逾時')); }, timeoutMs);
-        function cleanup() {
-          clearTimeout(timer);
-          if (s.parentNode) s.parentNode.removeChild(s);
-          delete window[cb];
-        }
-        s.onerror = () => { cleanup(); reject(new Error('載入失敗')); };
-        document.head.appendChild(s);
+    function formatTWTime(isoString) {
+      if (!isoString) return '無限制';
+      const date = new Date(isoString);
+      return date.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Taipei'
       });
     }
 
-    function escapeHtml(str){
-      return String(str||"").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-    }
-    function toDate(v){
-      if (!v && v!==0) return null;
-      const d = new Date(String(v)); return isNaN(d) ? null : d;
-    }
-    const pad = n => String(n).padStart(2,'0');
-    function fmtTs(d){
-      if (!d) return '-';
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
-
-    async function ensureEventId() {
-      const eid = urlParams.get('event');
-      if (eid) return eid;
-      const r = await jsonp('latestEvent');
-      if (r && r.ok && r.id) {
-        location.replace(location.pathname + '?event=' + r.id);
-        return null;
-      }
-      throw new Error('目前沒有進行中的活動');
-    }
-
     async function load() {
-      const eventInfoEl = document.getElementById('eventInfo');
-      const byPersonBox = document.getElementById('byPersonBox');
-      const byPersonList = document.getElementById('byPersonList');
-      const byPersonEmpty = document.getElementById('byPersonEmpty');
-      const errorEl = document.getElementById('error');
+      if (!eventId) {
+        alert('網址缺少訂單編號，請重新從首頁進入或輸入編號。');
+        location.href = 'index.html';
+        return;
+      }
+
+      showLoading(true);
 
       try {
-        showLoading(true);
-        byPersonList.innerHTML = '';
-        byPersonEmpty.classList.add('hidden');
-        errorEl.textContent = '';
+        const { data: results, error } = await _supabase
+          .from('events')
+          .select('*, orders(*)')
+          .eq('id', eventId);
 
-        const eventId = await ensureEventId();
-        if (!eventId) return;
+        if (error) throw error;
 
-        const evRes = await jsonp('getEvent', { eventId });
-        if (!evRes || !evRes.ok) throw new Error('無法取得活動資訊');
-        const ev = evRes.event || {};
+        if (!results || results.length === 0) {
+          document.getElementById('eventInfo').innerHTML = `<p style="color:red; text-align:center;">找不到此編號 (${eventId}) 的活動。</p>`;
+          return;
+        }
 
-        let deadlineText = fmtTs(toDate(ev.deadline));
-        if (deadlineText === '-') deadlineText = escapeHtml(ev.deadline || '-');
+        const ev = results[0];
 
-        eventInfoEl.innerHTML = `
-          <div class="meta-container">
-            <div class="event-title-box">ID: ${escapeHtml(ev.id || eventId)}</div>
-            <div class="info-row">
-              <div class="shop-box">
-                <span class="label">店家</span>
-                <div class="value">${escapeHtml(ev.shop || '-')}</div>
-              </div>
-              <div class="deadline-box">
-                <span class="label">截止日期</span>
-                <div class="value">${deadlineText}</div>
-              </div>
-            </div>
-          </div>
-        `;
+        const infoEl = document.getElementById('eventInfo');
+        infoEl.innerHTML = `
+          <div class="meta-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid #1e293b; margin-bottom: 25px;">
+            <h2 style="text-align:center; margin:0 0 10px 0; color:#1e293b;">${ev.shop}</h2>
+            <p style="text-align:center; color:#64748b; font-size: 0.85em; margin: 5px 0; word-break: break-all;">
+              訂單編號：<span style="user-select: all; background:#eee; padding:2px 4px;">${ev.id}</span>
+            </p>
+            <p style="text-align:center; color:#e11d48; font-weight:bold; margin: 5px 0;">
+              截止時間：${formatTWTime(ev.deadline)}
+            </p>
+          </div>`;
 
-        const agg = await jsonp('aggregatePublic', { eventId });
-        const byPerson = agg.byPerson || {};
-        const people = Object.keys(byPerson).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+        const listEl = document.getElementById('byPersonList');
+        listEl.innerHTML = '';
 
-        byPersonBox.classList.remove('hidden');
+        const groups = {};
+        const orders = ev.orders || [];
 
-        if (people.length === 0) {
-          byPersonEmpty.classList.remove('hidden');
+        if (orders.length === 0) {
+          listEl.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 40px 0;">目前尚無人下單。</p>';
         } else {
-          byPersonEmpty.classList.add('hidden');
-          people.forEach(name => {
-            const orders = byPerson[name] || [];
-            const items = orders.map(o => {
-              const sugar = o.sugar || o.sweet || '-';
-              const ice = o.ice || o.iceLevel || '-';
-              return `<li>${escapeHtml(o.name)}／${escapeHtml(sugar)}／${escapeHtml(ice)} × ${o.qty || 1}</li>`;
-            }).join('');
-            const box = document.createElement('div');
-            box.className = 'person';
-            box.innerHTML = `<h4>${escapeHtml(name)}</h4><ul>${items}</ul>`;
-            byPersonList.appendChild(box);
+          orders.forEach(o => {
+            if (!groups[o.customer]) groups[o.customer] = [];
+            groups[o.customer].push(o);
+          });
+
+          Object.keys(groups).sort().forEach(name => {
+            const items = groups[name].map(o => `
+              <li style="margin-bottom: 6px;">
+                <span style="font-weight:500;">${o.name}</span>
+                <span style="color:#64748b;">(${o.suger}／${o.ice})</span>
+                <span style="color:#1e293b; font-weight:bold;">x${o.qty}</span>
+              </li>
+            `).join('');
+
+            const div = document.createElement('div');
+            div.className = 'person';
+            div.style = "margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #e2e8f0;";
+            div.innerHTML = `
+              <h4 style="margin: 0 0 10px 0; color:#1e293b; border-left: 4px solid #f59e0b; padding-left: 10px;">${name}</h4>
+              <ul style="list-style: none; padding-left: 15px; margin: 0;">${items}</ul>
+            `;
+            listEl.appendChild(div);
           });
         }
+
       } catch (err) {
-        errorEl.textContent = '錯誤：' + err.message;
+        console.error('載入失敗:', err);
+        alert('讀取資料發生錯誤：' + err.message);
       } finally {
         showLoading(false);
       }
     }
 
-    document.getElementById('btnReload').onclick = () => location.reload();
-    load();
+    document.getElementById('btnReload').onclick = () => load();
+
+    document.addEventListener('DOMContentLoaded', load);
   </script>
 </body>
 </html>

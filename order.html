@@ -6,6 +6,7 @@
   <title>下單</title>
   <link rel="stylesheet" href="css/order_style.css">
   <link rel="stylesheet" href="css/loading.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="wrap">
@@ -39,145 +40,144 @@
       <div class="spinner-text">處理中，請稍候...</div>
     </div>
   </div>
-
   <script src="config.js"></script>
-  <script>
-    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
-    const EVENT_ID = new URLSearchParams(location.search).get("event");
+<script>
+  const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function showLoading(){ const el = document.getElementById('loadingOverlay'); if (el) el.style.display='block'; }
-    function hideLoading(){ const el = document.getElementById('loadingOverlay'); if (el) el.style.display='none'; }
+  const EVENT_ID = new URLSearchParams(location.search).get("event");
 
-    function jsonp(url, params) {
-      return new Promise((resolve, reject) => {
-        const cb = 'cb_' + Date.now() + Math.random().toString(36).slice(2);
-        params.callback = cb;
-        const qs = new URLSearchParams(params).toString();
-        const s = document.createElement('script');
-        s.src = url + '?' + qs;
-        window[cb] = (data) => { resolve(data); cleanup(); };
-        s.onerror = () => { reject(new Error('JSONP failed')); cleanup(); };
-        function cleanup(){ delete window[cb]; s.remove(); }
-        document.body.appendChild(s);
-      });
+  function showLoading(show) {
+    const loader = document.getElementById('loadingOverlay');
+    if (loader) loader.style.display = show ? 'flex' : 'none';
+  }
+
+  function addRow() {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input class="who" placeholder="姓名" required></td>
+      <td><input class="drink" placeholder="飲料名稱" required></td>
+      <td>
+        <select class="sugar">
+          <option>-</option>
+          <option>正常糖</option>
+          <option>少糖 (七分)</option>
+          <option>半糖 (五分)</option>
+          <option>微糖 (三分)</option>
+          <option>二分糖</option>
+          <option>一分糖</option>
+          <option>無糖</option>
+        </select>
+      </td>
+      <td>
+        <select class="ice">
+          <option>-</option>
+          <option>正常冰</option>
+          <option>少冰</option>
+          <option>微冰</option>
+          <option>去冰</option>
+          <option>完全去冰</option>
+          <option>常溫</option>
+          <option>熱</option>
+        </select>
+      </td>
+      <td><input class="qty" type="number" min="1" value="1" style="width:50px;"></td>
+      <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+    `;
+    document.querySelector('#itemsTbl tbody').appendChild(tr);
+  }
+
+  async function ensureEvent() {
+    if (!EVENT_ID) {
+      alert('無效的活動連結，請重新從首頁進入');
+      return;
     }
 
-    function parseDeadline(deadline){
-      if (!deadline) return null;
-      if (deadline instanceof Date && !isNaN(deadline)) return new Date(deadline.getTime());
-      let s = String(deadline).trim();
-      if (!s) return null;
-      if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}$/.test(s)) s = s.replace(' ', 'T');
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) s = s + ':00';
-      const d = new Date(s);
-      return isNaN(d) ? null : d;
-    }
-    function isExpired(deadlineStr){
-      const d = parseDeadline(deadlineStr);
-      if (!d) return false;
-      return Date.now() > d.getTime();
-    }
+    showLoading(true);
+    try {
+      const { data: ev, error } = await _supabase
+        .from('events')
+        .select('*')
+        .eq('id', EVENT_ID)
+        .single();
 
-    function addRow(defaults={}) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input class="who" placeholder="你的姓名" value="${defaults.who||''}"></td>
-        <td><input class="drink" placeholder="飲料名稱" value="${defaults.name||''}"></td>
-        <td>
-          <select class="sugar">
-            <option value="">—</option>
-            <option value="無糖">無糖</option>
-            <option value="一分糖">一分糖</option>
-            <option value="微糖">微糖</option>
-            <option value="半糖">半糖</option>
-            <option value="少糖">少糖</option>
-            <option value="全糖">正常</option>
-          </select>
-        </td>
-        <td>
-          <select class="ice">
-            <option value="">—</option>
-            <option>去冰</option>
-            <option>微冰</option>
-            <option>少冰</option>
-            <option>正常</option>
-          </select>
-        </td>
-        <td><input class="qty" type="number" min="1" value="${defaults.qty||1}"></td>
-        <td><button type="button" class="del">刪</button></td>
-      `;
-      document.querySelector('#itemsTbl tbody').appendChild(tr);
-      tr.querySelector('.del').addEventListener('click',()=>tr.remove());
-    }
-
-    function collectRows() {
-      const rows = [...document.querySelectorAll('#itemsTbl tbody tr')].map(tr => {
-        const who   = tr.querySelector('.who')?.value.trim()   || '';
-        const name  = tr.querySelector('.drink')?.value.trim() || '';
-        const sugar = tr.querySelector('.sugar')?.value || '';
-        const ice   = tr.querySelector('.ice')?.value   || '';
-        const qty   = Number(tr.querySelector('.qty')?.value || 0);
-        return { who, item: { name, sugar, ice, qty } };
-      });
-      const invalid = rows.find(r => !r.who || !r.item.name || !(r.item.qty > 0));
-      if (invalid) return { ok:false, error:'每筆都要填「姓名」與「飲料」，數量需 ≥ 1' };
-      return { ok:true, rows: rows.filter(r => r.who && r.item.name && r.item.qty > 0) };
-    }
-
-    async function ensureEvent(){
-      if (!WEB_APP_URL) { alert('WEB_APP_URL 未設定，請先在 config.js 填寫'); return; }
-      if (!EVENT_ID) { alert('缺少 event 參數，請從分享連結進入'); return; }
-      showLoading();
-      try{
-        const info = await jsonp(WEB_APP_URL, { action:'getEvent', eventId: EVENT_ID });
-        if (!info.ok) { alert('找不到事件：' + (info.error||'')); return; }
-        const ev = info.event;
-        document.title = `${ev.title || '下單'} - ${ev.shop || ''}`;
-        const h1 = document.querySelector('.page-title');
-        if (h1) h1.textContent = `${ev.shop || ev.title || '下單'}`;
-        const closed = String(ev.status||'').toLowerCase()==='closed';
-        const expired = (typeof info.expired === 'boolean') ? info.expired : isExpired(ev.deadline);
-        if (closed || expired){
-          document.querySelector('#addItem').disabled = true;
-          document.querySelector('#submitBtn').disabled = true;
-          alert(expired ? '已過截止時間，無法再下單。' : '此事件已結單。');
-        }
-      } finally {
-        hideLoading();
+      if (error || !ev) {
+        alert('找不到此活動資訊');
+        return;
       }
-    }
 
-    async function submitOrder(ev){
-      ev?.preventDefault();
+      document.querySelector('.page-title').textContent = ev.shop + ' - 下單';
 
-      const { ok, rows, error } = collectRows();
-      if (!ok) return alert(error || '請檢查每筆資料');
-      if (!EVENT_ID) return alert('缺少 event 參數，無法送出。');
-      if (!WEB_APP_URL) return alert('WEB_APP_URL 未設定，無法送出。');
+      const now = new Date().getTime();
+      const deadline = ev.deadline ? new Date(ev.deadline).getTime() : null;
 
-      showLoading();
-      try{
-        let success = 0, fail = 0, lastMsg = '';
-        for (const r of rows) {
-          const payload = { eventId: EVENT_ID, customer: r.who, items: [ r.item ] };
-          try{
-            const res = await jsonp(WEB_APP_URL, { action:'addOrder', payload: JSON.stringify(payload) });
-            if (res && res.ok) success++; else { fail++; lastMsg = res?.error || lastMsg; }
-          }catch(e){ fail++; lastMsg = e?.message || lastMsg; }
+      if (ev.status === 'closed' || (deadline && now > deadline)) {
+        const submitBtn = document.getElementById('submitBtn');
+        const addBtn = document.getElementById('addItem');
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = '下單已截止';
+          submitBtn.style.backgroundColor = '#94a3b8';
         }
-        if (fail === 0) alert(`已送出 ${success} 筆！`);
-        else alert(`成功 ${success} 筆，失敗 ${fail} 筆。${lastMsg?('最後錯誤：'+lastMsg):''}`);
-      } finally {
-        hideLoading();
+        if (addBtn) addBtn.style.display = 'none';
+
+        alert('這筆訂單已經超過截止時間，或是團長已結單。');
       }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  async function submitOrder() {
+    const trs = [...document.querySelectorAll('#itemsTbl tbody tr')];
+    if (trs.length === 0) return alert('請至少新增一筆飲料');
+
+    const rows = trs.map(tr => ({
+      event_id: EVENT_ID,
+      customer: tr.querySelector('.who').value.trim(),
+      name: tr.querySelector('.drink').value.trim(),
+      suger: tr.querySelector('.sugar').value,
+      ice: tr.querySelector('.ice').value,
+      qty: parseInt(tr.querySelector('.qty').value)
+    }));
+
+    if (rows.some(r => !r.customer || !r.name)) {
+      return alert('請填寫姓名與飲料名稱');
     }
 
-    document.addEventListener('DOMContentLoaded', async ()=>{
-      document.querySelector('#addItem').addEventListener('click',()=>addRow());
-      document.querySelector('#submitBtn').addEventListener('click',submitOrder);
-      addRow();
-      await ensureEvent();
-    });
-  </script>
+    showLoading(true);
+    try {
+      const { data: checkEv } = await _supabase.from('events').select('deadline, status').eq('id', EVENT_ID).single();
+      const now = new Date().getTime();
+      const deadline = checkEv.deadline ? new Date(checkEv.deadline).getTime() : null;
+
+      if (checkEv.status === 'closed' || (deadline && now > deadline)) {
+        alert('送出失敗：已截止下單！');
+        location.reload();
+        return;
+      }
+
+      const { error } = await _supabase.from('orders').insert(rows);
+      if (error) throw error;
+
+      alert('訂單送出成功！');
+      location.href = `summary.html?event=${EVENT_ID}`;
+    } catch (err) {
+      alert('送出失敗：' + err.message);
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('addItem').onclick = addRow;
+    document.getElementById('submitBtn').onclick = submitOrder;
+    addRow();
+    ensureEvent();
+  });
+</script>
 </body>
 </html>

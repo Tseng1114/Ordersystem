@@ -6,20 +6,13 @@
   <title>建立飲料訂單</title>
   <link rel="stylesheet" href="css/create_event_style.css">
   <link rel="stylesheet" href="css/loading.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="wrap">
     <h1 class="page-title">建立飲料訂單</h1>
-    <div id="loginCard" class="card">
-      <label for="pass">管理者密碼</label>
-      <input id="pass" type="password" placeholder="請輸入密碼">
-      <div class="actions">
-        <a class="back-home" href="index.html">回首頁</a>
-        <button class="primary" id="loginBtn" type="button">登入</button>
-      </div>
-      <div class="hint">登入成功後即可建立訂單。</div>
-    </div>
-    <div id="createCard" class="card hidden">
+
+    <div id="createCard" class="card">
       <label for="shopSelect">店家</label>
       <select id="shopSelect" class="select-like">
         <option value="" selected>請選擇店家</option>
@@ -28,24 +21,23 @@
         <option>珍煮丹</option>
         <option>得正</option>
         <option>50嵐</option>
-        <option>米里米里</option>
         <option>麻古茶坊</option>
-        <option>八曜和茶</option>
-        <option>有飲</option>
-        <option>青山</option>
-        <option>清心福全</option>
         <option>一沐日</option>
         <option value="__other">其他（自訂）</option>
       </select>
+
       <div id="otherBox" class="hidden" style="margin-top:10px;">
         <input id="shopOther" placeholder="請輸入店家名稱">
       </div>
+
       <label for="deadline" style="margin-top:12px;">截止時間</label>
       <input id="deadline" type="datetime-local" />
+
       <div class="actions">
         <a class="back-home" href="index.html">回首頁</a>
         <button class="primary" id="createBtn" type="button">建立訂單</button>
       </div>
+
       <div id="result" style="margin-top:16px; display:none;">
         <p>分享這個連結給大家下單：</p>
         <input id="shareLink" readonly style="width:100%;height:44px;padding:10px 12px;border:1px solid #ccc;border-radius:10px;">
@@ -62,22 +54,15 @@
       <div class="spinner-text">處理中，請稍候...</div>
     </div>
   </div>
+
   <script src="config.js"></script>
   <script>
-    const { WEB_APP_URL, TOKEN_KEY } = window.APP_CONFIG;
+    const { SUPABASE_URL, SUPABASE_KEY } = window.APP_CONFIG;
+
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     function showLoading(){ document.getElementById('loadingOverlay').style.display='block'; }
     function hideLoading(){ document.getElementById('loadingOverlay').style.display='none'; }
-
-    async function apiGet(params) {
-      const url = new URL(WEB_APP_URL);
-      Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
-      const res = await fetch(url.toString(), { credentials: 'omit' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
-    }
-
-    function setToken(t){ try { sessionStorage.setItem(TOKEN_KEY, t); } catch(_) {} }
-    function getToken(){ try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch(_) { return ''; } }
 
     const shopSelect = document.querySelector('#shopSelect');
     const otherBox = document.querySelector('#otherBox');
@@ -92,65 +77,59 @@
       }
     });
 
-    async function login(){
-      const pass = document.querySelector('#pass').value.trim();
-      if (!pass) return alert('請輸入密碼');
-      showLoading();
-      try{
-        const res = await apiGet({ action: 'login', pass });
-        if (!res.ok) throw new Error(res.error || 'login failed');
-        setToken(res.token || '');
-        document.querySelector('#loginCard').classList.add('hidden');
-        document.querySelector('#createCard').classList.remove('hidden');
-      }catch(err){
-        alert('登入失敗：' + (err.message || err));
-      }finally{
-        hideLoading();
-      }
-    }
-
     async function createEvent(){
       const sel = shopSelect.value;
       const shop = sel === '__other' ? shopOther.value.trim() : sel.trim();
       const deadline = document.querySelector('#deadline').value;
+
       if (!shop) return alert('請選擇店家或輸入自訂店名');
-      const token = getToken();
-      if (!token) return alert('尚未登入，請先輸入密碼');
+
       showLoading();
-      try{
-        const res = await apiGet({ action:'createEvent', shop, deadline, token });
-        if (!res.ok) throw new Error(res.error || 'create failed');
-        const id = res.id;
-        try { localStorage.setItem('last_event_id', id); } catch(_) {}
+      try {
+        const { data, error } = await _supabase
+          .from('events')
+          .insert([
+            {
+              title: shop + ' 訂單',
+              shop: shop,
+              deadline: deadline ? new Date(deadline).toISOString() : null,
+              status: 'open'
+            }
+          ])
+          .select(); // 使用 select() 獲取剛建立的資料（包含 ID）
+
+        if (error) throw error;
+
+        const newEvent = data[0];
+        const id = newEvent.id;
+
         const orderURL = new URL('order.html', location.href);
         orderURL.searchParams.set('event', id);
         const orderLink = orderURL.toString();
+
         const input = document.querySelector('#shareLink');
         input.value = orderLink;
         document.querySelector('#result').style.display = 'block';
+
         document.querySelector('#copyBtn').onclick = async () => {
           try {
-            if (navigator.clipboard) await navigator.clipboard.writeText(orderLink);
-            else { input.select(); document.execCommand('copy'); }
+            await navigator.clipboard.writeText(orderLink);
             alert('已複製下單連結');
           } catch (e) {
-            alert('複製失敗，請手動複製');
+            input.select();
+            document.execCommand('copy');
+            alert('已複製');
           }
         };
-      }catch(err){
-        alert('建立失敗：' + (err.message || err));
-      }finally{
+
+      } catch (err) {
+        alert('建立失敗：' + err.message);
+      } finally {
         hideLoading();
       }
     }
 
-    document.querySelector('#loginBtn').addEventListener('click', login);
     document.querySelector('#createBtn').addEventListener('click', createEvent);
-
-    if (getToken()){
-      document.querySelector('#loginCard').classList.add('hidden');
-      document.querySelector('#createCard').classList.remove('hidden');
-    }
   </script>
 </body>
 </html>

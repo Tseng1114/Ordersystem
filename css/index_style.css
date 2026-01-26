@@ -1,100 +1,207 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>曾可愛家族訂餐系統</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/index_style.css">
-</head>
-<body>
-  <div class="page-wrap">
-    <h1 class="title">曾可愛家族訂單系統</h1>
+:root {
+  --bg-body: #f7f9fc;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-color: #f59e0b;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-hover: 4px 4px 0px rgba(30, 41, 59, 0.15);
+  --border-radius: 16px;
+  --page-max: 1000px;
+  --card-min: 260px;
+  --gap: 24px;
+}
 
-    <div class="order-btn-container">
-      <a href="create_event.html" class="order-btn">建立訂單</a>
-    </div>
+* { box-sizing: border-box; }
 
-    <div class="search-card">
-      <h3>查詢過往訂單</h3>
-      <div class="search-group">
-        <input id="searchEventId" type="text" placeholder="請貼上訂單編號" class="search-input">
-        <button id="searchBtn" class="search-btn">立即查詢</button>
-      </div>
-    </div>
+html, body { height: 100%; }
 
-    <div class="grid">
-      <a class="card" href="./all_html/milksha.html">
-        <img class="logo" src="./logos/milksha_logo.png" alt="Milksha">
-        <div class="label"><b>迷客夏</b><small>Milksha</small></div>
-      </a>
-      <a class="card" href="./all_html/damingtea.html">
-        <img class="logo" src="./logos/damingtea_logo.png" alt="DAMING">
-        <div class="label"><b>大茗本味製茶堂</b><small>DAMING</small></div>
-      </a>
-      <a class="card" href="./all_html/truedan.html">
-        <img class="logo" src="./logos/truedan_logo.png" alt="TRUEDAN">
-        <div class="label"><b>珍煮丹</b><small>TRUEDAN</small></div>
-      </a>
-      <a class="card" href="./all_html/dejeng.html">
-        <img class="logo" src="./logos/dejeng_logo.png" alt="Dejeng">
-        <div class="label"><b>得正</b><small>Dejeng</small></div>
-      </a>
-      <a class="card" href="./all_html/50lan.html">
-        <img class="logo" src="./logos/50lan_logo.png" alt="50Lan">
-        <div class="label"><b>50嵐</b></div>
-      </a>
-      <a class="card" href="./all_html/minimini.html">
-        <img class="logo" src="./logos/minimini_logo.png" alt="minimini">
-        <div class="label"><b>米里米里</b><small>MINI-MINI</small></div>
-      </a>
-      <a class="card" href="./all_html/macutea.html">
-        <img class="logo" src="./logos/macutea_logo.png" alt="macu">
-        <div class="label"><b>麻古茶坊</b><small>MACU</small></div>
-      </a>
-      <a class="card" href="./all_html/8yotea.html">
-        <img class="logo" src="./logos/8yotea_logo.png" alt="8yotea">
-        <div class="label"><b>八曜和茶</b><small>ハチヨウワチヤ</small></div>
-      </a>
-      <a class="card" href="./all_html/youindrink.html">
-        <img class="logo" src="./logos/youindrink_logo.png" alt="youin">
-        <div class="label"><b>有飲</b><small>You in</small></div>
-      </a>
-      <a class="card" href="./all_html/peaktea.html">
-        <img class="logo" src="./logos/peaktea_logo.png" alt="Peak Tea">
-        <div class="label"><b>青山</b></div>
-      </a>
-      <a class="card" href="./all_html/chingshin.html">
-        <img class="logo" src="./logos/chingshin_logo.png" alt="chingshin">
-        <div class="label"><b>清心福全</b></div>
-      </a>
-      <a class="card" href="./all_html/aniceholiday.html">
-        <img class="logo" src="./logos/aniceholiday_logo.jpg" alt="A NICE HOLIDAY">
-        <div class="label"><b>一沐日</b><small>A NICE HOLIDAY</small></div>
-      </a>
-    </div>
-  </div>
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-body);
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-font-smoothing: antialiased;
+}
 
-  <script src="config.js"></script>
-  <script>
-    (function () {
-      const searchBtn = document.getElementById("searchBtn");
-      const searchInput = document.getElementById("searchEventId");
+.page-wrap {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+}
 
-      if (searchBtn) {
-        searchBtn.onclick = () => {
-          const id = searchInput.value.trim();
-          if (!id) return alert("請輸入編號");
-          location.href = "summary.html?event=" + encodeURIComponent(id);
-        };
-      }
+.title {
+  text-align: center;
+  margin: 0 0 32px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
 
-      searchInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") searchBtn.click();
-      });
-    })();
-  </script>
-</body>
-</html>
+.order-btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.order-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.order-btn:first-child {
+  background: var(--text-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2);
+}
+.order-btn:first-child:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(30, 41, 59, 0.3);
+}
+
+.order-btn:not(:first-child) {
+  background: #fff;
+  color: var(--text-primary);
+  border: 1.5px solid var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.order-btn:not(:first-child):hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.search-card {
+  margin: 0 auto 48px;
+  max-width: 500px;
+  padding: 24px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  border: 1.5px solid var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.search-card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.search-group {
+  display: flex;
+  gap: 12px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent-color);
+}
+
+.search-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: 1.5px solid var(--text-primary);
+  padding: 10px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.search-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--text-primary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr));
+  gap: var(--gap);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1.5px solid var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff;
+  border: 1.5px solid var(--text-primary);
+  padding: 6px;
+}
+
+.label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.label b {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.label small {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .page-wrap {
+    padding: 40px 20px 60px;
+  }
+  .title { font-size: 26px; margin-bottom: 24px; }
+  .grid { grid-template-columns: 1fr; gap: 16px; }
+  .card { padding: 16px; }
+  .search-group { flex-direction: column; }
+  .search-btn { width: 100%; }
+}

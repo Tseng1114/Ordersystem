@@ -16,10 +16,10 @@ serve(async (req) => {
         let replyText = ""
 
         if (userText === "官網") {
-          replyText = "🏠 曾可愛家族點餐系統：\nhttps://tseng1114.github.io/Ordersystem/"
+          replyText = " 曾可愛家族點餐系統：\nhttps://tseng1114.github.io/Ordersystem/"
         }
         else if (userText === "查詢") {
-          replyText = "🔍 請輸入【訂單編號】來查看訂單明細。"
+          replyText = " 請輸入【訂單編號】來查看訂單明細。"
         }
         else {
           console.log(`正在查詢訂單: ${userText}`);
@@ -31,11 +31,11 @@ serve(async (req) => {
 
           if (error) {
             console.error("SQL Error:", error.message);
-            replyText = `❌ 查詢失敗，請檢查欄位名稱。`;
+            replyText = ` 查詢失敗，請檢查欄位名稱。`;
           } else if (!data || data.length === 0) {
-            replyText = `📍 找不到該訂單編號「${userText}」的任何訂單。`;
+            replyText = ` 找不到該訂單編號「${userText}」的任何訂單。`;
           } else {
-            let list = `📋 訂單編號 #${userText} 的明細\n------------------\n`;
+            let list = ` 訂單編號 #${userText} 的明細\n------------------\n`;
             data.forEach((order, index) => {
               list += `${index + 1}. ${order.customer}：${order.name} (${order.suger}/${order.ice}) x${order.qty}\n`;
             });
@@ -63,3 +63,7 @@ serve(async (req) => {
   }
   return new Response("ok", { status: 200 })
 })
+
+/*
+beta version
+*/

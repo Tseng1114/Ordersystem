@@ -9,6 +9,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <div class="marquee-bar">
+    <div class="marquee-content">
+      ⚠️ 系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！ ⚠️
+    </div>
+  </div>
+
   <div id="loadingOverlay">
     <div class="spinner-box">
       <div class="spinner"></div>
@@ -19,6 +25,15 @@
   <div class="wrap">
     <div class="card">
       <h1 class="page-title">訂單彙整</h1>
+
+      <div class="id-copy-section">
+        <div class="id-label">訂單編號</div>
+        <div class="id-display-row">
+          <span id="targetOrderId">載入中...</span>
+          <button id="btnCopy" class="copy-action-btn">複製編號</button>
+        </div>
+        <div id="copyToast" class="copy-toast"> 已複製到剪貼簿</div>
+      </div>
 
       <div id="eventInfo"></div>
 
@@ -40,6 +55,22 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const eventId = new URLSearchParams(location.search).get('event');
 
+    const btnCopy = document.getElementById('btnCopy');
+    const copyToast = document.getElementById('copyToast');
+    const targetOrderId = document.getElementById('targetOrderId');
+
+    btnCopy.onclick = () => {
+      if (!eventId) return;
+      navigator.clipboard.writeText(eventId).then(() => {
+        copyToast.style.display = 'block';
+        btnCopy.innerText = '已複製';
+        setTimeout(() => {
+          copyToast.style.display = 'none';
+          btnCopy.innerText = '複製編號';
+        }, 2000);
+      });
+    };
+
     function showLoading(show) {
       document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
     }
@@ -48,23 +79,20 @@
       if (!isoString) return '無限制';
       const date = new Date(isoString);
       return date.toLocaleString('zh-TW', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false,
         timeZone: 'Asia/Taipei'
       });
     }
 
     async function load() {
       if (!eventId) {
-        alert('網址缺少訂單編號，請重新從首頁進入或輸入編號。');
+        alert('網址缺少訂單編號，請重新從首頁進入。');
         location.href = 'index.html';
         return;
       }
 
+      targetOrderId.innerText = eventId;
       showLoading(true);
 
       try {
@@ -74,21 +102,15 @@
           .eq('id', eventId);
 
         if (error) throw error;
-
         if (!results || results.length === 0) {
-          document.getElementById('eventInfo').innerHTML = `<p style="color:red; text-align:center;">找不到此編號 (${eventId}) 的活動。</p>`;
+          document.getElementById('eventInfo').innerHTML = `<p style="color:red; text-align:center;">找不到此編號的活動。</p>`;
           return;
         }
 
         const ev = results[0];
-
-        const infoEl = document.getElementById('eventInfo');
-        infoEl.innerHTML = `
+        document.getElementById('eventInfo').innerHTML = `
           <div class="meta-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid #1e293b; margin-bottom: 25px;">
-            <h2 style="text-align:center; margin:0 0 10px 0; color:#1e293b;">${ev.shop}</h2>
-            <p style="text-align:center; color:#64748b; font-size: 0.85em; margin: 5px 0; word-break: break-all;">
-              訂單編號：<span style="user-select: all; background:#eee; padding:2px 4px;">${ev.id}</span>
-            </p>
+            <h2 style="text-align:center; margin:0 0 10px 0;">${ev.shop}</h2>
             <p style="text-align:center; color:#e11d48; font-weight:bold; margin: 5px 0;">
               截止時間：${formatTWTime(ev.deadline)}
             </p>
@@ -96,7 +118,6 @@
 
         const listEl = document.getElementById('byPersonList');
         listEl.innerHTML = '';
-
         const groups = {};
         const orders = ev.orders || [];
 
@@ -110,35 +131,29 @@
 
           Object.keys(groups).sort().forEach(name => {
             const items = groups[name].map(o => `
-              <li style="margin-bottom: 6px;">
-                <span style="font-weight:500;">${o.name}</span>
-                <span style="color:#64748b;">(${o.suger}／${o.ice})</span>
-                <span style="color:#1e293b; font-weight:bold;">x${o.qty}</span>
+              <li>
+                <span>${o.name} (${o.suger}／${o.ice})</span>
+                <span style="font-weight:bold;">x${o.qty}</span>
               </li>
             `).join('');
-
             const div = document.createElement('div');
             div.className = 'person';
-            div.style = "margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #e2e8f0;";
-            div.innerHTML = `
-              <h4 style="margin: 0 0 10px 0; color:#1e293b; border-left: 4px solid #f59e0b; padding-left: 10px;">${name}</h4>
-              <ul style="list-style: none; padding-left: 15px; margin: 0;">${items}</ul>
-            `;
+            div.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
             listEl.appendChild(div);
           });
         }
-
       } catch (err) {
-        console.error('載入失敗:', err);
-        alert('讀取資料發生錯誤：' + err.message);
+        alert('讀取失敗：' + err.message);
       } finally {
         showLoading(false);
       }
     }
-
     document.getElementById('btnReload').onclick = () => load();
-
     document.addEventListener('DOMContentLoaded', load);
   </script>
 </body>
 </html>
+
+<!--
+beta version
+-->

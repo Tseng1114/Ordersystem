@@ -15,15 +15,13 @@ serve(async (req) => {
         const userText = event.message.text.trim()
         let replyText = ""
 
-        if (userText === "官網") {
-          replyText = " 曾可愛家族點餐系統：\nhttps://tseng1114.github.io/Ordersystem/"
+        if (userText === "小九的功能") {
+          replyText = " 小九的功能如下：\n1. 輸入「官網」，取得點餐系統連結。\n2. 輸入「訂單編號」：查看該訂單明細。"
         }
-        else if (userText === "查詢") {
-          replyText = " 請輸入【訂單編號】來查看訂單明細。"
+        else if (userText === "官網") {
+          replyText = "曾可愛家族點餐系統：\nhttps://tseng1114.github.io/Ordersystem/"
         }
-        else {
-          console.log(`正在查詢訂單: ${userText}`);
-
+        else if (userText.length >= 5) {
           const { data, error } = await supabase
             .from('orders')
             .select('customer, name, suger, ice, qty')
@@ -31,11 +29,10 @@ serve(async (req) => {
 
           if (error) {
             console.error("SQL Error:", error.message);
-            replyText = ` 查詢失敗，請檢查欄位名稱。`;
           } else if (!data || data.length === 0) {
-            replyText = ` 找不到該訂單編號「${userText}」的任何訂單。`;
+            replyText = "找無此訂單，請確認訂單編號";
           } else {
-            let list = ` 訂單編號 #${userText} 的明細\n------------------\n`;
+            let list = `訂單編號 #${userText} 的明細\n------------------\n`;
             data.forEach((order, index) => {
               list += `${index + 1}. ${order.customer}：${order.name} (${order.suger}/${order.ice}) x${order.qty}\n`;
             });
@@ -63,7 +60,3 @@ serve(async (req) => {
   }
   return new Response("ok", { status: 200 })
 })
-
-/*
-beta version
-*/

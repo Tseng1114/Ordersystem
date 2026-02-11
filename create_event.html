@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>建立訂單</title>
+    <script type="module" crossorigin src="./assets/create_event-BLimJc9U.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/config-Cz5MLLdD.js">
+    <link rel="stylesheet" crossorigin href="./assets/create_event-DLCtmkxe.css">
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 class="page-title">建立訂單</h1>
+
+      <div id="createCard" class="card">
+        <label for="shopSelect">店家</label>
+        <select id="shopSelect" class="select-like">
+          <option value="" selected>請選擇店家</option>
+          <option>迷客夏</option>
+          <option>大茗本味製茶堂</option>
+          <option>珍煮丹</option>
+          <option>得正</option>
+          <option>50嵐</option>
+          <option>米里米里</option>
+          <option>麻古茶坊</option>
+          <option>八曜和茶</option>
+          <option>有飲</option>
+          <option>青山</option>
+          <option>清心福全</option>
+          <option>一沐日</option>
+          <option>波哥茶飲</option>
+          <option>双生綠豆沙牛奶</option>
+          <option>來日方茶</option>
+          <option>茶湯會</option>
+          <option>老賴茶棧</option>
+          <option>可不可熟成紅茶</option>
+          <option value="__other">其他（自訂）</option>
+        </select>
+
+        <div id="otherBox" class="hidden" style="margin-top: 10px">
+          <input id="shopOther" placeholder="請輸入店家名稱" />
+        </div>
+
+        <label for="deadline" style="margin-top: 12px">截止時間</label>
+        <input id="deadline" type="datetime-local" />
+
+        <div class="actions">
+          <a class="back-home" href="index.html">回首頁</a>
+          <button class="primary" id="createBtn" type="button">建立訂單</button>
+        </div>
+
+        <div id="result" style="margin-top: 16px; display: none">
+          <p>分享這個連結給大家下單：</p>
+          <input
+            id="shareLink"
+            readonly
+            style="
+              width: 100%;
+              height: 44px;
+              padding: 10px 12px;
+              border: 1px solid #ccc;
+              border-radius: 10px;
+            "
+          />
+          <div class="actions" style="margin-top: 12px">
+            <button class="primary" id="copyBtn" type="button">
+              複製下單連結
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadingOverlay">
+      <div class="spinner-box">
+        <div class="spinner"></div>
+        <div class="spinner-text">處理中，請稍候...</div>
+      </div>
+    </div>
+
+  </body>
+</html>
+
+<!--
+beta version
+-->

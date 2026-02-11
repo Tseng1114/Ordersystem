@@ -14,7 +14,7 @@ export default defineConfig({
         "50lan": resolve(__dirname, "all_html/50lan.html"),
         aniceholiday: resolve(__dirname, "all_html/aniceholiday.html"),
         bogteashop: resolve(__dirname, "all_html/bogteashop.html"),
-        chingshing: resolve(__dirname, "all_html/chingshing.html"),
+        chingshing: resolve(__dirname, "all_html/chingshin.html"),
         damingtea: resolve(__dirname, "all_html/damingtea.html"),
         dejeng: resolve(__dirname, "all_html/dejeng.html"),
         kebuke: resolve(__dirname, "all_html/kebuke.html"),

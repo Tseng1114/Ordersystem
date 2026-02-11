@@ -19,7 +19,7 @@ export default defineConfig({
         dejeng: resolve(__dirname, "all_html/dejeng.html"),
         kebuke: resolve(__dirname, "all_html/kebuke.html"),
         lairitea: resolve(__dirname, "all_html/lairitea.html"),
-        liketea: resolve(__dirname, "all_html/liketea.html"),
+        liketeashop: resolve(__dirname, "all_html/liketeashop.html"),
         macutea: resolve(__dirname, "all_html/macutea.html"),
         milksha: resolve(__dirname, "all_html/milksha.html"),
         minimini: resolve(__dirname, "all_html/minimini.html"),

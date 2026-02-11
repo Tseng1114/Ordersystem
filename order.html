@@ -84,7 +84,20 @@
             .select("*")
             .eq("id", EVENT_ID)
             .single();
+
           if (error || !ev) return alert("找不到該訂單");
+
+          if (ev.deadline) {
+            const now = new Date();
+            const deadline = new Date(ev.deadline);
+            if (now > deadline) {
+              alert("此訂單已超過截止時間，無法再下單囉！");
+              document.getElementById("submitBtn").disabled = true;
+              document.getElementById("submitBtn").innerText = "已截止";
+              document.getElementById("addItem").style.display = "none";
+            }
+          }
+
           document.querySelector(".page-title").textContent =
             ev.shop + " - 下單";
         } finally {

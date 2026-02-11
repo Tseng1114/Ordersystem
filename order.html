@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>下單</title>
+    <link rel="stylesheet" href="css/order_style.css" />
+    <link rel="stylesheet" href="css/loading.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1 class="page-title">下單</h1>
+      <div class="card">
+        <table id="itemsTbl">
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>飲料</th>
+              <th>糖度</th>
+              <th>冰量</th>
+              <th>數量</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="actions">
+          <a href="index.html" class="back-home">回首頁</a>
+          <button type="button" class="add" id="addItem">＋新增一筆</button>
+          <button type="button" class="primary" id="submitBtn">送出訂單</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadingOverlay">
+      <div class="spinner-box">
+        <div class="spinner"></div>
+        <div class="spinner-text">處理中，請稍候...</div>
+      </div>
+    </div>
+    <script type="module">
+      import { supabase } from "./config.js";
+
+      const EVENT_ID = new URLSearchParams(location.search).get("event");
+
+      function showLoading(show) {
+        const loader = document.getElementById("loadingOverlay");
+        if (loader) loader.style.display = show ? "flex" : "none";
+      }
+
+      function addRow() {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input class="who" placeholder="姓名" required></td>
+          <td><input class="drink" placeholder="飲料名稱" required></td>
+          <td>
+            <select class="sugar">
+              <option>-</option>
+              <option>正常糖</option><option>少糖 (七分)</option><option>半糖 (五分)</option>
+              <option>微糖 (三分)</option><option>二分糖</option><option>一分糖</option><option>無糖</option>
+            </select>
+          </td>
+          <td>
+            <select class="ice">
+              <option>-</option>
+              <option>正常冰</option><option>少冰</option><option>微冰</option><option>去冰</option>
+              <option>完全去冰</option><option>常溫</option><option>熱</option>
+            </select>
+          </td>
+          <td><input class="qty" type="number" min="1" value="1" style="width:50px;"></td>
+          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+        `;
+        document.querySelector("#itemsTbl tbody").appendChild(tr);
+      }
+
+      async function ensureEvent() {
+        if (!EVENT_ID) return alert("無效訂單編號");
+        showLoading(true);
+        try {
+          const { data: ev, error } = await supabase
+            .from("events")
+            .select("*")
+            .eq("id", EVENT_ID)
+            .single();
+          if (error || !ev) return alert("找不到該訂單");
+          document.querySelector(".page-title").textContent =
+            ev.shop + " - 下單";
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      async function submitOrder() {
+        const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
+        const rows = trs.map((tr) => ({
+          event_id: EVENT_ID,
+          customer: tr.querySelector(".who").value.trim(),
+          name: tr.querySelector(".drink").value.trim(),
+          suger: tr.querySelector(".sugar").value,
+          ice: tr.querySelector(".ice").value,
+          qty: parseInt(tr.querySelector(".qty").value),
+        }));
+
+        showLoading(true);
+        try {
+          const { error } = await supabase.from("orders").insert(rows);
+          if (error) throw error;
+          alert("訂單送出成功！");
+          location.href = `summary.html?event=${EVENT_ID}`;
+        } catch (err) {
+          alert("送出失敗：" + err.message);
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("addItem").onclick = addRow;
+        document.getElementById("submitBtn").onclick = submitOrder;
+        addRow();
+        ensureEvent();
+      });
+    </script>
+  </body>
+</html>
+
+<!--
+beta version
+-->

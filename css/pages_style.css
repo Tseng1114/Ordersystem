@@ -1,0 +1,81 @@
+:root {
+  --bg-body: #f7f9fc;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --divider-color: #000000; 
+  --radius: 16px;
+  --page-max: 980px;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", system-ui, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-body);
+  padding: 40px 20px;
+}
+
+header {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 10px 0 30px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+}
+
+.back {
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #1e293b;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  position: absolute;
+  right: 0;
+}
+
+.back:hover {
+  background-color: #334155;
+  transform: translateY(-2px);
+}
+
+.header-divider {
+  max-width: var(--page-max);
+  margin: 0 auto 40px;
+  border: 0;
+  height: 1.5px;
+  background-color: var(--divider-color);
+  display: block;
+}
+
+.grid {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.grid img {
+  width: 100%;
+  display: block;
+  border: 1.5px solid var(--text-primary);
+  border-radius: var(--radius);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.grid:hover img {
+  transform: scale(1.03);
+  cursor: zoom-in;
+}

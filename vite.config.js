@@ -1,5 +1,9 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
   base: "./",
@@ -10,24 +14,26 @@ export default defineConfig({
         create_event: resolve(__dirname, "create_event.html"),
         order: resolve(__dirname, "order.html"),
         summary: resolve(__dirname, "summary.html"),
-        "8yotea": resolve(__dirname, "all_html/8yotea.html"),
-        "50lan": resolve(__dirname, "all_html/50lan.html"),
-        aniceholiday: resolve(__dirname, "all_html/aniceholiday.html"),
-        bogteashop: resolve(__dirname, "all_html/bogteashop.html"),
-        chingshing: resolve(__dirname, "all_html/chingshin.html"),
-        damingtea: resolve(__dirname, "all_html/damingtea.html"),
-        dejeng: resolve(__dirname, "all_html/dejeng.html"),
-        kebuke: resolve(__dirname, "all_html/kebuke.html"),
-        lairitea: resolve(__dirname, "all_html/lairitea.html"),
-        liketeashop: resolve(__dirname, "all_html/liketeashop.html"),
-        macutea: resolve(__dirname, "all_html/macutea.html"),
-        milksha: resolve(__dirname, "all_html/milksha.html"),
-        minimini: resolve(__dirname, "all_html/minimini.html"),
-        peaktea: resolve(__dirname, "all_html/peaktea.html"),
-        shuansenbeverages: resolve(__dirname, "all_html/shuansenbeverages.html"),
-        tptea: resolve(__dirname, "all_html/tptea.html"),
-        truedan: resolve(__dirname, "all_html/truedan.html"),
-        youindrink: resolve(__dirname, "all_html/youindrink.html"),
+        "8yotea": resolve(__dirname, "all_html/drinks/8yotea.html"),
+        "50lan": resolve(__dirname, "all_html/drinks/50lan.html"),
+        aniceholiday: resolve(__dirname, "all_html/drinks/aniceholiday.html"),
+        bogteashop: resolve(__dirname, "all_html/drinks/bogteashop.html"),
+        chingshing: resolve(__dirname, "all_html/drinks/chingshin.html"),
+        damingtea: resolve(__dirname, "all_html/drinks/damingtea.html"),
+        dejeng: resolve(__dirname, "all_html/drinks/dejeng.html"),
+        kebuke: resolve(__dirname, "all_html/drinks/kebuke.html"),
+        lairitea: resolve(__dirname, "all_html/drinks/lairitea.html"),
+        liketeashop: resolve(__dirname, "all_html/drinks/liketeashop.html"),
+        macutea: resolve(__dirname, "all_html/drinks/macutea.html"),
+        milksha: resolve(__dirname, "all_html/drinks/milksha.html"),
+        minimini: resolve(__dirname, "all_html/drinks/minimini.html"),
+        peaktea: resolve(__dirname, "all_html/drinks/peaktea.html"),
+        shuansenbeverages: resolve(__dirname, "all_html/drinks/shuansenbeverages.html"),
+        tptea: resolve(__dirname, "all_html/drinks/tptea.html"),
+        truedan: resolve(__dirname, "all_html/drinks/truedan.html"),
+        youindrink: resolve(__dirname, "all_html/drinks/youindrink.html"),
+        lucymama: resolve(__dirname, "all_html/meals/lucymama.html"),
+        guijihandmadedumplingrestaurant: resolve(__dirname, "all_html/meals/guijihandmadedumplingrestaurant.html"),
       },
     },
   },

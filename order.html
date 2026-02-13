@@ -57,6 +57,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const EVENT_ID = urlParams.get("event");
       let currentCategory = "drink";
+      let isExpired = false; 
 
       function showLoading(s) {
         document.getElementById("loadingOverlay").style.display = s
@@ -86,55 +87,65 @@
             document.getElementById("colSpecB").textContent = "備註";
           }
 
-          const now = new Date();
-          if (ev.deadline && now > new Date(ev.deadline)) {
-            const btn = document.getElementById("submitBtn");
-            btn.disabled = true;
-            btn.innerText = "已截止";
-            document.getElementById("addItem").classList.add("hidden");
+          if (ev.deadline) {
+            const now = new Date();
+            const deadlineTime = new Date(ev.deadline);
+            if (now > deadlineTime) {
+              isExpired = true;
+              const btn = document.getElementById("submitBtn");
+              btn.disabled = true;
+              btn.innerText = "已截止 (無法送出)";
+              btn.classList.add("btn-disabled"); 
+              document.getElementById("addItem").classList.add("hidden");
+              alert("此訂單已截止。");
+            }
           }
         } finally {
           showLoading(false);
         }
       }
-
       function addRow() {
         const tr = document.createElement("tr");
         let middleCols = "";
 
         if (currentCategory === "food") {
           middleCols = `
-            <td><input class="spec-a-input" placeholder="大/小,加麵等"></td>
-            <td><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
-          `;
+      <td><input class="spec-a-input" placeholder="大/小,加麵等"></td>
+      <td><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
+    `;
         } else {
           middleCols = `
-            <td>
-              <select class="spec-a-input">
-                <option>正常糖</option><option>少糖</option><option>半糖</option>
-                <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
-              </select>
-            </td>
-            <td>
-              <select class="spec-b-input">
-                <option>正常冰</option><option>少冰</option><option>微冰</option>
-                <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
-              </select>
-            </td>
-          `;
+      <td>
+        <select class="spec-a-input">
+          <option>正常糖</option><option>少糖</option><option>半糖</option>
+          <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
+        </select>
+      </td>
+      <td>
+        <select class="spec-b-input">
+          <option>正常冰</option><option>少冰</option><option>微冰</option>
+          <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
+        </select>
+      </td>
+    `;
         }
 
         tr.innerHTML = `
-          <td><input class="who" placeholder="姓名" required></td>
-          <td><input class="drink" placeholder="請輸入名稱" required></td>
-          ${middleCols}
-          <td><input class="qty" type="number" min="1" value="1"></td>
-          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
-        `;
+    <td><input class="who" placeholder="姓名" required></td>
+    <td><input class="drink" placeholder="請輸入名稱" required></td>
+    ${middleCols}
+    <td><input class="qty" type="number" min="1" value="1"></td>
+    <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+  `;
         document.querySelector("#itemsTbl tbody").appendChild(tr);
       }
 
       async function submitOrder() {
+        if (isExpired) {
+          alert("訂單已截止，無法送出！");
+          return;
+        }
+
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
         if (trs.length === 0) return alert("請至少新增一筆品項");
 
@@ -142,7 +153,7 @@
           event_id: EVENT_ID,
           customer: tr.querySelector(".who").value.trim(),
           name: tr.querySelector(".drink").value.trim(),
-          suger: tr.querySelector(".spec-a-input").value, //
+          suger: tr.querySelector(".spec-a-input").value,
           ice: tr.querySelector(".spec-b-input").value,
           qty: parseInt(tr.querySelector(".qty").value),
         }));

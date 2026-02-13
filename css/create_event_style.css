@@ -75,7 +75,8 @@ input:focus {
 .actions {
   display: flex;
   gap: 12px;
-  margin-top: 25px;
+  align-items: center;
+  margin-top: 20px;
 }
 
 .action-gap {
@@ -83,15 +84,20 @@ input:focus {
 }
 
 button.primary {
-  flex: 2;
-  background: var(--text-primary);
-  color: #fff;
-  border: none;
-  padding: 14px;
+  flex: 1; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff; 
+  color: var(--text-primary); 
+  border: 1.5px solid var(--text-primary); 
+  height: 48px; 
+  padding: 0 24px;
   border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: all 0.1s;
+  box-sizing: border-box;
 }
 
 button.primary:active {
@@ -99,14 +105,19 @@ button.primary:active {
 }
 
 .back-home {
-  flex: 1;
-  text-align: center;
-  text-decoration: none;
-  color: var(--text-primary);
-  border: 1.5px solid var(--text-primary);
-  padding: 12px;
+  flex: 1; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--text-primary);
+  color: #fff;
+  border: none;
+  height: 48px; 
+  padding: 0 24px;
   border-radius: 50px;
-  font-weight: 600;
+  text-decoration: none;
+  font-weight: 700;
+  box-sizing: border-box; 
 }
 
 .hidden {

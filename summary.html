@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="css/summary_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
+    <link rel="stylesheet" href="css/copyright_style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
@@ -52,8 +53,16 @@
         </div>
       </div>
     </div>
+    <footer class="footer">
+      <div class="footer-content">
+        <p>© 2025 曾可愛家族點餐系統</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
+      </div>
+    </footer>
     <script type="module">
-      import { supabase } from './config.js';
+      import { supabase } from "./config.js";
 
       const eventId = new URLSearchParams(location.search).get("event");
       const btnCopy = document.getElementById("btnCopy");
@@ -73,15 +82,21 @@
       };
 
       function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
+        document.getElementById("loadingOverlay").style.display = show
+          ? "flex"
+          : "none";
       }
 
       function formatTWTime(isoString) {
         if (!isoString) return "無限制";
         const date = new Date(isoString);
         return date.toLocaleString("zh-TW", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit", hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
           timeZone: "Asia/Taipei",
         });
       }
@@ -104,7 +119,8 @@
 
           if (error) throw error;
           if (!results || results.length === 0) {
-            document.getElementById("eventInfo").innerHTML = `<p style="color:red; text-align:center;">找不到此活動。</p>`;
+            document.getElementById("eventInfo").innerHTML =
+              `<p style="color:red; text-align:center;">找不到此活動。</p>`;
             return;
           }
 
@@ -123,25 +139,32 @@
           const orders = ev.orders || [];
 
           if (orders.length === 0) {
-            listEl.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 40px 0;">目前尚無人下單。</p>';
+            listEl.innerHTML =
+              '<p style="text-align:center; color:#94a3b8; padding: 40px 0;">目前尚無人下單。</p>';
           } else {
             orders.forEach((o) => {
               if (!groups[o.customer]) groups[o.customer] = [];
               groups[o.customer].push(o);
             });
 
-            Object.keys(groups).sort().forEach((name) => {
-              const items = groups[name].map(o => `
+            Object.keys(groups)
+              .sort()
+              .forEach((name) => {
+                const items = groups[name]
+                  .map(
+                    (o) => `
                 <li>
                   <span>${o.name} (${o.suger}／${o.ice})</span>
                   <span style="font-weight:bold;">x${o.qty}</span>
                 </li>
-              `).join("");
-              const div = document.createElement("div");
-              div.className = "person";
-              div.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
-              listEl.appendChild(div);
-            });
+              `,
+                  )
+                  .join("");
+                const div = document.createElement("div");
+                div.className = "person";
+                div.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
+                listEl.appendChild(div);
+              });
           }
         } catch (err) {
           alert("讀取失敗：" + err.message);

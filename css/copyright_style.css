@@ -1,0 +1,19 @@
+.footer {
+  margin-top: 40px;
+  padding: 30px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  border-top: 1px solid #eee;
+  line-height: 1.6;
+}
+
+.disclaimer {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/*
+beta version
+*/

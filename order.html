@@ -3,9 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>下單</title>
+    <title>下單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/order_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
+    <link rel="stylesheet" href="css/copyright_style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
@@ -14,11 +15,11 @@
       <div class="card">
         <table id="itemsTbl">
           <thead>
-            <tr>
+            <tr id="tableHeader">
               <th>姓名</th>
-              <th>飲料</th>
-              <th>糖度</th>
-              <th>冰量</th>
+              <th id="itemName">品項</th>
+              <th id="colSpecA">糖度</th>
+              <th id="colSpecB">冰量</th>
               <th>數量</th>
               <th></th>
             </tr>
@@ -40,39 +41,27 @@
         <div class="spinner-text">處理中，請稍候...</div>
       </div>
     </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
+      </div>
+    </footer>
+
     <script type="module">
       import { supabase } from "./config.js";
 
-      const EVENT_ID = new URLSearchParams(location.search).get("event");
+      const urlParams = new URLSearchParams(window.location.search);
+      const EVENT_ID = urlParams.get("event");
+      let currentCategory = "drink";
 
-      function showLoading(show) {
-        const loader = document.getElementById("loadingOverlay");
-        if (loader) loader.style.display = show ? "flex" : "none";
-      }
-
-      function addRow() {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><input class="who" placeholder="姓名" required></td>
-          <td><input class="drink" placeholder="飲料名稱" required></td>
-          <td>
-            <select class="sugar">
-              <option>-</option>
-              <option>正常糖</option><option>少糖 (七分)</option><option>半糖 (五分)</option>
-              <option>微糖 (三分)</option><option>二分糖</option><option>一分糖</option><option>無糖</option>
-            </select>
-          </td>
-          <td>
-            <select class="ice">
-              <option>-</option>
-              <option>正常冰</option><option>少冰</option><option>微冰</option><option>去冰</option>
-              <option>完全去冰</option><option>常溫</option><option>熱</option>
-            </select>
-          </td>
-          <td><input class="qty" type="number" min="1" value="1" style="width:50px;"></td>
-          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
-        `;
-        document.querySelector("#itemsTbl tbody").appendChild(tr);
+      function showLoading(s) {
+        document.getElementById("loadingOverlay").style.display = s
+          ? "block"
+          : "none";
       }
 
       async function ensureEvent() {
@@ -87,32 +76,74 @@
 
           if (error || !ev) return alert("找不到該訂單");
 
-          if (ev.deadline) {
-            const now = new Date();
-            const deadline = new Date(ev.deadline);
-            if (now > deadline) {
-              alert("此訂單已超過截止時間，無法再下單囉！");
-              document.getElementById("submitBtn").disabled = true;
-              document.getElementById("submitBtn").innerText = "已截止";
-              document.getElementById("addItem").style.display = "none";
-            }
-          }
-
+          currentCategory = ev.category || "drink";
           document.querySelector(".page-title").textContent =
             ev.shop + " - 下單";
+
+          if (currentCategory === "food") {
+            document.getElementById("itemName").textContent = "餐點名稱";
+            document.getElementById("colSpecA").textContent = "份量";
+            document.getElementById("colSpecB").textContent = "備註";
+          }
+
+          const now = new Date();
+          if (ev.deadline && now > new Date(ev.deadline)) {
+            const btn = document.getElementById("submitBtn");
+            btn.disabled = true;
+            btn.innerText = "已截止";
+            document.getElementById("addItem").classList.add("hidden");
+          }
         } finally {
           showLoading(false);
         }
       }
 
+      function addRow() {
+        const tr = document.createElement("tr");
+        let middleCols = "";
+
+        if (currentCategory === "food") {
+          middleCols = `
+            <td><input class="spec-a-input" placeholder="大/小,加麵等"></td>
+            <td><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
+          `;
+        } else {
+          middleCols = `
+            <td>
+              <select class="spec-a-input">
+                <option>正常糖</option><option>少糖</option><option>半糖</option>
+                <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
+              </select>
+            </td>
+            <td>
+              <select class="spec-b-input">
+                <option>正常冰</option><option>少冰</option><option>微冰</option>
+                <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
+              </select>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td><input class="who" placeholder="姓名" required></td>
+          <td><input class="drink" placeholder="請輸入名稱" required></td>
+          ${middleCols}
+          <td><input class="qty" type="number" min="1" value="1"></td>
+          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+        `;
+        document.querySelector("#itemsTbl tbody").appendChild(tr);
+      }
+
       async function submitOrder() {
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
+        if (trs.length === 0) return alert("請至少新增一筆品項");
+
         const rows = trs.map((tr) => ({
           event_id: EVENT_ID,
           customer: tr.querySelector(".who").value.trim(),
           name: tr.querySelector(".drink").value.trim(),
-          suger: tr.querySelector(".sugar").value,
-          ice: tr.querySelector(".ice").value,
+          suger: tr.querySelector(".spec-a-input").value, //
+          ice: tr.querySelector(".spec-b-input").value,
           qty: parseInt(tr.querySelector(".qty").value),
         }));
 
@@ -130,10 +161,9 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        ensureEvent();
         document.getElementById("addItem").onclick = addRow;
         document.getElementById("submitBtn").onclick = submitOrder;
-        addRow();
-        ensureEvent();
       });
     </script>
   </body>

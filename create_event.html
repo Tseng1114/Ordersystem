@@ -6,41 +6,29 @@
     <title>建立訂單</title>
     <link rel="stylesheet" href="css/create_event_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
+    <link rel="stylesheet" href="css/copyright_style.css" />
   </head>
   <body>
     <div class="wrap">
       <h1 class="page-title">建立訂單</h1>
 
       <div id="createCard" class="card">
-        <label for="shopSelect">店家</label>
-        <select id="shopSelect" class="select-like">
-          <option value="" selected>請選擇店家</option>
-          <option>迷客夏</option>
-          <option>大茗本味製茶堂</option>
-          <option>珍煮丹</option>
-          <option>得正</option>
-          <option>50嵐</option>
-          <option>米里米里</option>
-          <option>麻古茶坊</option>
-          <option>八曜和茶</option>
-          <option>有飲</option>
-          <option>青山</option>
-          <option>清心福全</option>
-          <option>一沐日</option>
-          <option>波哥茶飲</option>
-          <option>双生綠豆沙牛奶</option>
-          <option>來日方茶</option>
-          <option>茶湯會</option>
-          <option>老賴茶棧</option>
-          <option>可不可熟成紅茶</option>
-          <option value="__other">其他（自訂）</option>
-        </select>
+        <label>選擇訂單類型</label>
+        <div class="category-toggle">
+          <button type="button" id="btnDrink" class="toggle-btn active">
+            飲料區
+          </button>
+          <button type="button" id="btnFood" class="toggle-btn">餐點區</button>
+        </div>
 
-        <div id="otherBox" class="hidden" style="margin-top: 10px">
+        <label for="shopSelect">店家</label>
+        <select id="shopSelect" class="select-like"></select>
+
+        <div id="otherBox" class="hidden">
           <input id="shopOther" placeholder="請輸入店家名稱" />
         </div>
 
-        <label for="deadline" style="margin-top: 12px">截止時間</label>
+        <label for="deadline">截止時間</label>
         <input id="deadline" type="datetime-local" />
 
         <div class="actions">
@@ -48,20 +36,10 @@
           <button class="primary" id="createBtn" type="button">建立訂單</button>
         </div>
 
-        <div id="result" style="margin-top: 16px; display: none">
-          <p>分享這個連結給大家下單：</p>
-          <input
-            id="shareLink"
-            readonly
-            style="
-              width: 100%;
-              height: 44px;
-              padding: 10px 12px;
-              border: 1px solid #ccc;
-              border-radius: 10px;
-            "
-          />
-          <div class="actions" style="margin-top: 12px">
+        <div id="result" class="hidden">
+          <p class="share-text">分享這個連結給大家下單：</p>
+          <input id="shareLink" readonly />
+          <div class="actions action-gap">
             <button class="primary" id="copyBtn" type="button">
               複製下單連結
             </button>
@@ -77,24 +55,84 @@
       </div>
     </div>
 
+    <footer class="footer">
+      <div class="footer-content">
+        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
+      </div>
+    </footer>
+
     <script type="module">
       import { supabase } from "./config.js";
 
-      function showLoading() {
-        document.getElementById("loadingOverlay").style.display = "block";
-      }
-      function hideLoading() {
-        document.getElementById("loadingOverlay").style.display = "none";
-      }
+      const drinkShops = [
+        "迷客夏",
+        "大茗本味製茶堂",
+        "珍煮丹",
+        "得正",
+        "50嵐",
+        "米里米里",
+        "麻古茶坊",
+        "八曜和茶",
+        "有飲",
+        "青山",
+        "清心福全",
+        "一沐日",
+        "波哥茶飲",
+        "双生綠豆沙牛奶",
+        "來日方茶",
+        "茶湯會",
+        "老賴茶棧",
+        "可不可熟成紅茶",
+      ];
+      const foodShops = [
+        "露西媽媽",
+        "桂記手工水餃",
+        "老曾牛肉麵",
+        "劉家鴨肉",
+        "作伙來",
+        "牛族",
+      ];
+
+      let currentCategory = "drink";
 
       const shopSelect = document.querySelector("#shopSelect");
       const otherBox = document.querySelector("#otherBox");
       const shopOther = document.querySelector("#shopOther");
+      const btnDrink = document.getElementById("btnDrink");
+      const btnFood = document.getElementById("btnFood");
+
+      function updateShopList(category) {
+        currentCategory = category;
+        const list = category === "drink" ? drinkShops : foodShops;
+
+        shopSelect.innerHTML = '<option value="" selected>請選擇店家</option>';
+        list.forEach((shop) => {
+          const opt = document.createElement("option");
+          opt.value = shop;
+          opt.textContent = shop;
+          shopSelect.appendChild(opt);
+        });
+        shopSelect.innerHTML += '<option value="__other">其他（自訂）</option>';
+      }
+
+      btnDrink.onclick = () => {
+        btnDrink.classList.add("active");
+        btnFood.classList.remove("active");
+        updateShopList("drink");
+      };
+
+      btnFood.onclick = () => {
+        btnFood.classList.add("active");
+        btnDrink.classList.remove("active");
+        updateShopList("food");
+      };
 
       shopSelect.addEventListener("change", () => {
         if (shopSelect.value === "__other") {
           otherBox.classList.remove("hidden");
-          shopOther.focus();
         } else {
           otherBox.classList.add("hidden");
           shopOther.value = "";
@@ -106,9 +144,9 @@
         const shop = sel === "__other" ? shopOther.value.trim() : sel.trim();
         const deadline = document.querySelector("#deadline").value;
 
-        if (!shop) return alert("請選擇店家或輸入自訂店名");
+        if (!shop) return alert("請選擇店家或輸入店名");
 
-        showLoading();
+        document.getElementById("loadingOverlay").style.display = "block";
         try {
           const { data, error } = await supabase
             .from("events")
@@ -116,6 +154,7 @@
               {
                 title: shop + " 訂單",
                 shop: shop,
+                category: currentCategory,
                 deadline: deadline ? new Date(deadline).toISOString() : null,
                 status: "open",
               },
@@ -124,44 +163,27 @@
 
           if (error) throw error;
 
-          if (!data || data.length === 0) {
-            throw new Error(
-              "資料已寫入但無法讀取回傳值，請確認資料庫 RLS 設定。",
-            );
-          }
-
-          const newEvent = data[0];
-          const id = newEvent.id;
-
+          const id = data[0].id;
           const orderURL = new URL("order.html", location.href);
           orderURL.searchParams.set("event", id);
-          const orderLink = orderURL.toString();
 
-          const input = document.querySelector("#shareLink");
-          input.value = orderLink;
-          document.querySelector("#result").style.display = "block";
+          document.querySelector("#shareLink").value = orderURL.toString();
+          document.querySelector("#result").classList.remove("hidden");
 
           document.querySelector("#copyBtn").onclick = async () => {
-            try {
-              await navigator.clipboard.writeText(orderLink);
-              alert("已複製下單連結");
-            } catch (e) {
-              input.select();
-              document.execCommand("copy");
-              alert("已複製");
-            }
+            await navigator.clipboard.writeText(orderURL.toString());
+            alert("已複製下單連結");
           };
         } catch (err) {
-          console.error("建立失敗原因:", err);
           alert("建立失敗：" + err.message);
         } finally {
-          hideLoading();
+          document.getElementById("loadingOverlay").style.display = "none";
         }
       }
 
-      document
-        .querySelector("#createBtn")
-        .addEventListener("click", createEvent);
+      document.querySelector("#createBtn").onclick = createEvent;
+
+      updateShopList("drink");
     </script>
   </body>
 </html>

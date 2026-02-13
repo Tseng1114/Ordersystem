@@ -24,21 +24,47 @@ body {
   margin: 0 auto 24px;
 }
 
-h2,
-h3 {
-  margin-top: 0;
-  font-weight: 800;
+.category-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: var(--text-primary);
+  color: #fff;
+}
+
+.card label {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 8px;
+  margin-top: 15px;
 }
 
 input,
 select {
   width: 100%;
   padding: 12px;
-  margin: 8px 0 20px;
+  margin: 8px 0 10px;
   border: 1.5px solid var(--text-primary);
   border-radius: 8px;
   font-size: 16px;
   background: #fff;
+  box-sizing: border-box;
 }
 
 input:focus {
@@ -49,6 +75,11 @@ input:focus {
 .actions {
   display: flex;
   gap: 12px;
+  margin-top: 25px;
+}
+
+.action-gap {
+  margin-top: 12px;
 }
 
 button.primary {
@@ -90,23 +121,15 @@ button.primary:active {
   width: 100%;
 }
 
-.card label {
-  display: block;
-  text-align: center;
-  font-weight: 700;
-  margin-bottom: 8px;
+#shareLink {
+  background-color: #f1f5f9;
+  cursor: default;
 }
 
-.hint {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-#result p {
+.share-text {
   text-align: center;
   font-weight: 600;
+  margin-top: 20px;
 }
 
 /*

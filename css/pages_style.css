@@ -37,7 +37,7 @@ header h1 {
   color: #ffffff;
   background-color: #1e293b;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 50px;
   font-weight: 600;
   font-size: 14px;
   transition: all 0.2s ease;
@@ -79,3 +79,7 @@ header h1 {
   transform: scale(1.03);
   cursor: zoom-in;
 }
+
+/*
+beta version
+*/

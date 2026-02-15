@@ -15,9 +15,7 @@
       <div id="createCard" class="card">
         <label>選擇訂單類型</label>
         <div class="category-toggle">
-          <button type="button" id="btnDrink" class="toggle-btn active">
-            飲料區
-          </button>
+          <button type="button" id="btnDrink" class="toggle-btn active">飲料區</button>
           <button type="button" id="btnFood" class="toggle-btn">餐點區</button>
         </div>
 
@@ -37,12 +35,21 @@
         </div>
 
         <div id="result" class="hidden">
-          <p class="share-text">分享這個連結給大家下單：</p>
-          <input id="shareLink" readonly />
-          <div class="actions action-gap">
-            <button class="primary" id="copyBtn" type="button">
-              複製下單連結
-            </button>
+          <hr class="divider" />
+
+          <button id="directGoBtn" type="button">直接進入點餐</button>
+
+          <hr class="divider" />
+
+          <label>分享給團員</label>
+          <textarea
+            id="shareMsg"
+            class="share-textarea"
+            readonly
+            rows="5"
+          ></textarea>
+          <div class="actions action-gap" style="margin-top: 10px">
+            <button class="primary" id="copyBtn" type="button">複製分享訊息</button>
           </div>
         </div>
       </div>
@@ -58,9 +65,7 @@
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">
-          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
-        </p>
+        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。</p>
       </div>
     </footer>
 
@@ -97,7 +102,6 @@
       ];
 
       let currentCategory = "drink";
-
       const shopSelect = document.querySelector("#shopSelect");
       const otherBox = document.querySelector("#otherBox");
       const shopOther = document.querySelector("#shopOther");
@@ -107,7 +111,6 @@
       function updateShopList(category) {
         currentCategory = category;
         const list = category === "drink" ? drinkShops : foodShops;
-
         shopSelect.innerHTML = '<option value="" selected>請選擇店家</option>';
         list.forEach((shop) => {
           const opt = document.createElement("option");
@@ -167,12 +170,24 @@
           const orderURL = new URL("order.html", location.href);
           orderURL.searchParams.set("event", id);
 
-          document.querySelector("#shareLink").value = orderURL.toString();
+          let deadlineText = "無期限";
+          if (deadline) {
+            const d = new Date(deadline);
+            deadlineText = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+          }
+
+          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n 點餐連結：${orderURL.toString()}`;
+
+          document.querySelector("#shareMsg").value = finalMsg;
           document.querySelector("#result").classList.remove("hidden");
 
+          document.getElementById("directGoBtn").onclick = () => {
+            location.href = orderURL.toString();
+          };
+
           document.querySelector("#copyBtn").onclick = async () => {
-            await navigator.clipboard.writeText(orderURL.toString());
-            alert("已複製下單連結");
+            await navigator.clipboard.writeText(finalMsg);
+            alert("分享訊息已複製到剪貼簿！");
           };
         } catch (err) {
           alert("建立失敗：" + err.message);
@@ -182,12 +197,7 @@
       }
 
       document.querySelector("#createBtn").onclick = createEvent;
-
       updateShopList("drink");
     </script>
   </body>
 </html>
-
-<!--
-beta version
--->

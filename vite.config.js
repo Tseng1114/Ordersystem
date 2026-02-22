@@ -38,6 +38,7 @@ export default defineConfig({
         liufamilyduckmeat: resolve(__dirname, "all_html/meals/liufamilyduckmeat.html"),
         cometogether: resolve(__dirname, "all_html/meals/cometogether.html"),
         niuzu: resolve(__dirname, "all_html/meals/niuzu.html"),
+        dandanburger: resolve(__dirname, "all_html/meals/dandanburger.html"),
       },
     },
   },

@@ -44,7 +44,10 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <p>© 2025 - 2026 曾可愛家族點餐系統</p><p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
       </div>
     </footer>
 
@@ -54,7 +57,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const EVENT_ID = urlParams.get("event");
       let currentCategory = "drink";
-      let isExpired = false; 
+      let isExpired = false;
 
       function showLoading(s) {
         document.getElementById("loadingOverlay").style.display = s
@@ -92,7 +95,7 @@
               const btn = document.getElementById("submitBtn");
               btn.disabled = true;
               btn.innerText = "已截止 (無法送出)";
-              btn.classList.add("btn-disabled"); 
+              btn.classList.add("btn-disabled");
               document.getElementById("addItem").classList.add("hidden");
               alert("此訂單已截止。");
             }
@@ -107,18 +110,18 @@
 
         if (currentCategory === "food") {
           middleCols = `
-      <td><input class="spec-a-input" placeholder="大/小,加麵等"></td>
-      <td><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
+      <td data-label="份量"><input class="spec-a-input" placeholder="大/小,加麵等"></td>
+      <td data-label="備註"><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
     `;
         } else {
           middleCols = `
-      <td>
+      <td data-label="糖度">
         <select class="spec-a-input">
           <option>正常糖</option><option>少糖</option><option>半糖</option>
           <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
         </select>
       </td>
-      <td>
+      <td data-label="冰量">
         <select class="spec-b-input">
           <option>正常冰</option><option>少冰</option><option>微冰</option>
           <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
@@ -128,11 +131,11 @@
         }
 
         tr.innerHTML = `
-    <td><input class="who" placeholder="姓名" required></td>
-    <td><input class="drink" placeholder="請輸入名稱" required></td>
+    <td data-label="姓名"><input class="who" placeholder="姓名" required></td>
+    <td data-label="品項"><input class="drink" placeholder="請輸入名稱" required></td>
     ${middleCols}
-    <td><input class="qty" type="number" min="1" value="1"></td>
-    <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+    <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
+    <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除此筆</button></td>
   `;
         document.querySelector("#itemsTbl tbody").appendChild(tr);
       }

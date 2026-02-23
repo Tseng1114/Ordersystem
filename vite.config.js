@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { buffer } from "stream/consumers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,7 +28,7 @@ export default defineConfig({
         macutea: resolve(__dirname, "all_html/drinks/macutea.html"),
         milksha: resolve(__dirname, "all_html/drinks/milksha.html"),
         minimini: resolve(__dirname, "all_html/drinks/minimini.html"),
-        peaktea: resolve(__dirname, "all_html/drinks/peaktea.html"),
+        chingshanteashop: resolve(__dirname, "all_html/drinks/chingshanteashop.html"),
         shuansenbeverages: resolve(__dirname, "all_html/drinks/shuansenbeverages.html"),
         tptea: resolve(__dirname, "all_html/drinks/tptea.html"),
         truedan: resolve(__dirname, "all_html/drinks/truedan.html"),
@@ -39,6 +40,8 @@ export default defineConfig({
         cometogether: resolve(__dirname, "all_html/meals/cometogether.html"),
         niuzu: resolve(__dirname, "all_html/meals/niuzu.html"),
         dandanburger: resolve(__dirname, "all_html/meals/dandanburger.html"),
+        fengangelicaduck: resolve(__dirname, "all_html/meals/fengangelicaduck.html"),
+        ahzhenfriedchicken: resolve(__dirname, "all_html/meals/ahzhenfriedchicken.html"),
       },
     },
   },

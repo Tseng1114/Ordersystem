@@ -121,14 +121,63 @@ button:active {
 }
 
 @media (max-width: 600px) {
-  .card {
+  .actions {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+  }
+
+.actions button, .actions .back-home {
+    width: 100%;
+    border-radius: 12px; 
+    padding: 14px;      
+    display: block;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  
+  #itemsTbl thead {
+    display: none;
+  }
+
+  #itemsTbl tr {
+    display: block;
+    border: 2px solid var(--text-primary);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    position: relative;
+  }
+
+  #itemsTbl td {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+  }
+
+  #itemsTbl td::before {
+    content: attr(data-label); 
+    font-weight: bold;
+    width: 80px;
+    min-width: 80px;
+  }
+
+  input, select {
+    flex: 1;
+  }
+
+  input.qty {
+    max-width: 100px;
+  }
+
+  .del-btn {
+    width: 100%;
+    margin-top: 10px;
     padding: 10px;
   }
-  th,
-  td {
-    font-size: 14px;
-    padding: 8px 4px;
-  }
+
 }
 
 .btn-disabled {

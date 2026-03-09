@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>菜單</title>
+    <link rel="stylesheet" href="css/pages_style.css" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  </head>
+  <body>
+    <header>
+      <h1 id="shopTitle">載入中...</h1>
+      <a class="back" href="index.html">← 回首頁</a>
+    </header>
+    <hr class="header-divider" />
+    <div class="grid" id="menuGrid"></div>
+
+    <script>
+      const SHOPS = {
+//-------------------------------------------------------------- drinks --------------------------------------------------------------
+        milksha:                    { name: "迷客夏 Milksha",               type: "drinks", imgs: ["milksha_menu.jpg"] },
+        damingtea:                  { name: "大茗本味製茶堂 DAMING",         type: "drinks", imgs: ["damingtea_menu.jpg"] },
+        truedan:                    { name: "珍煮丹 TRUEDAN",                type: "drinks", imgs: ["truedan_menu.jpg"] },
+        dejeng:                     { name: "得正 Dejeng",                   type: "drinks", imgs: ["dejeng_menu.jpg"] },
+        "50lan":                    { name: "50嵐",                          type: "drinks", imgs: ["50lan_menu.jpg"] },
+        minimini:                   { name: "米里米里 MINI-MINI",            type: "drinks", imgs: ["minimini_menu.jpg"] },
+        macutea:                    { name: "麻古茶坊 MACU",                 type: "drinks", imgs: ["macutea_menu.jpg"] },
+        "8yotea":                   { name: "八曜和茶 ハチヨウワチヤ",       type: "drinks", imgs: ["8yotea_menu.jpg"] },
+        youindrink:                 { name: "有飲 You in",                   type: "drinks", imgs: ["youindrink_menu.webp"] },
+        chingshanteashop:           { name: "青山茶行",                      type: "drinks", imgs: ["chingshanteashop_menu.jpg"] },
+        chingshin:                  { name: "清心福全",                      type: "drinks", imgs: ["chingshin_menu.jpg"] },
+        aniceholiday:               { name: "一沐日 A NICE HOLIDAY",        type: "drinks", imgs: ["aniceholiday_menu.jpg"] },
+        bogteashop:                 { name: "波哥茶飲 BOG TEA SHOP",        type: "drinks", imgs: ["bogteashop_menu.jpg"] },
+        shuansenbeverages:          { name: "双生綠豆沙牛奶",                type: "drinks", imgs: ["shuansenbeverages_menu.jpg"] },
+        lairitea:                   { name: "來日方茶",                      type: "drinks", imgs: ["lairitea_menu.jpg"] },
+        tptea:                      { name: "茶湯會 TP-TEA",                 type: "drinks", imgs: ["tptea_menu.jpg"] },
+        liketeashop:                { name: "老賴茶棧 LIKE TEA SHOP",       type: "drinks", imgs: ["liketeashop_menu.jpg"] },
+        kebuke:                     { name: "可不可熟成紅茶 KEBUKE",         type: "drinks", imgs: ["kebuke_menu.jpg"] },
+//-------------------------------------------------------------- meals --------------------------------------------------------------
+        lucymama:                   { name: "露西媽媽 Lucy Mama",            type: "meals",  imgs: ["lucymama_menu1.jpg", "lucymama_menu2.jpg"] },
+        guijihandmadedumplingrestaurant: { name: "桂記手工水餃餐廳",         type: "meals",  imgs: ["guijihandmadedumplingrestaurant_menu.jpg"] },
+        laotsengbeefnoodles:        { name: "老曾牛肉麵",                    type: "meals",  imgs: ["laotsengbeefnoodles_menu.jpg"] },
+        liufamilyduckmeat:          { name: "劉家鴨肉",                      type: "meals",  imgs: ["liufamilyduckmeat_menu.jpg"] },
+        cometogether:               { name: "作伙來",                        type: "meals",  imgs: ["cometogether_menu.jpg"] },
+        fengangelicaduck:           { name: "豐當歸鴨",                      type: "meals",  imgs: ["fengangelicaduck_menu.jpg"] },
+        niuzu:                      { name: "牛族",                          type: "meals",  imgs: ["niuzu_menu1.jpg", "niuzu_menu2.jpg", "niuzu_menu3.jpg", "niuzu_menu4.jpg"] },
+        dandanburger:               { name: "丹丹漢堡",                      type: "meals",  imgs: ["dandanburger_menu.jpg"] },
+        ahzhenfriedchicken:         { name: "阿珍炸雞",                      type: "meals",  imgs: ["ahzhenfriedchicken_menu.jpg"] },
+      };
+
+      const params = new URLSearchParams(location.search);
+      const shopKey = params.get("shop");
+      const shop = SHOPS[shopKey];
+
+      if (!shop) {
+        document.getElementById("shopTitle").textContent = "找不到此店家";
+      } else {
+        document.title = shop.name + " 菜單";
+        document.getElementById("shopTitle").textContent = shop.name;
+
+        const grid = document.getElementById("menuGrid");
+        shop.imgs.forEach((img) => {
+          const el = document.createElement("img");
+          el.src = `menus/${shop.type}/${img}`;
+          el.alt = shop.name + " 菜單";
+          grid.appendChild(el);
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,11 +1,5 @@
 node_modules/
 dist/
 .env
-.env.local
-.env.*.local
-.DS_Store
-Thumbs.db
 .vscode/
 .idea/
-src/
-public/

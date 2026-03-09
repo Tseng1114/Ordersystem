@@ -8,11 +8,16 @@
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
     <div class="wrap">
       <h1 class="page-title">下單</h1>
       <div class="card">
+        <div id="expiredBanner" class="expired-banner">
+           此訂單已截止，無法新增或送出訂單。
+        </div>
+
         <table id="itemsTbl">
           <thead>
             <tr id="tableHeader">
@@ -97,13 +102,14 @@
               btn.innerText = "已截止 (無法送出)";
               btn.classList.add("btn-disabled");
               document.getElementById("addItem").classList.add("hidden");
-              alert("此訂單已截止。");
+              document.getElementById("expiredBanner").classList.add("show");
             }
           }
         } finally {
           showLoading(false);
         }
       }
+
       function addRow() {
         const tr = document.createElement("tr");
         let middleCols = "";
@@ -179,7 +185,3 @@
     </script>
   </body>
 </html>
-
-<!--
-beta version
--->

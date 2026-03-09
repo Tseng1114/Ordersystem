@@ -7,35 +7,51 @@
     <link rel="stylesheet" href="css/order_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
     <div class="wrap">
       <h1 class="page-title">下單</h1>
       <div class="card">
         <div id="expiredBanner" class="expired-banner">
-           此訂單已截止，無法新增或送出訂單。
+          此訂單已截止，無法新增或送出訂單。
         </div>
 
-        <table id="itemsTbl">
-          <thead>
-            <tr id="tableHeader">
-              <th>姓名</th>
-              <th id="itemName">品項</th>
-              <th id="colSpecA">糖度</th>
-              <th id="colSpecB">冰量</th>
-              <th>數量</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div id="orderForm">
+          <table id="itemsTbl">
+            <thead>
+              <tr id="tableHeader">
+                <th>姓名</th>
+                <th id="itemName">品項</th>
+                <th id="colSpecA">糖度</th>
+                <th id="colSpecB">冰量</th>
+                <th>數量</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
 
-        <div class="actions">
-          <a href="index.html" class="back-home">回首頁</a>
-          <button type="button" class="add" id="addItem">＋新增一筆</button>
-          <button type="button" class="primary" id="submitBtn">送出訂單</button>
+          <div class="actions">
+            <a href="index.html" class="back-home">回首頁</a>
+            <button type="button" class="add" id="addItem">＋新增一筆</button>
+            <button type="button" class="primary" id="submitBtn">
+              送出訂單
+            </button>
+          </div>
+        </div>
+
+        <div id="successScreen" class="success-screen">
+          <div class="success-icon">🎉</div>
+          <h2>訂單送出成功！</h2>
+          <p>你的點餐已記錄，可以前往彙整頁查看所有訂單。</p>
+          <div class="actions">
+            <a href="index.html" class="back-home">回首頁</a>
+            <button type="button" class="primary" id="goSummaryBtn">
+              查看訂單彙整
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -116,41 +132,38 @@
 
         if (currentCategory === "food") {
           middleCols = `
-      <td data-label="份量"><input class="spec-a-input" placeholder="大/小,加麵等"></td>
-      <td data-label="備註"><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
-    `;
+            <td data-label="份量"><input class="spec-a-input" placeholder="大/小,加麵等"></td>
+            <td data-label="備註"><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
+          `;
         } else {
           middleCols = `
-      <td data-label="糖度">
-        <select class="spec-a-input">
-          <option>正常糖</option><option>少糖</option><option>半糖</option>
-          <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
-        </select>
-      </td>
-      <td data-label="冰量">
-        <select class="spec-b-input">
-          <option>正常冰</option><option>少冰</option><option>微冰</option>
-          <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
-        </select>
-      </td>
-    `;
+            <td data-label="糖度">
+              <select class="spec-a-input">
+                <option>正常糖</option><option>少糖</option><option>半糖</option>
+                <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
+              </select>
+            </td>
+            <td data-label="冰量">
+              <select class="spec-b-input">
+                <option>正常冰</option><option>少冰</option><option>微冰</option>
+                <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
+              </select>
+            </td>
+          `;
         }
 
         tr.innerHTML = `
-    <td data-label="姓名"><input class="who" placeholder="姓名" required></td>
-    <td data-label="品項"><input class="drink" placeholder="請輸入名稱" required></td>
-    ${middleCols}
-    <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
-    <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除此筆</button></td>
-  `;
+          <td data-label="姓名"><input class="who" placeholder="姓名" required></td>
+          <td data-label="品項"><input class="drink" placeholder="請輸入名稱" required></td>
+          ${middleCols}
+          <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
+          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除此筆</button></td>
+        `;
         document.querySelector("#itemsTbl tbody").appendChild(tr);
       }
 
       async function submitOrder() {
-        if (isExpired) {
-          alert("訂單已截止，無法送出！");
-          return;
-        }
+        if (isExpired) return;
 
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
         if (trs.length === 0) return alert("請至少新增一筆品項");
@@ -168,8 +181,12 @@
         try {
           const { error } = await supabase.from("orders").insert(rows);
           if (error) throw error;
-          alert("訂單送出成功！");
-          location.href = `summary.html?event=${EVENT_ID}`;
+
+          document.getElementById("orderForm").style.display = "none";
+          document.getElementById("successScreen").style.display = "block";
+          document.getElementById("goSummaryBtn").onclick = () => {
+            location.href = `summary.html?event=${EVENT_ID}`;
+          };
         } catch (err) {
           alert("送出失敗：" + err.message);
         } finally {

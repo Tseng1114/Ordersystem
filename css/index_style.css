@@ -319,6 +319,142 @@ body {
   margin-top: 20px;
 }
 
-/*
-beta version
-*/
+.fab-group {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.fab {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1.5px solid #1e293b;
+  background: #fff;
+  color: #1e293b;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0px #1e293b;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.fab:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #1e293b;
+}
+
+.fab-top {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fab-top.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-box {
+  background: #fff;
+  border: 2px solid #1e293b;
+  border-radius: 20px;
+  box-shadow: 6px 6px 0px #1e293b;
+  padding: 32px 28px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #1e293b;
+}
+
+.modal-box h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #1e293b;
+}
+
+.modal-box p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 20px;
+}
+
+.modal-box img {
+  width: 100%;
+  max-width: 220px;
+  border: 1.5px solid #1e293b;
+  border-radius: 12px;
+}
+
+.modal-line-btn {
+  display: inline-block;
+  margin-top: 16px;
+  background: #06c755;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  border: 1.5px solid #1e293b;
+  box-shadow: 3px 3px 0px #1e293b;
+  transition: all 0.2s;
+}
+
+.modal-line-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #1e293b;
+}

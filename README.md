@@ -49,8 +49,10 @@ graph LR
     Create -.->|Insert| Events
     Order -.->|Insert| Orders
     Summary -.->|Select/Filter| Supa
+    L2 -.->|Query orders by event_id| Supa
 
     class Line,L1,L2 line;
     class Index,Create,Order,Summary frontend;
     class Repo,GHA,GHP automation;
     class Supa,Events,Orders backend;
+```

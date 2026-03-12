@@ -3,13 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>建立訂單</title>
+    <title>建立訂單 - 曾可愛家族點餐系統</title>
+    <link rel="stylesheet" href="css/navbar_style.css" />
     <link rel="stylesheet" href="css/create_event_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
+    <div id="navbar-root"></div>
+
     <div class="wrap">
       <h1 class="page-title">建立訂單</h1>
 
@@ -72,7 +75,9 @@
 
     <script type="module">
       import { supabase } from "./config.js";
-
+      import { initNavbar } from "./navbar.js";
+      initNavbar();
+      
       const drinkShops = [
         "迷客夏",
         "大茗本味製茶堂",

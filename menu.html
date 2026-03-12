@@ -3,69 +3,413 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>菜單</title>
-    <link rel="stylesheet" href="css/pages_style.css" />
+    <title>菜單 - 曾可愛家族點餐系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/menu_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
-    <header>
-      <h1 id="shopTitle">載入中...</h1>
-      <a class="back" href="index.html">← 回首頁</a>
-    </header>
-    <hr class="header-divider" />
-    <div class="grid" id="menuGrid"></div>
+    <div id="navbar-root"></div>
+    <div id="listView">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-target="drinkPanel" id="tabDrink">飲料區</button>
+        <button class="tab-btn" data-target="foodPanel" id="tabFood">餐點區</button>
+      </div>
+
+      <div class="list-wrap">
+        <div class="section-panel active" id="drinkPanel">
+          <h2 class="section-title"> 飲料區</h2>
+          <div class="shop-grid" id="drinkGrid"></div>
+        </div>
+        <div class="section-panel" id="foodPanel">
+          <h2 class="section-title"> 餐點區</h2>
+          <div class="shop-grid" id="foodGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="menuView">
+      <div class="menu-header">
+        <button class="menu-back-btn" id="backBtn">返回</button>
+        <span id="menuShopTitle"></span>
+      </div>
+      <div class="menu-img-wrap" id="menuImgs"></div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
+      </div>
+    </footer>
+
+    <script type="module">
+      import { initNavbar } from "./navbar.js";
+      initNavbar();
+    </script>
 
     <script>
       const SHOPS = {
-//-------------------------------------------------------------- drinks --------------------------------------------------------------
-        milksha:                    { name: "迷客夏 Milksha",               type: "drinks", imgs: ["milksha_menu.jpg"] },
-        damingtea:                  { name: "大茗本味製茶堂 DAMING",         type: "drinks", imgs: ["damingtea_menu.png"] },
-        truedan:                    { name: "珍煮丹 TRUEDAN",                type: "drinks", imgs: ["truedan_menu.jpg"] },
-        dejeng:                     { name: "得正 Dejeng",                   type: "drinks", imgs: ["dejeng_menu.jpg"] },
-        "50lan":                    { name: "50嵐",                          type: "drinks", imgs: ["50lan_menu.jpg"] },
-        minimini:                   { name: "米里米里 MINI-MINI",            type: "drinks", imgs: ["minimini_menu.jpg"] },
-        macutea:                    { name: "麻古茶坊 MACU",                 type: "drinks", imgs: ["macutea_menu.jpg"] },
-        "8yotea":                   { name: "八曜和茶 ハチヨウワチヤ",       type: "drinks", imgs: ["8yotea_menu.jpg"] },
-        youindrink:                 { name: "有飲 You in",                   type: "drinks", imgs: ["youindrink_menu.webp"] },
-        chingshanteashop:           { name: "青山茶行",                      type: "drinks", imgs: ["chingshanteashop_menu.jpg"] },
-        chingshin:                  { name: "清心福全",                      type: "drinks", imgs: ["chingshin_menu.jpg"] },
-        aniceholiday:               { name: "一沐日 A NICE HOLIDAY",        type: "drinks", imgs: ["aniceholiday_menu.jpg"] },
-        bogteashop:                 { name: "波哥茶飲 BOG TEA SHOP",        type: "drinks", imgs: ["bogteashop_menu.jpg"] },
-        shuansenbeverages:          { name: "双生綠豆沙牛奶",                type: "drinks", imgs: ["shuansenbeverages_menu.jpg"] },
-        lairitea:                   { name: "來日方茶",                      type: "drinks", imgs: ["lairitea_menu.jpg"] },
-        tptea:                      { name: "茶湯會 TP-TEA",                 type: "drinks", imgs: ["tptea_menu.jpg"] },
-        liketeashop:                { name: "老賴茶棧 LIKE TEA SHOP",       type: "drinks", imgs: ["liketeashop_menu.jpg"] },
-        kebuke:                     { name: "可不可熟成紅茶 KEBUKE",         type: "drinks", imgs: ["kebuke_menu.jpg"] },
-//-------------------------------------------------------------- meals --------------------------------------------------------------
-        lucymama:                   { name: "露西媽媽 Lucy Mama",            type: "meals",  imgs: ["lucymama_menu1.jpg", "lucymama_menu2.jpg"] },
-        guijihandmadedumplingrestaurant: { name: "桂記手工水餃餐廳",         type: "meals",  imgs: ["guijihandmadedumplingrestaurant_menu.jpg"] },
-        laotsengbeefnoodles:        { name: "老曾牛肉麵",                    type: "meals",  imgs: ["laotsengbeefnoodles_menu.jpg"] },
-        liufamilyduckmeat:          { name: "劉家鴨肉",                      type: "meals",  imgs: ["liufamilyduckmeat_menu.jpg"] },
-        cometogether:               { name: "作伙來",                        type: "meals",  imgs: ["cometogether_menu.jpg"] },
-        fengangelicaduck:           { name: "豐當歸鴨",                      type: "meals",  imgs: ["fengangelicaduck_menu.jpg"] },
-        niuzu:                      { name: "牛族",                          type: "meals",  imgs: ["niuzu_menu1.jpg", "niuzu_menu2.jpg", "niuzu_menu3.jpg", "niuzu_menu4.jpg"] },
-        dandanburger:               { name: "丹丹漢堡",                      type: "meals",  imgs: ["dandanburger_menu.jpg"] },
-        ahzhenfriedchicken:         { name: "阿珍炸雞",                      type: "meals",  imgs: ["ahzhenfriedchicken_menu.jpg"] },
+        // drinks
+        milksha: {
+          name: "迷客夏",
+          sub: "Milksha",
+          type: "drinks",
+          logo: "milksha_logo.png",
+          imgs: ["milksha_menu.jpg"],
+        },
+        damingtea: {
+          name: "大茗本味製茶堂",
+          sub: "DAMING",
+          type: "drinks",
+          logo: "damingtea_logo.png",
+          imgs: ["damingtea_menu.png"],
+        },
+        truedan: {
+          name: "珍煮丹",
+          sub: "TRUEDAN",
+          type: "drinks",
+          logo: "truedan_logo.png",
+          imgs: ["truedan_menu.jpg"],
+        },
+        dejeng: {
+          name: "得正",
+          sub: "Dejeng",
+          type: "drinks",
+          logo: "dejeng_logo.png",
+          imgs: ["dejeng_menu.jpg"],
+        },
+        "50lan": {
+          name: "50嵐",
+          sub: "",
+          type: "drinks",
+          logo: "50lan_logo.png",
+          imgs: ["50lan_menu.jpg"],
+        },
+        minimini: {
+          name: "米里米里",
+          sub: "MINI-MINI",
+          type: "drinks",
+          logo: "minimini_logo.png",
+          imgs: ["minimini_menu.jpg"],
+        },
+        macutea: {
+          name: "麻古茶坊",
+          sub: "MACU",
+          type: "drinks",
+          logo: "macutea_logo.png",
+          imgs: ["macutea_menu.jpg"],
+        },
+        "8yotea": {
+          name: "八曜和茶",
+          sub: "ハチヨウワチヤ",
+          type: "drinks",
+          logo: "8yotea_logo.png",
+          imgs: ["8yotea_menu.jpg"],
+        },
+        youindrink: {
+          name: "有飲",
+          sub: "You in",
+          type: "drinks",
+          logo: "youindrink_logo.png",
+          imgs: ["youindrink_menu.webp"],
+        },
+        chingshanteashop: {
+          name: "青山茶行",
+          sub: "",
+          type: "drinks",
+          logo: "chingshanteashop_logo.jpg",
+          imgs: ["chingshanteashop_menu.jpg"],
+        },
+        chingshin: {
+          name: "清心福全",
+          sub: "",
+          type: "drinks",
+          logo: "chingshin_logo.png",
+          imgs: ["chingshin_menu.jpg"],
+        },
+        aniceholiday: {
+          name: "一沐日",
+          sub: "A NICE HOLIDAY",
+          type: "drinks",
+          logo: "aniceholiday_logo.jpg",
+          imgs: ["aniceholiday_menu.jpg"],
+        },
+        bogteashop: {
+          name: "波哥茶飲",
+          sub: "BOG TEA SHOP",
+          type: "drinks",
+          logo: "bogteashop_logo.png",
+          imgs: ["bogteashop_menu.jpg"],
+        },
+        shuansenbeverages: {
+          name: "双生綠豆沙牛奶",
+          sub: "Shuànsên beverages",
+          type: "drinks",
+          logo: "shuansenbeverages_logo.png",
+          imgs: ["shuansenbeverages_menu.jpg"],
+        },
+        lairitea: {
+          name: "來日方茶",
+          sub: "",
+          type: "drinks",
+          logo: "lairitea_logo.jpg",
+          imgs: ["lairitea_menu.jpg"],
+        },
+        tptea: {
+          name: "茶湯會",
+          sub: "TP-TEA",
+          type: "drinks",
+          logo: "tptea_logo.png",
+          imgs: ["tptea_menu.jpg"],
+        },
+        liketeashop: {
+          name: "老賴茶棧",
+          sub: "LIKE TEA SHOP",
+          type: "drinks",
+          logo: "liketeashop_logo.jpg",
+          imgs: ["liketeashop_menu.jpg"],
+        },
+        kebuke: {
+          name: "可不可熟成紅茶",
+          sub: "KEBUKE",
+          type: "drinks",
+          logo: "kebuke_logo.png",
+          imgs: ["kebuke_menu.jpg"],
+        },
+        // meals
+        lucymama: {
+          name: "露西媽媽",
+          sub: "Lucy Mama",
+          type: "meals",
+          logo: "lucymama_logo.jpg",
+          imgs: ["lucymama_menu1.jpg", "lucymama_menu2.jpg"],
+        },
+        guijihandmadedumplingrestaurant: {
+          name: "桂記手工水餃餐廳",
+          sub: "",
+          type: "meals",
+          logo: "guijihandmadedumplingrestaurant_logo.jpg",
+          imgs: ["guijihandmadedumplingrestaurant_menu.jpg"],
+        },
+        laotsengbeefnoodles: {
+          name: "老曾牛肉麵",
+          sub: "",
+          type: "meals",
+          logo: "laotsengbeefnoodles_logo.jpg",
+          imgs: ["laotsengbeefnoodles_menu.jpg"],
+        },
+        liufamilyduckmeat: {
+          name: "劉家鴨肉",
+          sub: "",
+          type: "meals",
+          logo: "liufamilyduckmeat_logo.jpg",
+          imgs: ["liufamilyduckmeat_menu.jpg"],
+        },
+        cometogether: {
+          name: "作伙來",
+          sub: "",
+          type: "meals",
+          logo: "cometogether_logo.jpg",
+          imgs: ["cometogether_menu.jpg"],
+        },
+        fengangelicaduck: {
+          name: "豐當歸鴨",
+          sub: "",
+          type: "meals",
+          logo: "fengangelicaduck_logo.jpg",
+          imgs: ["fengangelicaduck_menu.jpg"],
+        },
+        niuzu: {
+          name: "牛族",
+          sub: "",
+          type: "meals",
+          logo: "niuzu_logo.jpg",
+          imgs: [
+            "niuzu_menu1.jpg",
+            "niuzu_menu2.jpg",
+            "niuzu_menu3.jpg",
+            "niuzu_menu4.jpg",
+          ],
+        },
+        dandanburger: {
+          name: "丹丹漢堡",
+          sub: "",
+          type: "meals",
+          logo: "dandanburger_logo.jpg",
+          imgs: ["dandanburger_menu.jpg"],
+        },
+        ahzhenfriedchicken: {
+          name: "阿珍炸雞",
+          sub: "",
+          type: "meals",
+          logo: "ahzhenfriedchicken_logo.jpg",
+          imgs: ["ahzhenfriedchicken_menu.jpg"],
+        },
+        burgerking: {
+          name: "漢堡王",
+          sub: "",
+          type: "meals",
+          logo: "burgerking_logo.png",
+          imgs: [],
+          url: "https://www.burgerking.com.tw/",
+        },
+        mcdonalds: {
+          name: "麥當勞",
+          sub: "",
+          type: "meals",
+          logo: "mcdonalds_logo.png",
+          imgs: [],
+          url: "https://www.mcdonalds.com/tw/zh-tw.html",
+        },
+        kfc: {
+          name: "肯德基",
+          sub: "",
+          type: "meals",
+          logo: "kfc_logo.png",
+          imgs: [],
+          url: "https://www.kfcclub.com.tw/",
+        },
       };
 
-      const params = new URLSearchParams(location.search);
-      const shopKey = params.get("shop");
-      const shop = SHOPS[shopKey];
+      function renderGrid(gridId, type) {
+        const grid = document.getElementById(gridId);
+        Object.entries(SHOPS)
+          .filter(([, s]) => s.type === type)
+          .forEach(([key, s]) => {
+            const logoDir = type === "drinks" ? "drinks" : "meals";
+            const el = document.createElement("div");
+            el.className = "shop-card";
+            el.innerHTML = `
+              <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" />
+              <div class="shop-info">
+                <b>${s.name}</b>
+                ${s.sub ? `<small>${s.sub}</small>` : ""}
+              </div>`;
+            el.addEventListener("click", () => openShop(key));
+            grid.appendChild(el);
+          });
+      }
 
-      if (!shop) {
-        document.getElementById("shopTitle").textContent = "找不到此店家";
-      } else {
-        document.title = shop.name + " 菜單";
-        document.getElementById("shopTitle").textContent = shop.name;
+      renderGrid("drinkGrid", "drinks");
+      renderGrid("foodGrid", "meals");
 
-        const grid = document.getElementById("menuGrid");
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".section-panel")
+            .forEach((p) => p.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById(btn.dataset.target).classList.add("active");
+
+          const t = btn.dataset.target === "drinkPanel" ? "drink" : "food";
+          history.replaceState(null, "", `menu.html?type=${t}`);
+        });
+      });
+
+      function openShop(key) {
+        const shop = SHOPS[key];
+        if (!shop) return;
+
+        if (shop.url) {
+          window.open(shop.url, "_blank");
+          return;
+        }
+
+        history.pushState({ shop: key }, "", `menu.html?shop=${key}`);
+        showMenuView(key);
+      }
+
+      function showMenuView(key) {
+        const shop = SHOPS[key];
+        document.title = shop.name + " 菜單 - 曾可愛家族點餐系統";
+        document.getElementById("menuShopTitle").textContent = shop.name;
+        const wrap = document.getElementById("menuImgs");
+        wrap.innerHTML = "";
         shop.imgs.forEach((img) => {
           const el = document.createElement("img");
           el.src = `menus/${shop.type}/${img}`;
           el.alt = shop.name + " 菜單";
-          grid.appendChild(el);
+          wrap.appendChild(el);
         });
+        document.getElementById("listView").style.display = "none";
+        document.getElementById("menuView").style.display = "block";
+        document.querySelector(".footer").style.display = "none";
+        window.scrollTo(0, 0);
       }
+
+      function showListView() {
+        document.getElementById("menuView").style.display = "none";
+        document.getElementById("listView").style.display = "block";
+        document.querySelector(".footer").style.display = "";
+        document.title = "菜單 - 曾可愛家族點餐系統";
+      }
+
+      document.getElementById("backBtn").addEventListener("click", () => {
+        history.back();
+      });
+
+      window.addEventListener("popstate", (e) => {
+        const params = new URLSearchParams(location.search);
+        const shopKey = params.get("shop");
+        const type = params.get("type");
+        if (shopKey && SHOPS[shopKey]) {
+          showMenuView(shopKey);
+        } else {
+          showListView();
+          if (type === "food") document.getElementById("tabFood").click();
+        }
+      });
+
+      (function init() {
+        const params = new URLSearchParams(location.search);
+        const shopKey = params.get("shop");
+        const type = params.get("type");
+        if (shopKey && SHOPS[shopKey]) {
+          showMenuView(shopKey);
+        } else {
+          if (type === "food") document.getElementById("tabFood").click();
+        }
+      })();
+      function syncStickyTop() {
+        const nb = document.querySelector(".nb__bar");
+        if (!nb) return;
+        const h = nb.getBoundingClientRect().height + "px";
+        const tabBar = document.querySelector(".tab-bar");
+        const menuHeader = document.querySelector(".menu-header");
+        if (tabBar) tabBar.style.top = h;
+        if (menuHeader) menuHeader.style.top = h;
+      }
+      requestAnimationFrame(() => {
+        syncStickyTop();
+        window.addEventListener("resize", syncStickyTop);
+      });
+
+      document.addEventListener("click", (e) => {
+        const a = e.target.closest("a[href]");
+        if (!a) return;
+        const url = new URL(a.href, location.href);
+        if (url.pathname !== location.pathname) return;
+        const type = url.searchParams.get("type");
+        if (!type) return;
+        e.preventDefault();
+        showListView();
+        if (type === "food") {
+          document.getElementById("tabFood").click();
+        } else {
+          document.getElementById("tabDrink").click();
+        }
+        window.scrollTo(0, 0);
+      });
     </script>
   </body>
 </html>

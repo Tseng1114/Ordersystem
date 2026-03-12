@@ -21,7 +21,7 @@ export function initNavbar(pageKey = "") {
           </button>
           <div class="nb__dropdown">
             <a href="create_event.html" class="${pageKey === "create" ? "nb__active" : ""}">新增訂單</a>
-            <a href="edit_order.html"   class="${pageKey === "edit" ? "nb__active" : ""}">修改訂單</a>
+            <a href="index.html"   class="${pageKey === "edit" ? "nb__active" : ""}">修改訂單</a>
             <a href="search.html"       class="${pageKey === "lookup" ? "nb__active" : ""}">查詢訂單</a>
           </div>
         </li>

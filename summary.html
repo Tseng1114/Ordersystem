@@ -2,8 +2,9 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
-    <title>訂單彙整</title>
+    <title>訂單彙整 - 曾可愛家族點餐系統</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/navbar_style.css" />
     <link rel="stylesheet" href="css/summary_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
@@ -11,6 +12,8 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
+    <div id="navbar-root"></div>
+
     <div class="marquee-bar">
       <div class="marquee-content">
         ⚠️
@@ -62,7 +65,9 @@
     </footer>
     <script type="module">
       import { supabase } from "./config.js";
-
+      import { initNavbar } from "./navbar.js";
+      initNavbar();
+      
       const eventId = new URLSearchParams(location.search).get("event");
       const btnCopy = document.getElementById("btnCopy");
       const copyToast = document.getElementById("copyToast");

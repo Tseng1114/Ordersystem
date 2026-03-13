@@ -7,7 +7,7 @@ export function initNavbar(pageKey = "") {
 
   root.innerHTML = `
     <nav class="nb__bar">
-      <a class="nb__brand" href="index.html">🍹 曾可愛家族點餐</a>
+      <a class="nb__brand" href="index.html"> 曾可愛家族點餐</a>
 
       <button class="nb__toggle" id="nb_toggle" aria-label="選單">
         <span></span><span></span><span></span>

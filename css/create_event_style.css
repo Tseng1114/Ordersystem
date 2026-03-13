@@ -17,6 +17,7 @@ body {
   background-size: 32px 32px;
   color: var(--text-primary);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .wrap {
@@ -119,6 +120,7 @@ select:focus {
 }
 
 .back-home {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -134,8 +136,6 @@ select:focus {
   border: 1.5px solid #cbd5e1;
   white-space: nowrap;
   transition: all 0.15s;
-  flex-shrink: 0;
-  flex: 1
 }
 .back-home:hover {
   background: #e2e8f0;
@@ -208,4 +208,14 @@ button.primary:active {
 
 .action-gap {
   margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    padding: 32px 16px 60px;
+  }
+  .card {
+    box-shadow: 4px 4px 0 var(--text-primary);
+    padding: 24px 20px;
+  }
 }

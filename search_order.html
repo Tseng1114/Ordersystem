@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="css/navbar_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/search_order_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="css/search_style.css" />
   </head>
   <body>
     <div id="navbar-root"></div>
@@ -26,11 +26,17 @@
 
     <div class="page-wrap">
       <h1 class="page-title">查詢訂單</h1>
+
       <div class="search-card">
         <label for="searchInput">輸入訂單編號</label>
         <div class="search-group">
-          <input id="searchInput" class="search-input" type="text" placeholder="請貼上訂單編號..."/>
-          <button id="searchBtn" class="search-btn">查詢</button>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="請貼上訂單編號..."
+          />
+          <button id="searchBtn" class="search-btn">輸入</button>
         </div>
       </div>
 
@@ -48,7 +54,7 @@
           <hr class="divider" />
           <div id="resByPerson"></div>
           <div class="result-footer">
-            <button class="btn btn-ghost" id="clearBtn">清除</button>
+            <button class="btn btn-ghost" id="clearBtn">✕ 清除</button>
             <a id="editLink" class="btn btn-ghost" href="#">修改訂單</a>
             <a id="summaryLink" class="btn btn-dark" href="#">完整彙整</a>
           </div>

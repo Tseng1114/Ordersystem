@@ -31,7 +31,12 @@
       <div class="search-card">
         <label for="searchInput">輸入訂單編號</label>
         <div class="search-group">
-          <input id="searchInput" class="search-input" type="text" placeholder="請貼上訂單編號..."/>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="請貼上訂單編號..."
+          />
           <button id="searchBtn" class="search-btn">輸入</button>
         </div>
       </div>
@@ -66,6 +71,16 @@
     </footer>
 
     <script type="module">
+      function esc(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
       initNavbar("lookup");
@@ -118,16 +133,16 @@
             .map(
               ([name, items]) => `
             <div class="person-block">
-              <div class="person-name">${name}</div>
+              <div class="person-name">${esc(name)}</div>
               ${items
                 .map(
                   (o) => `
                 <div class="order-item">
                   <div>
-                    <div class="order-item-name">${o.name}</div>
-                    <div class="order-item-spec">${o.suger || o.spec_a || ""}／${o.ice || o.spec_b || ""}</div>
+                    <div class="order-item-name">${esc(o.name)}</div>
+                    <div class="order-item-spec">${esc(o.suger || o.spec_a || "")}／${esc(o.ice || o.spec_b || "")}</div>
                   </div>
-                  <span class="order-item-qty">x${o.qty}</span>
+                  <span class="order-item-qty">x${esc(o.qty)}</span>
                 </div>`,
                 )
                 .join("")}

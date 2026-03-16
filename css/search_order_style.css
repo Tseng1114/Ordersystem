@@ -216,6 +216,7 @@ body {
   gap: 8px;
   margin-top: 20px;
   flex-wrap: wrap;
+  justify-self: center;
 }
 .btn {
   display: inline-flex;

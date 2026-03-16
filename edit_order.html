@@ -31,12 +31,7 @@
         <div class="lookup-card">
           <label for="eventIdInput">輸入訂單編號</label>
           <div class="lookup-row">
-            <input
-              id="eventIdInput"
-              class="id-input"
-              type="text"
-              placeholder="請貼上訂單編號..."
-            />
+            <input id="eventIdInput" class="id-input" type="text" placeholder="請貼上訂單編號..."/>
             <button class="btn-primary" id="loadBtn">載入</button>
           </div>
         </div>
@@ -105,6 +100,16 @@
     </footer>
 
     <script type="module">
+      function esc(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
       initNavbar("edit");
@@ -205,6 +210,7 @@
         badge.textContent = isLocked ? "已關閉" : "進行中";
         badge.className = "badge " + (isLocked ? "badge-closed" : "badge-open");
 
+
         renderOrders(isLocked);
         setupAddRow(isLocked);
 
@@ -212,18 +218,15 @@
         if (!banner) {
           banner = document.createElement("div");
           banner.id = "expiredBanner";
-          banner.style.cssText =
-            "background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:0.88rem;font-weight:600;display:none;";
-          document
-            .getElementById("tabOrders")
-            .insertAdjacentElement("afterbegin", banner);
+          banner.className = "expired-banner";
+          document.getElementById("tabOrders").insertAdjacentElement("afterbegin", banner);
         }
         if (isLocked) {
-          banner.textContent ="此訂單已截止或關閉，無法新增或修改訂單內容。";
-          banner.style.display = "block";
+          banner.textContent = "⚠️ 此訂單已截止或關閉，無法新增或修改訂單內容。";
+          banner.classList.add("show");
           document.getElementById("showAddRowBtn").style.display = "none";
         } else {
-          banner.style.display = "none";
+          banner.classList.remove("show");
           document.getElementById("showAddRowBtn").style.display = "";
         }
 
@@ -254,10 +257,10 @@
 
           div.innerHTML = `
             <div class="row-view">
-              <span class="row-customer">${o.customer}</span>
-              <span class="row-name">${o.name}</span>
-              <span class="row-spec">${specA} / ${specB}</span>
-              <span class="row-qty">x${o.qty}</span>
+              <span class="row-customer">${esc(o.customer)}</span>
+              <span class="row-name">${esc(o.name)}</span>
+              <span class="row-spec">${esc(specA)} / ${esc(specB)}</span>
+              <span class="row-qty">x${esc(o.qty)}</span>
               <div class="row-actions">
                 <button class="btn-save-row edit-btn">編輯</button>
                 <button class="btn-danger del-btn">刪除</button>
@@ -266,11 +269,11 @@
             <div class="row-edit" id="edit_${o.id}">
               <div class="edit-field">
                 <label>姓名</label>
-                <input class="f-customer" value="${o.customer}" />
+                <input class="f-customer" value="${esc(o.customer)}" />
               </div>
               <div class="edit-field">
                 <label>${isDrink ? "品項" : "餐點名稱"}</label>
-                <input class="f-name" value="${o.name}" />
+                <input class="f-name" value="${esc(o.name)}" />
               </div>
               ${
                 isDrink
@@ -316,17 +319,19 @@
             });
           div
             .querySelector(".save-edit-btn")
-            .addEventListener("click", () => saveRow(div, o.id));
-          div.querySelector(".del-btn").addEventListener("click", () => {
-            if (isLocked) return;
-            deleteRow(o.id, div);
-          });
+            .addEventListener("click", () => { if (isLocked) return; saveRow(div, o.id); });
+          div
+            .querySelector(".del-btn")
+            .addEventListener("click", () => { if (isLocked) return; deleteRow(o.id, div); });
 
           list.appendChild(div);
         });
       }
 
       async function saveRow(div, orderId) {
+        const expired = eventData.deadline && new Date(eventData.deadline) < new Date();
+        const isClosed = eventData.status === "closed";
+        if (expired || isClosed) return alert("此訂單已截止或關閉，無法修改。");
         const customer = div.querySelector(".f-customer").value.trim();
         const name = div.querySelector(".f-name").value.trim();
         const specA = div.querySelector(".f-speca").value;
@@ -339,12 +344,16 @@
           const isDrink = eventData.category !== "food";
           const update = isDrink
             ? { customer, name, suger: specA, ice: specB, qty }
-            : { customer, name, spec_a: specA, spec_b: specB, qty };
-          const { error } = await supabase
+            : { customer, name, suger: specA, ice: specB, qty };
+
+          const { data, error, count } = await supabase
             .from("orders")
             .update(update)
-            .eq("id", orderId);
+            .eq("id", orderId)
+            .select();
+
           if (error) throw error;
+          if (!data || data.length === 0) throw new Error("找不到該筆訂單，更新失敗（id: " + orderId + "）");
 
           const idx = eventData.orders.findIndex((o) => o.id === orderId);
           if (idx !== -1)
@@ -353,8 +362,6 @@
               name,
               suger: specA,
               ice: specB,
-              spec_a: specA,
-              spec_b: specB,
               qty,
             });
           renderOrders();
@@ -366,6 +373,9 @@
       }
 
       async function deleteRow(orderId, div) {
+        const expired = eventData.deadline && new Date(eventData.deadline) < new Date();
+        const isClosed = eventData.status === "closed";
+        if (expired || isClosed) return alert("此訂單已截止或關閉，無法刪除。");
         if (!confirm("確定要刪除這筆訂單嗎？")) return;
         showLoading(true);
         try {
@@ -400,7 +410,7 @@
           const el = document.createElement(tag);
           el.id = fieldId;
           if (tag === "select") {
-            el.innerHTML = opts.map((s) => `<option>${s}</option>`).join("");
+            el.innerHTML = opts.map(s => `<option>${s}</option>`).join("");
           } else {
             el.placeholder = opts;
           }
@@ -411,20 +421,8 @@
           replaceEl("newSpecA", "newSpecALabel", "糖度", "select", SUGAR_OPTS);
           replaceEl("newSpecB", "newSpecBLabel", "冰量", "select", ICE_OPTS);
         } else {
-          replaceEl(
-            "newSpecA",
-            "newSpecALabel",
-            "份量",
-            "input",
-            "大/小/加麵等",
-          );
-          replaceEl(
-            "newSpecB",
-            "newSpecBLabel",
-            "備註",
-            "input",
-            "不蔥/加辣等",
-          );
+          replaceEl("newSpecA", "newSpecALabel", "份量", "input", "大/小/加麵等");
+          replaceEl("newSpecB", "newSpecBLabel", "備註", "input", "不蔥/加辣等");
         }
 
         document.getElementById("showAddRowBtn").onclick = () => {
@@ -469,8 +467,8 @@
                 event_id: eventData.id,
                 customer,
                 name,
-                spec_a: specA,
-                spec_b: specB,
+                suger: specA,
+                ice: specB,
                 qty,
               };
           const { data, error } = await supabase
@@ -489,6 +487,7 @@
           showLoading(false);
         }
       }
+
 
       document.getElementById("loadBtn").addEventListener("click", loadEvent);
       document

@@ -16,7 +16,11 @@
     <div id="navbar-root"></div>
 
     <div class="marquee-bar">
-      <div class="marquee-content">系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！</div>
+      <div class="marquee-content">
+        ⚠️
+        系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！
+        ⚠️
+      </div>
     </div>
 
     <div id="loadingOverlay">
@@ -48,7 +52,9 @@
 
         <div class="actions">
           <a href="index.html" class="back-home">回首頁</a>
-          <button id="btnReload" type="button" class="back-home">重新整理資料</button>
+          <button id="btnReload" type="button" class="back-home">
+            重新整理資料
+          </button>
         </div>
       </div>
     </div>
@@ -59,6 +65,16 @@
       </div>
     </footer>
     <script type="module">
+      function esc(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+
       import { supabase } from "./config.js";
       import { initNavbar } from "./navbar.js";
       initNavbar();
@@ -126,9 +142,9 @@
           const ev = results[0];
           document.getElementById("eventInfo").innerHTML = `
             <div class="meta-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid #1e293b; margin-bottom: 25px;">
-              <h2 style="text-align:center; margin:0 0 10px 0;">${ev.shop}</h2>
+              <h2 style="text-align:center; margin:0 0 10px 0;">${esc(ev.shop)}</h2>
               <p style="text-align:center; color:#e11d48; font-weight:bold; margin: 5px 0;">
-                截止時間：${formatTWTime(ev.deadline)}
+                截止時間：${esc(formatTWTime(ev.deadline))}
               </p>
             </div>`;
 
@@ -153,7 +169,7 @@
                   .map(
                     (o) => `
                 <li>
-                  <span>${o.name} (${o.suger}／${o.ice})</span>
+                  <span>${esc(o.name)} (${esc(o.suger)}／${esc(o.ice)})</span>
                   <span style="font-weight:bold;">x${o.qty}</span>
                 </li>
               `,
@@ -161,7 +177,7 @@
                   .join("");
                 const div = document.createElement("div");
                 div.className = "person";
-                div.innerHTML = `<h4>${name}</h4><ul>${items}</ul>`;
+                div.innerHTML = `<h4>${esc(name)}</h4><ul>${items}</ul>`;
                 listEl.appendChild(div);
               });
           }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>建立訂單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/create_event_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
@@ -45,14 +46,14 @@
 
           <hr class="divider" />
 
-          <label>分享給團員</label>
+          <label>分享給其他人</label>
           <textarea
             id="shareMsg"
             class="share-textarea"
             readonly
             rows="5"
           ></textarea>
-          <div class="actions action-gap" style="margin-top: 10px">
+          <div class="actions action-gap">
             <button class="primary" id="copyBtn" type="button">複製分享訊息</button>
           </div>
         </div>
@@ -77,7 +78,7 @@
       import { supabase } from "./config.js";
       import { initNavbar } from "./navbar.js";
       initNavbar();
-      
+
       const drinkShops = [
         "迷客夏",
         "大茗本味製茶堂",

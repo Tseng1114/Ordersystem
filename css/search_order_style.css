@@ -58,7 +58,9 @@ body {
   font-size: 0.95rem;
   font-family: "Noto Sans TC", sans-serif;
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
 }
 .search-input:focus {
   border-color: #f59e0b;
@@ -117,25 +119,6 @@ body {
   margin: 0;
 }
 
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1.5px solid;
-}
-.badge-open {
-  background: #dcfce7;
-  color: #15803d;
-  border-color: #86efac;
-}
-.badge-closed {
-  background: #fee2e2;
-  color: #dc2626;
-  border-color: #fca5a5;
-}
-
 .id-row {
   display: flex;
   align-items: center;
@@ -175,12 +158,6 @@ body {
 .meta-row span {
   font-weight: 600;
   color: #334155;
-}
-
-.divider {
-  border: none;
-  border-top: 1.5px solid #e2e8f0;
-  margin: 16px 0;
 }
 
 .person-block {
@@ -232,12 +209,6 @@ body {
   padding: 2px 10px;
   border-radius: 99px;
   white-space: nowrap;
-}
-.empty-state {
-  text-align: center;
-  color: #94a3b8;
-  padding: 2rem 0;
-  font-size: 0.93rem;
 }
 
 .result-footer {

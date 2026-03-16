@@ -26,14 +26,6 @@ body {
   padding: 48px 20px 80px;
 }
 
-.page-title {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 28px;
-  letter-spacing: -0.02em;
-}
-
 .card {
   background: #fff;
   border: 2px solid var(--text-primary);
@@ -190,16 +182,6 @@ button.primary:active {
 #directGoBtn:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--text-primary);
-}
-
-.divider {
-  border: none;
-  border-top: 2px dashed #e2e8f0;
-  margin: 24px 0;
-}
-
-.hidden {
-  display: none !important;
 }
 
 #otherBox input {

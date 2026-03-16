@@ -104,8 +104,8 @@ button:active {
   border: none;
   padding: 12px 24px;
   border-radius: 50px;
-  text-decoration: none; 
-  display: inline-block; 
+  text-decoration: none;
+  display: inline-block;
 }
 
 .del-btn {
@@ -116,26 +116,23 @@ button:active {
   border-radius: 6px;
 }
 
-.hidden {
-  display: none !important;
-}
-
 @media (max-width: 600px) {
   .actions {
-      flex-direction: column;
-      width: 100%;
-      gap: 12px;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
   }
 
-.actions button, .actions .back-home {
+  .actions button,
+  .actions .back-home {
     width: 100%;
-    border-radius: 12px; 
-    padding: 14px;      
+    border-radius: 12px;
+    padding: 14px;
     display: block;
     text-align: center;
     box-sizing: border-box;
   }
-  
+
   #itemsTbl thead {
     display: none;
   }
@@ -158,13 +155,14 @@ button:active {
   }
 
   #itemsTbl td::before {
-    content: attr(data-label); 
+    content: attr(data-label);
     font-weight: bold;
     width: 80px;
     min-width: 80px;
   }
 
-  input, select {
+  input,
+  select {
     flex: 1;
   }
 
@@ -177,7 +175,6 @@ button:active {
     margin-top: 10px;
     padding: 10px;
   }
-
 }
 
 .btn-disabled {
@@ -187,10 +184,6 @@ button:active {
   opacity: 0.7;
 }
 
-.hidden {
-  display: none !important;
-}
-
 .expired-banner {
   background: #fef2f2;
   border: 2px solid #e11d48;
@@ -203,23 +196,6 @@ button:active {
   margin-bottom: 20px;
   display: none;
 }
-.expired-banner.show {
-  display: block;
-}
-
-.expired-banner {
-  background: #fef2f2;
-  border: 2px solid #e11d48;
-  border-radius: 12px;
-  color: #be123c;
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-align: center;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  display: none;
-}
-
 .expired-banner.show {
   display: block;
 }

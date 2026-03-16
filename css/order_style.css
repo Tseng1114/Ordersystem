@@ -104,35 +104,36 @@ button:active {
   border: none;
   padding: 12px 24px;
   border-radius: 50px;
-  text-decoration: none;
-  display: inline-block;
+  text-decoration: none; 
+  display: inline-block; 
 }
 
 .del-btn {
   background: #ff4d4f;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 6px;
+  white-space: nowrap;
+  min-width: 72px;
 }
 
 @media (max-width: 600px) {
   .actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 12px;
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
   }
 
-  .actions button,
-  .actions .back-home {
+.actions button, .actions .back-home {
     width: 100%;
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 12px; 
+    padding: 14px;      
     display: block;
     text-align: center;
     box-sizing: border-box;
   }
-
+  
   #itemsTbl thead {
     display: none;
   }
@@ -155,14 +156,13 @@ button:active {
   }
 
   #itemsTbl td::before {
-    content: attr(data-label);
+    content: attr(data-label); 
     font-weight: bold;
     width: 80px;
     min-width: 80px;
   }
 
-  input,
-  select {
+  input, select {
     flex: 1;
   }
 
@@ -175,6 +175,7 @@ button:active {
     margin-top: 10px;
     padding: 10px;
   }
+
 }
 
 .btn-disabled {

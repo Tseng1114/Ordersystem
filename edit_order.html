@@ -55,7 +55,7 @@
         <div class="tab-panel active" id="tabOrders">
           <div class="orders-toolbar">
             <h3 id="ordersCount">載入中...</h3>
-            <button class="btn-primary" id="showAddRowBtn" style="height: 36px; font-size: 0.85rem; padding: 0 16px">＋ 新增一筆</button>
+            <button class="btn-primary btn-sm" id="showAddRowBtn">＋ 新增一筆</button>
           </div>
 
           <div class="add-row-card" id="addRowCard">
@@ -222,7 +222,7 @@
           document.getElementById("tabOrders").insertAdjacentElement("afterbegin", banner);
         }
         if (isLocked) {
-          banner.textContent = "⚠️ 此訂單已截止或關閉，無法新增或修改訂單內容。";
+          banner.textContent = "此訂單已截止或關閉，無法新增或修改訂單內容。";
           banner.classList.add("show");
           document.getElementById("showAddRowBtn").style.display = "none";
         } else {

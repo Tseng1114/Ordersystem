@@ -1,4 +1,4 @@
-*,
+**,
 *::before,
 *::after {
   box-sizing: border-box;
@@ -464,4 +464,10 @@ body {
 }
 .expired-banner.show {
   display: block;
+}
+
+.btn-sm {
+  height: 36px;
+  font-size: 0.85rem;
+  padding: 0 16px;
 }

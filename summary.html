@@ -16,11 +16,7 @@
     <div id="navbar-root"></div>
 
     <div class="marquee-bar">
-      <div class="marquee-content">
-        ⚠️
-        系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！
-        ⚠️
-      </div>
+      <div class="marquee-content">系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！</div>
     </div>
 
     <div id="loadingOverlay">
@@ -46,8 +42,12 @@
         <div id="eventInfo"></div>
 
         <div id="byPersonBox" class="by-person">
-          <h3 class="section-title">依人統計清單</h3>
+          <div class="summary-tabs">
+            <button class="summary-tab active" id="tabByPerson">依人統計</button>
+            <button class="summary-tab" id="tabByItem">依品項統計</button>
+          </div>
           <div id="byPersonList"></div>
+          <div id="byItemList" class="hidden"></div>
         </div>
 
         <div class="actions">
@@ -135,17 +135,15 @@
           if (error) throw error;
           if (!results || results.length === 0) {
             document.getElementById("eventInfo").innerHTML =
-              `<p style="color:red; text-align:center;">找不到此活動。</p>`;
+              `<p class="state-error">找不到此活動。</p>`;
             return;
           }
 
           const ev = results[0];
           document.getElementById("eventInfo").innerHTML = `
-            <div class="meta-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid #1e293b; margin-bottom: 25px;">
-              <h2 style="text-align:center; margin:0 0 10px 0;">${esc(ev.shop)}</h2>
-              <p style="text-align:center; color:#e11d48; font-weight:bold; margin: 5px 0;">
-                截止時間：${esc(formatTWTime(ev.deadline))}
-              </p>
+            <div class="meta-container">
+              <h2 class="meta-shop">${esc(ev.shop)}</h2>
+              <p class="meta-deadline">截止時間：${esc(formatTWTime(ev.deadline))}</p>
             </div>`;
 
           const listEl = document.getElementById("byPersonList");
@@ -155,7 +153,7 @@
 
           if (orders.length === 0) {
             listEl.innerHTML =
-              '<p style="text-align:center; color:#94a3b8; padding: 40px 0;">目前尚無人下單。</p>';
+              '<p class="state-empty">目前尚無人下單。</p>';
           } else {
             orders.forEach((o) => {
               if (!groups[o.customer]) groups[o.customer] = [];
@@ -170,7 +168,7 @@
                     (o) => `
                 <li>
                   <span>${esc(o.name)} (${esc(o.suger)}／${esc(o.ice)})</span>
-                  <span style="font-weight:bold;">x${o.qty}</span>
+                  <span class="order-qty">x${esc(o.qty)}</span>
                 </li>
               `,
                   )
@@ -181,6 +179,45 @@
                 listEl.appendChild(div);
               });
           }
+          const itemGroups = {};
+          orders.forEach((o) => {
+            const key = `${o.name}__${o.suger}__${o.ice}`;
+            if (!itemGroups[key]) itemGroups[key] = { name: o.name, suger: o.suger, ice: o.ice, qty: 0 };
+            itemGroups[key].qty += o.qty;
+          });
+          const itemListEl = document.getElementById("byItemList");
+          itemListEl.innerHTML = "";
+          if (orders.length === 0) {
+            itemListEl.innerHTML = '<p class="state-empty">目前尚無人下單。</p>';
+          } else {
+            Object.values(itemGroups)
+              .sort((a, b) => b.qty - a.qty)
+              .forEach((item) => {
+                const div = document.createElement("div");
+                div.className = "person";
+                div.innerHTML = `
+                  <h4>${esc(item.name)}</h4>
+                  <ul><li>
+                    <span>${esc(item.suger)}／${esc(item.ice)}</span>
+                    <span class="order-qty">x${item.qty}</span>
+                  </li></ul>`;
+                itemListEl.appendChild(div);
+              });
+          }
+
+          document.getElementById("tabByPerson").onclick = () => {
+            document.getElementById("byPersonList").classList.remove("hidden");
+            document.getElementById("byItemList").classList.add("hidden");
+            document.getElementById("tabByPerson").classList.add("active");
+            document.getElementById("tabByItem").classList.remove("active");
+          };
+          document.getElementById("tabByItem").onclick = () => {
+            document.getElementById("byItemList").classList.remove("hidden");
+            document.getElementById("byPersonList").classList.add("hidden");
+            document.getElementById("tabByItem").classList.add("active");
+            document.getElementById("tabByPerson").classList.remove("active");
+          };
+
         } catch (err) {
           alert("讀取失敗：" + err.message);
         } finally {

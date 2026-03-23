@@ -16,6 +16,7 @@
       <h1 class="page-title">下單</h1>
       <div class="card">
         <div id="expiredBanner" class="expired-banner">此訂單已截止，無法新增或送出訂單。</div>
+        <div id="menuStatusBanner" class="menu-status-banner hidden"></div>
 
         <div id="orderForm">
           <table id="itemsTbl">
@@ -23,6 +24,7 @@
               <tr id="tableHeader">
                 <th>姓名</th>
                 <th id="itemName">品項</th>
+                <th id="colAddon">加料</th>
                 <th id="colSpecA">糖度</th>
                 <th id="colSpecB">冰量</th>
                 <th>數量</th>
@@ -69,11 +71,33 @@
 
     <script type="module">
       import { supabase } from "./config.js";
+      import { findShopByName } from "./shop-data.js";
 
       const urlParams = new URLSearchParams(window.location.search);
       const EVENT_ID = urlParams.get("event");
       let currentCategory = "drink";
+      let currentShop = null;
       let isExpired = false;
+
+      const SUGAR_OPTIONS = [
+        "正常糖",
+        "少糖",
+        "半糖",
+        "微糖",
+        "二分糖",
+        "一分糖",
+        "無糖",
+      ];
+      const ICE_OPTIONS = [
+        "正常冰",
+        "少冰",
+        "微冰",
+        "去冰",
+        "完全去冰",
+        "常溫",
+        "溫",
+        "熱",
+      ];
 
       function showLoading(s) {
         document.getElementById("loadingOverlay").style.display = s
@@ -94,11 +118,14 @@
           if (error || !ev) return alert("找不到該訂單");
 
           currentCategory = ev.category || "drink";
+          currentShop = findShopByName(ev.shop, currentCategory);
           document.querySelector(".page-title").textContent =
             ev.shop + " - 下單";
+          renderMenuStatus();
 
           if (currentCategory === "food") {
             document.getElementById("itemName").textContent = "餐點名稱";
+            document.getElementById("colAddon").textContent = "加點";
             document.getElementById("colSpecA").textContent = "份量";
             document.getElementById("colSpecB").textContent = "備註";
           }
@@ -121,35 +148,109 @@
         }
       }
 
+      function buildSelect(className, options, selectedValue) {
+        return `
+          <select class="${className}">
+            ${options
+              .map(
+                (option) =>
+                  `<option${option === selectedValue ? " selected" : ""}>${option}</option>`,
+              )
+              .join("")}
+          </select>
+        `;
+      }
+
+      function buildItemField() {
+        const shopMeta = currentShop?.[1];
+        const menuItems = shopMeta?.menuItems || [];
+
+        if (menuItems.length > 0) {
+          return `
+            <select class="item-input" required>
+              <option value="" selected disabled>請選擇品項</option>
+              ${menuItems
+                .map((item) => `<option value="${item}">${item}</option>`)
+                .join("")}
+            </select>
+          `;
+        }
+
+        return '<input class="item-input" placeholder="請輸入名稱" required>';
+      }
+
+      function buildAddonField() {
+        const shopMeta = currentShop?.[1];
+        const addonOptions = shopMeta?.addonOptions || ["不加料"];
+
+        if (currentCategory === "food") {
+          return '<input class="addon-input" placeholder="加蛋/加麵等">';
+        }
+
+        return `
+          <select class="addon-input">
+            ${addonOptions
+              .map((option) => `<option value="${option}">${option}</option>`)
+              .join("")}
+          </select>
+        `;
+      }
+
+      function combineItemAndAddon(itemName, addonName) {
+        const addon = addonName?.trim();
+        if (!addon || addon === "不加料") return itemName;
+        return `${itemName}（加料：${addon}）`;
+      }
+
+      function renderMenuStatus() {
+        const banner = document.getElementById("menuStatusBanner");
+        const [shopKey, shopMeta] = currentShop || [];
+
+        if (!shopMeta) {
+          banner.classList.add("hidden");
+          banner.innerHTML = "";
+          return;
+        }
+
+        const menuUrl = `menu.html?shop=${shopKey}`;
+        const hasMenuItems = Array.isArray(shopMeta.menuItems) && shopMeta.menuItems.length > 0;
+
+        if (hasMenuItems) {
+          banner.innerHTML = `${shopMeta.name} 目前已套用下拉式品項清單。這份清單是先整理出的初版，仍可搭配 <a href="${menuUrl}" target="_blank" rel="noreferrer">菜單頁</a> 一起確認。`;
+        } else {
+          banner.innerHTML = `${shopMeta.name} 目前還沒有完整整理成下拉式品項，這一頁先保留手動輸入。你也可以先查看 <a href="${menuUrl}" target="_blank" rel="noreferrer">菜單頁</a>。`;
+        }
+
+        banner.classList.remove("hidden");
+      }
+
       function addRow() {
         const tr = document.createElement("tr");
         let middleCols = "";
 
         if (currentCategory === "food") {
           middleCols = `
+            <td data-label="加點"><input class="addon-input" placeholder="加蛋/加麵等"></td>
             <td data-label="份量"><input class="spec-a-input" placeholder="大/小,加麵等"></td>
             <td data-label="備註"><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
           `;
         } else {
           middleCols = `
+            <td data-label="加料">
+              ${buildAddonField()}
+            </td>
             <td data-label="糖度">
-              <select class="spec-a-input">
-                <option>正常糖</option><option>少糖</option><option>半糖</option>
-                <option>微糖</option><option>二分糖</option><option>一分糖</option><option selected>無糖</option>
-              </select>
+              ${buildSelect("spec-a-input", SUGAR_OPTIONS, "無糖")}
             </td>
             <td data-label="冰量">
-              <select class="spec-b-input">
-                <option>正常冰</option><option>少冰</option><option>微冰</option>
-                <option>去冰</option><option selected>完全去冰</option><option>常溫</option><option>溫</option><option>熱</option>
-              </select>
+              ${buildSelect("spec-b-input", ICE_OPTIONS, "完全去冰")}
             </td>
           `;
         }
 
         tr.innerHTML = `
           <td data-label="姓名"><input class="who" placeholder="姓名" required></td>
-          <td data-label="品項"><input class="drink" placeholder="請輸入名稱" required></td>
+          <td data-label="品項">${buildItemField()}</td>
           ${middleCols}
           <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
           <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除此筆</button></td>
@@ -166,11 +267,18 @@
         const rows = trs.map((tr) => ({
           event_id: EVENT_ID,
           customer: tr.querySelector(".who").value.trim(),
-          name: tr.querySelector(".drink").value.trim(),
+          name: combineItemAndAddon(
+            tr.querySelector(".item-input").value.trim(),
+            tr.querySelector(".addon-input")?.value || "",
+          ),
           suger: tr.querySelector(".spec-a-input").value,
           ice: tr.querySelector(".spec-b-input").value,
           qty: parseInt(tr.querySelector(".qty").value),
         }));
+
+        if (rows.some((row) => !row.customer || !row.name)) {
+          return alert("請完整填寫姓名與品項");
+        }
 
         showLoading(true);
         try {

@@ -201,6 +201,21 @@ button:active {
   display: block;
 }
 
+.menu-status-banner {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 12px;
+  color: #1d4ed8;
+  line-height: 1.6;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+}
+
+.menu-status-banner a {
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
 .success-screen {
   display: none;
   text-align: center;

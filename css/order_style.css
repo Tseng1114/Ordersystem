@@ -176,6 +176,11 @@ button:active {
     padding: 10px;
   }
 
+  .menu-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
 }
 
 .btn-disabled {
@@ -199,6 +204,44 @@ button:active {
 }
 .expired-banner.show {
   display: block;
+}
+
+.menu-section {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 28px;
+  padding-top: 24px;
+}
+
+.menu-section-head {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.menu-section-title {
+  margin: 0;
+}
+
+.menu-open-link {
+  color: var(--text-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.menu-frame-wrap {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.menu-embed-frame {
+  border: 0;
+  display: block;
+  min-height: 480px;
+  width: 100%;
 }
 
 .success-screen {

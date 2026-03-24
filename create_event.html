@@ -76,6 +76,7 @@
 
     <script type="module">
       import { supabase } from "./config.js";
+      import { getEventCode } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       initNavbar();
 
@@ -100,6 +101,8 @@
         "可不可熟成紅茶",
         "宣福居",
         "鶴茶樓",
+        "龜記",
+        "再睡5分鐘",
       ];
       const foodShops = [
         "露西媽媽",
@@ -182,8 +185,9 @@
           if (error) throw error;
 
           const id = data[0].id;
+          const shortId = getEventCode(id);
           const orderURL = new URL("order.html", location.href);
-          orderURL.searchParams.set("event", id);
+          orderURL.searchParams.set("event", shortId);
 
           let deadlineText = "無期限";
           if (deadline) {

@@ -14,14 +14,16 @@
   <body>
     <div class="wrap">
       <h1 class="page-title">下單</h1>
+
       <div class="card">
-        <div id="expiredBanner" class="expired-banner">此訂單已截止，無法新增或送出訂單。</div>
-        <div id="menuStatusBanner" class="menu-status-banner hidden"></div>
+        <div id="expiredBanner" class="expired-banner">
+          此訂單已超過截止時間，目前不能再新增或送出訂單。
+        </div>
 
         <div id="orderForm">
           <table id="itemsTbl">
             <thead>
-              <tr id="tableHeader">
+              <tr>
                 <th>姓名</th>
                 <th id="itemName">品項</th>
                 <th id="colAddon">加料</th>
@@ -37,19 +39,42 @@
           <div class="actions">
             <a href="index.html" class="back-home">回首頁</a>
             <button type="button" class="add" id="addItem">＋新增一筆</button>
-            <button type="button" class="primary" id="submitBtn">
-              送出訂單
-            </button>
+            <button type="button" class="primary" id="submitBtn">送出訂單</button>
           </div>
         </div>
 
+        <section id="menuSection" class="menu-section hidden">
+          <div class="menu-section-head">
+            <h2 class="menu-section-title">菜單</h2>
+            <a
+              id="menuOpenLink"
+              class="menu-open-link"
+              href="menu.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              另開菜單
+            </a>
+          </div>
+          <div class="menu-frame-wrap">
+            <iframe
+              id="menuEmbedFrame"
+              class="menu-embed-frame"
+              title="店家菜單"
+              loading="lazy"
+            ></iframe>
+          </div>
+        </section>
+
         <div id="successScreen" class="success-screen">
-          <div class="success-icon">🎉</div>
-          <h2>訂單送出成功！</h2>
-          <p>你的點餐已記錄，可以前往彙整頁查看所有訂單。</p>
+          <div class="success-icon">✓</div>
+          <h2>訂單送出成功</h2>
+          <p>你可以回到首頁，或直接查看這張訂單的彙整結果。</p>
           <div class="actions">
             <a href="index.html" class="back-home">回首頁</a>
-            <button type="button" class="primary" id="goSummaryBtn">查看訂單彙整</button>
+            <button type="button" class="primary" id="goSummaryBtn">
+              查看訂單彙整
+            </button>
           </div>
         </div>
       </div>
@@ -58,26 +83,32 @@
     <div id="loadingOverlay">
       <div class="spinner-box">
         <div class="spinner"></div>
-        <div class="spinner-text">處理中，請稍候...</div>
+        <div class="spinner-text">載入中...</div>
       </div>
     </div>
 
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
       </div>
     </footer>
 
     <script type="module">
       import { supabase } from "./config.js";
+      import { resolveEventId } from "./event-utils.js";
       import { findShopByName } from "./shop-data.js";
 
       const urlParams = new URLSearchParams(window.location.search);
-      const EVENT_ID = urlParams.get("event");
+      const rawEventId = urlParams.get("event");
+
+      let resolvedEventId = null;
       let currentCategory = "drink";
       let currentShop = null;
       let isExpired = false;
+      let itemListCounter = 0;
 
       const SUGAR_OPTIONS = [
         "正常糖",
@@ -88,64 +119,22 @@
         "一分糖",
         "無糖",
       ];
+
       const ICE_OPTIONS = [
         "正常冰",
         "少冰",
         "微冰",
         "去冰",
         "完全去冰",
-        "常溫",
         "溫",
         "熱",
+        "常溫",
       ];
 
-      function showLoading(s) {
-        document.getElementById("loadingOverlay").style.display = s
-          ? "block"
+      function showLoading(show) {
+        document.getElementById("loadingOverlay").style.display = show
+          ? "flex"
           : "none";
-      }
-
-      async function ensureEvent() {
-        if (!EVENT_ID) return alert("無效訂單編號");
-        showLoading(true);
-        try {
-          const { data: ev, error } = await supabase
-            .from("events")
-            .select("*")
-            .eq("id", EVENT_ID)
-            .single();
-
-          if (error || !ev) return alert("找不到該訂單");
-
-          currentCategory = ev.category || "drink";
-          currentShop = findShopByName(ev.shop, currentCategory);
-          document.querySelector(".page-title").textContent =
-            ev.shop + " - 下單";
-          renderMenuStatus();
-
-          if (currentCategory === "food") {
-            document.getElementById("itemName").textContent = "餐點名稱";
-            document.getElementById("colAddon").textContent = "加點";
-            document.getElementById("colSpecA").textContent = "份量";
-            document.getElementById("colSpecB").textContent = "備註";
-          }
-
-          if (ev.deadline) {
-            const now = new Date();
-            const deadlineTime = new Date(ev.deadline);
-            if (now > deadlineTime) {
-              isExpired = true;
-              const btn = document.getElementById("submitBtn");
-              btn.disabled = true;
-              btn.innerText = "已截止 (無法送出)";
-              btn.classList.add("btn-disabled");
-              document.getElementById("addItem").classList.add("hidden");
-              document.getElementById("expiredBanner").classList.add("show");
-            }
-          }
-        } finally {
-          showLoading(false);
-        }
       }
 
       function buildSelect(className, options, selectedValue) {
@@ -166,25 +155,38 @@
         const menuItems = shopMeta?.menuItems || [];
 
         if (menuItems.length > 0) {
+          itemListCounter += 1;
+          const listId = `item-suggestions-${itemListCounter}`;
           return `
-            <select class="item-input" required>
-              <option value="" selected disabled>請選擇品項</option>
+            <input
+              class="item-input"
+              list="${listId}"
+              placeholder="可輸入搜尋或直接輸入其他品項"
+              required
+            >
+            <datalist id="${listId}">
               ${menuItems
-                .map((item) => `<option value="${item}">${item}</option>`)
+                .map((item) => `<option value="${item}"></option>`)
                 .join("")}
-            </select>
+            </datalist>
           `;
         }
 
-        return '<input class="item-input" placeholder="請輸入名稱" required>';
+        return `
+          <input
+            class="item-input"
+            placeholder="請輸入品項"
+            required
+          >
+        `;
       }
 
       function buildAddonField() {
         const shopMeta = currentShop?.[1];
-        const addonOptions = shopMeta?.addonOptions || ["不加料"];
+        const addonOptions = shopMeta?.addonOptions || ["無"];
 
         if (currentCategory === "food") {
-          return '<input class="addon-input" placeholder="加蛋/加麵等">';
+          return '<input class="addon-input" placeholder="備註 / 規格">';
         }
 
         return `
@@ -198,30 +200,78 @@
 
       function combineItemAndAddon(itemName, addonName) {
         const addon = addonName?.trim();
-        if (!addon || addon === "不加料") return itemName;
+        if (!addon || addon === "無") return itemName;
         return `${itemName}（加料：${addon}）`;
       }
 
-      function renderMenuStatus() {
-        const banner = document.getElementById("menuStatusBanner");
+      function renderEmbeddedMenu() {
+        const section = document.getElementById("menuSection");
+        const frame = document.getElementById("menuEmbedFrame");
+        const link = document.getElementById("menuOpenLink");
         const [shopKey, shopMeta] = currentShop || [];
 
         if (!shopMeta) {
-          banner.classList.add("hidden");
-          banner.innerHTML = "";
+          section.classList.add("hidden");
+          frame.removeAttribute("src");
           return;
         }
 
-        const menuUrl = `menu.html?shop=${shopKey}`;
-        const hasMenuItems = Array.isArray(shopMeta.menuItems) && shopMeta.menuItems.length > 0;
+        frame.src = `menu.html?shop=${shopKey}&embed=1`;
+        link.href = `menu.html?shop=${shopKey}`;
+        section.classList.remove("hidden");
+      }
 
-        if (hasMenuItems) {
-          banner.innerHTML = `${shopMeta.name} 目前已套用下拉式品項清單。這份清單是先整理出的初版，仍可搭配 <a href="${menuUrl}" target="_blank" rel="noreferrer">菜單頁</a> 一起確認。`;
-        } else {
-          banner.innerHTML = `${shopMeta.name} 目前還沒有完整整理成下拉式品項，這一頁先保留手動輸入。你也可以先查看 <a href="${menuUrl}" target="_blank" rel="noreferrer">菜單頁</a>。`;
+      async function ensureEvent() {
+        if (!rawEventId) {
+          alert("無效訂單編號");
+          return;
         }
 
-        banner.classList.remove("hidden");
+        showLoading(true);
+        try {
+          resolvedEventId = await resolveEventId(supabase, rawEventId);
+          if (!resolvedEventId) {
+            alert("找不到這筆訂單");
+            return;
+          }
+
+          const { data: ev, error } = await supabase
+            .from("events")
+            .select("*")
+            .eq("id", resolvedEventId)
+            .single();
+
+          if (error || !ev) {
+            alert("找不到這筆訂單");
+            return;
+          }
+
+          currentCategory = ev.category || "drink";
+          currentShop = findShopByName(ev.shop, currentCategory);
+
+          document.querySelector(".page-title").textContent = `${ev.shop} - 下單`;
+
+          if (currentCategory === "food") {
+            document.getElementById("itemName").textContent = "品項名稱";
+            document.getElementById("colAddon").textContent = "備註";
+            document.getElementById("colSpecA").textContent = "規格一";
+            document.getElementById("colSpecB").textContent = "規格二";
+          }
+
+          renderEmbeddedMenu();
+
+          if (ev.deadline && new Date() > new Date(ev.deadline)) {
+            isExpired = true;
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "已截止";
+            submitBtn.classList.add("btn-disabled");
+            document.getElementById("addItem").classList.add("hidden");
+            document.getElementById("expiredBanner").classList.add("show");
+          }
+        } finally {
+          showLoading(false);
+        }
       }
 
       function addRow() {
@@ -230,21 +280,15 @@
 
         if (currentCategory === "food") {
           middleCols = `
-            <td data-label="加點"><input class="addon-input" placeholder="加蛋/加麵等"></td>
-            <td data-label="份量"><input class="spec-a-input" placeholder="大/小,加麵等"></td>
-            <td data-label="備註"><input class="spec-b-input" placeholder="不蔥/加辣等"></td>
+            <td data-label="備註"><input class="addon-input" placeholder="備註 / 規格"></td>
+            <td data-label="規格一"><input class="spec-a-input" placeholder="例如：大份"></td>
+            <td data-label="規格二"><input class="spec-b-input" placeholder="例如：加辣"></td>
           `;
         } else {
           middleCols = `
-            <td data-label="加料">
-              ${buildAddonField()}
-            </td>
-            <td data-label="糖度">
-              ${buildSelect("spec-a-input", SUGAR_OPTIONS, "無糖")}
-            </td>
-            <td data-label="冰量">
-              ${buildSelect("spec-b-input", ICE_OPTIONS, "完全去冰")}
-            </td>
+            <td data-label="加料">${buildAddonField()}</td>
+            <td data-label="糖度">${buildSelect("spec-a-input", SUGAR_OPTIONS, "無糖")}</td>
+            <td data-label="冰量">${buildSelect("spec-b-input", ICE_OPTIONS, "完全去冰")}</td>
           `;
         }
 
@@ -253,8 +297,9 @@
           <td data-label="品項">${buildItemField()}</td>
           ${middleCols}
           <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
-          <td><button type="button" class="del-btn" onclick="this.parentElement.parentElement.remove()">刪除此筆</button></td>
+          <td><button type="button" class="del-btn" onclick="this.closest('tr').remove()">刪除</button></td>
         `;
+
         document.querySelector("#itemsTbl tbody").appendChild(tr);
       }
 
@@ -262,10 +307,13 @@
         if (isExpired) return;
 
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
-        if (trs.length === 0) return alert("請至少新增一筆品項");
+        if (trs.length === 0) {
+          alert("請先新增至少一筆訂單");
+          return;
+        }
 
         const rows = trs.map((tr) => ({
-          event_id: EVENT_ID,
+          event_id: resolvedEventId,
           customer: tr.querySelector(".who").value.trim(),
           name: combineItemAndAddon(
             tr.querySelector(".item-input").value.trim(),
@@ -273,11 +321,12 @@
           ),
           suger: tr.querySelector(".spec-a-input").value,
           ice: tr.querySelector(".spec-b-input").value,
-          qty: parseInt(tr.querySelector(".qty").value),
+          qty: parseInt(tr.querySelector(".qty").value, 10) || 1,
         }));
 
         if (rows.some((row) => !row.customer || !row.name)) {
-          return alert("請完整填寫姓名與品項");
+          alert("請完整填寫姓名與品項");
+          return;
         }
 
         showLoading(true);
@@ -286,20 +335,37 @@
           if (error) throw error;
 
           document.getElementById("orderForm").style.display = "none";
+          document.getElementById("menuSection").style.display = "none";
           document.getElementById("successScreen").style.display = "block";
           document.getElementById("goSummaryBtn").onclick = () => {
-            location.href = `summary.html?event=${EVENT_ID}`;
+            location.href = `summary.html?event=${resolvedEventId}`;
           };
         } catch (err) {
-          alert("送出失敗：" + err.message);
+          alert(`送出失敗：${err.message}`);
         } finally {
           showLoading(false);
         }
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        ensureEvent();
-        document.getElementById("addItem").onclick = addRow;
+        const addItemBtn = document.getElementById("addItem");
+        addItemBtn.disabled = true;
+
+        window.addEventListener("message", (event) => {
+          if (event.data?.type !== "menu-embed-height") return;
+          const frame = document.getElementById("menuEmbedFrame");
+          if (!frame) return;
+          frame.style.height = `${Math.max(480, Number(event.data.height) || 0)}px`;
+        });
+
+        ensureEvent().then(() => {
+          if (!isExpired) {
+            addItemBtn.disabled = false;
+            addRow();
+          }
+        });
+
+        addItemBtn.onclick = addRow;
         document.getElementById("submitBtn").onclick = submitOrder;
       });
     </script>

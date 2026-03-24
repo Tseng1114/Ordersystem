@@ -50,10 +50,14 @@
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
-      initNavbar();
+      const params = new URLSearchParams(location.search);
+      const isEmbed = params.get("embed") === "1";
+      if (!isEmbed) initNavbar();
     </script>
 
     <script>
+      const PAGE_PARAMS = new URLSearchParams(location.search);
+      const IS_EMBED = PAGE_PARAMS.get("embed") === "1";
       const SHOPS = {
         // drinks
         milksha: {
@@ -196,6 +200,21 @@
           logo: "hechaloutea_logo.jpeg",
           imgs: ["hechaloutea_menu.webp"],
         },
+        guiji:{
+          name: "龜記",
+          sub: "guiji",
+          type: "drinks",
+          logo: "guiji_logo.jpg",
+          imgs: ["guiji_menu.jpg"],
+        },
+        napteazzz:{
+          name: "再睡5分鐘",
+          sub: "napteazzz",
+          type: "drinks",
+          logo: "npateazzz_logo.png",
+          imgs: ["napteazzz_menu.avif"],
+        },
+
         // meals
         lucymama: {
           name: "露西媽媽",
@@ -338,8 +357,15 @@
           return;
         }
 
-        history.pushState({ shop: key }, "", `menu.html?shop=${key}`);
+        const suffix = IS_EMBED ? "&embed=1" : "";
+        history.pushState({ shop: key }, "", `menu.html?shop=${key}${suffix}`);
         showMenuView(key);
+      }
+
+      function reportEmbedHeight() {
+        if (!IS_EMBED || window.parent === window) return;
+        const height = document.documentElement.scrollHeight;
+        window.parent.postMessage({ type: "menu-embed-height", height }, "*");
       }
 
       function showMenuView(key) {
@@ -357,7 +383,10 @@
         document.getElementById("listView").style.display = "none";
         document.getElementById("menuView").style.display = "block";
         document.querySelector(".footer").style.display = "none";
-        window.scrollTo(0, 0);
+        if (!IS_EMBED) {
+          window.scrollTo(0, 0);
+        }
+        reportEmbedHeight();
       }
 
       function showListView() {
@@ -423,6 +452,46 @@
         }
         window.scrollTo(0, 0);
       });
+    </script>
+
+    <script>
+      (function setupEmbedMode() {
+        const params = new URLSearchParams(location.search);
+        if (params.get("embed") !== "1") return;
+
+        const navbarRoot = document.getElementById("navbar-root");
+        const backBtn = document.getElementById("backBtn");
+        const footer = document.querySelector(".footer");
+        const listView = document.getElementById("listView");
+        const menuView = document.getElementById("menuView");
+
+        if (navbarRoot) navbarRoot.style.display = "none";
+        if (backBtn) backBtn.style.display = "none";
+        if (footer) footer.style.display = "none";
+        if (listView) listView.style.display = "none";
+        if (menuView) menuView.style.paddingTop = "0";
+
+        const reportHeight = () => {
+          if (window.parent === window) return;
+          const height = document.documentElement.scrollHeight;
+          window.parent.postMessage(
+            { type: "menu-embed-height", height },
+            "*",
+          );
+        };
+
+        window.addEventListener("load", reportHeight);
+        window.addEventListener("resize", reportHeight);
+
+        if ("ResizeObserver" in window) {
+          const observer = new ResizeObserver(reportHeight);
+          observer.observe(document.body);
+        }
+
+        setTimeout(reportHeight, 50);
+        setTimeout(reportHeight, 250);
+        setTimeout(reportHeight, 800);
+      })();
     </script>
   </body>
 </html>

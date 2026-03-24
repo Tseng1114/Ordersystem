@@ -76,17 +76,20 @@
 
 
       import { supabase } from "./config.js";
+      import { getEventCode, resolveEventId } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       initNavbar();
 
-      const eventId = new URLSearchParams(location.search).get("event");
+      const rawEventId = new URLSearchParams(location.search).get("event");
+      let resolvedEventId = null;
+      let displayEventCode = rawEventId || "";
       const btnCopy = document.getElementById("btnCopy");
       const copyToast = document.getElementById("copyToast");
       const targetOrderId = document.getElementById("targetOrderId");
 
       btnCopy.onclick = () => {
-        if (!eventId) return;
-        navigator.clipboard.writeText(eventId).then(() => {
+        if (!displayEventCode) return;
+        navigator.clipboard.writeText(displayEventCode).then(() => {
           copyToast.style.display = "block";
           btnCopy.innerText = "已複製";
           setTimeout(() => {
@@ -117,20 +120,26 @@
       }
 
       async function load() {
-        if (!eventId) {
+        if (!rawEventId) {
           alert("網址缺少訂單編號，請重新從首頁進入。");
           location.href = "index.html";
           return;
         }
 
-        targetOrderId.innerText = eventId;
         showLoading(true);
 
         try {
+          resolvedEventId = await resolveEventId(supabase, rawEventId);
+          if (!resolvedEventId) {
+            document.getElementById("eventInfo").innerHTML =
+              `<p class="state-error">?曆??唳迨瘣餃???/p>`;
+            return;
+          }
+
           const { data: results, error } = await supabase
             .from("events")
             .select("*, orders(*)")
-            .eq("id", eventId);
+            .eq("id", resolvedEventId);
 
           if (error) throw error;
           if (!results || results.length === 0) {
@@ -140,6 +149,8 @@
           }
 
           const ev = results[0];
+          displayEventCode = getEventCode(ev.id);
+          targetOrderId.innerText = displayEventCode;
           document.getElementById("eventInfo").innerHTML = `
             <div class="meta-container">
               <h2 class="meta-shop">${esc(ev.shop)}</h2>

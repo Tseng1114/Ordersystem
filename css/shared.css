@@ -1,61 +1,98 @@
 :root {
-  --text-primary: #1e293b;
+  /* 統一與首頁、內頁一致的核心變數 */
+  --navy: #1e293b;
   --accent: #f59e0b;
-  --bg-body: #f1f5f9;
-  --radius: 16px;
+  --accent-light: #fff7ed;
+  --bg-body: #f8fafc;
+  --white: #ffffff;
+  --border-color: #1e293b; /* 邊框統一使用深藍 */
+  --radius: 24px;
 }
 
 .hidden {
   display: none !important;
 }
 
+/* 標題樣式優化：加入橘色裝飾線底座 */
 .page-title {
   text-align: center;
-  font-size: 1.8rem;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
   font-weight: 800;
-  margin-bottom: 28px;
-  letter-spacing: -0.02em;
+  margin-bottom: 36px;
+  color: var(--navy);
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 15%;
+  width: 70%;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: 0.6;
+}
+
+/* 標籤樣式：加入硬邊框感 */
 .badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1.5px solid;
+  padding: 6px 14px;
+  border-radius: 12px; /* 從膠囊狀改為稍微方潤的感覺 */
+  font-size: 0.8rem;
+  font-weight: 800;
+  border: 2px solid var(--navy);
+  box-shadow: 2px 2px 0 var(--navy);
 }
+
 .badge-open {
   background: #dcfce7;
   color: #15803d;
-  border-color: #86efac;
 }
+
 .badge-closed {
   background: #fee2e2;
   color: #dc2626;
-  border-color: #fca5a5;
 }
 
+/* 分隔線：加粗並增加間距 */
 .divider {
   border: none;
-  border-top: 2px dashed #e2e8f0;
-  margin: 24px 0;
+  border-top: 2px dashed #cbd5e1;
+  margin: 32px 0;
+}
+
+/* 頁尾樣式：與首頁 index_style.css 保持同步 */
+.footer {
+  text-align: center;
+  padding: 48px 24px;
+  font-size: 0.85rem;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footer p + p {
+  margin-top: 6px;
+}
+
+.footer .disclaimer {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  max-width: 800px;
+  margin: 8px auto 0;
 }
 
 .empty-state {
   text-align: center;
   color: #94a3b8;
-  padding: 2.5rem 0;
-  font-size: 0.93rem;
-}
-
-.footer {
-  text-align: center;
-  padding: 32px 24px;
-  font-size: 0.78rem;
-  color: #64748b;
-  border-top: 1px solid #e2e8f0;
-}
-.footer p + p {
-  margin-top: 4px;
+  padding: 4rem 20px;
+  font-size: 1rem;
+  background: var(--white);
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius);
+  margin: 20px 0;
 }

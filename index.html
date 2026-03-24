@@ -76,9 +76,8 @@
         .map(
           (a) => `
         <div class="announce-item">
-          <div class="announce-dot"></div>
-          <div>
-            <div class="announce-date">${a.date}</div>
+          <div class="announce-date">${a.date}</div>
+          <div class="announce-content">
             ${a.text}
           </div>
         </div>`,
@@ -93,14 +92,24 @@
         fabTop.classList.toggle("show", window.scrollY > 300);
       });
 
-      const fabLine = document.getElementById("fabLine");
-      const lineModal = document.getElementById("lineModal");
-      const modalClose = document.getElementById("modalClose");
-      fabLine.onclick = () => lineModal.classList.add("show");
-      modalClose.onclick = () => lineModal.classList.remove("show");
-      lineModal.addEventListener("click", (e) => {
-        if (e.target === lineModal) lineModal.classList.remove("show");
-      });
+    const fabLine = document.getElementById("fabLine");
+    const lineModal = document.getElementById("lineModal");
+    const modalClose = document.getElementById("modalClose");
+
+    fabLine.addEventListener("click", () => {
+        console.log("LINE button clicked");
+        lineModal.classList.add("show");
+    });
+
+    modalClose.addEventListener("click", () => {
+        lineModal.classList.remove("show");
+    });
+
+    lineModal.addEventListener("click", (e) => {
+        if (e.target === lineModal) {
+            lineModal.classList.remove("show");
+        }
+    });
     </script>
   </body>
 </html>

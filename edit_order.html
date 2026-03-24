@@ -222,8 +222,8 @@
           document.getElementById("tabOrders").insertAdjacentElement("afterbegin", banner);
         }
         if (isLocked) {
-          banner.textContent = "此訂單已截止或關閉，無法新增或修改訂單內容。";
-          banner.classList.add("show");
+          banner.textContent ="此訂單已截止或關閉，無法新增或修改訂單內容。";
+          banner.style.display = "block";
           document.getElementById("showAddRowBtn").style.display = "none";
         } else {
           banner.classList.remove("show");

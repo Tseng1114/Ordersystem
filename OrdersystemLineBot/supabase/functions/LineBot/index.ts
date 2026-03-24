@@ -90,7 +90,7 @@ const COMMANDS: Array<{ keywords: string[]; handler: Handler }> = [
   },
   {
     keywords: ['官網', 'website', '網站'],
-    handler: () => '曾可愛家族點餐系統：\nhttps://tseng1114.github.io/Ordersystem/',
+    handler: () => '曾可愛家族點餐系統：\nhttps://ordersystem-46n.pages.dev/',
   },
   {
     keywords: ['訂單', 'order'],

@@ -276,8 +276,8 @@
 
         const expiredBanner = document.getElementById("expiredBanner");
         if (isLocked) {
-          expiredBanner.textContent = "此訂單已截止，目前不能新增、修改或刪除內容。";
-          expiredBanner.classList.add("show");
+          banner.textContent ="此訂單已截止或關閉，無法新增或修改訂單內容。";
+          banner.style.display = "block";
           document.getElementById("showAddRowBtn").style.display = "none";
         } else {
           expiredBanner.classList.remove("show");

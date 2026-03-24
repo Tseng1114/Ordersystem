@@ -1106,7 +1106,6 @@ export const SHOPS = {
   },
 };
 
-// Fill `menuItems` to enable per-shop dropdown options on the order page.
 export function getShopList(category) {
   return Object.values(SHOPS)
     .filter((shop) => shop.category === category)

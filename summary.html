@@ -16,7 +16,11 @@
     <div id="navbar-root"></div>
 
     <div class="marquee-bar">
-      <div class="marquee-content">系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！</div>
+      <div class="marquee-content">
+        ⚠️
+        系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！
+        ⚠️
+      </div>
     </div>
 
     <div id="loadingOverlay">
@@ -152,9 +156,11 @@
           displayEventCode = getEventCode(ev.id);
           targetOrderId.innerText = displayEventCode;
           document.getElementById("eventInfo").innerHTML = `
-            <div class="meta-container">
-              <h2 class="meta-shop">${esc(ev.shop)}</h2>
-              <p class="meta-deadline">截止時間：${esc(formatTWTime(ev.deadline))}</p>
+            <div class="meta-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1.5px solid #1e293b; margin-bottom: 25px;">
+              <h2 style="text-align:center; margin:0 0 10px 0;">${ev.shop}</h2>
+              <p style="text-align:center; color:#e11d48; font-weight:bold; margin: 5px 0;">
+                截止時間：${formatTWTime(ev.deadline)}
+              </p>
             </div>`;
 
           const listEl = document.getElementById("byPersonList");
@@ -178,8 +184,8 @@
                   .map(
                     (o) => `
                 <li>
-                  <span>${esc(o.name)} (${esc(o.suger)}／${esc(o.ice)})</span>
-                  <span class="order-qty">x${esc(o.qty)}</span>
+                  <span>${o.name} (${o.suger}／${o.ice})</span>
+                  <span style="font-weight:bold;">x${o.qty}</span>
                 </li>
               `,
                   )

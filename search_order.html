@@ -6,7 +6,10 @@
     <title>查詢訂單 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/navbar_style.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
@@ -21,7 +24,7 @@
     <div id="loadingOverlay">
       <div class="spinner-box">
         <div class="spinner"></div>
-        <div class="spinner-text">查詢中，請稍候...</div>
+        <div class="spinner-text">查詢中...</div>
       </div>
     </div>
 
@@ -29,15 +32,15 @@
       <h1 class="page-title">查詢訂單</h1>
 
       <div class="search-card">
-        <label for="searchInput">輸入訂單編號</label>
+        <label for="searchInput">輸入訂單代碼</label>
         <div class="search-group">
           <input
             id="searchInput"
             class="search-input"
             type="text"
-            placeholder="請貼上訂單編號..."
+            placeholder="請輸入短代碼或完整訂單編號"
           />
-          <button id="searchBtn" class="search-btn">輸入</button>
+          <button id="searchBtn" class="search-btn">查詢</button>
         </div>
       </div>
 
@@ -55,7 +58,7 @@
           <hr class="divider" />
           <div id="resByPerson"></div>
           <div class="result-footer">
-            <button class="btn btn-ghost" id="clearBtn">✕ 清除</button>
+            <button class="btn btn-ghost" id="clearBtn">清除結果</button>
             <a id="editLink" class="btn btn-ghost" href="#">修改訂單</a>
             <a id="summaryLink" class="btn btn-dark" href="#">完整彙整</a>
           </div>
@@ -66,11 +69,19 @@
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
       </div>
     </footer>
 
     <script type="module">
+      import { initNavbar } from "./navbar.js";
+      import { supabase } from "./config.js";
+      import { getEventCode, resolveEventId } from "./event-utils.js";
+
+      initNavbar("lookup");
+
       function esc(str) {
         return String(str ?? "")
           .replace(/&/g, "&amp;")
@@ -80,19 +91,14 @@
           .replace(/'/g, "&#39;");
       }
 
-
-      import { initNavbar } from "./navbar.js";
-      import { supabase } from "./config.js";
-      initNavbar("lookup");
-
-      function showLoading(s) {
-        document.getElementById("loadingOverlay").style.display = s
+      function showLoading(show) {
+        document.getElementById("loadingOverlay").style.display = show
           ? "flex"
           : "none";
       }
 
       function formatTW(iso) {
-        if (!iso) return "無期限";
+        if (!iso) return "未設定";
         return new Date(iso).toLocaleString("zh-TW", {
           year: "numeric",
           month: "2-digit",
@@ -105,15 +111,16 @@
       }
 
       function render(ev) {
+        const shortCode = getEventCode(ev.id);
         document.getElementById("resShopName").textContent = ev.shop;
-        document.getElementById("resEventId").textContent = ev.id;
+        document.getElementById("resEventId").textContent = shortCode;
         document.getElementById("resDeadline").textContent = formatTW(
           ev.deadline,
         );
         document.getElementById("summaryLink").href =
-          `summary.html?event=${ev.id}`;
+          `summary.html?event=${shortCode}`;
         document.getElementById("editLink").href =
-          `edit_order.html?event=${ev.id}`;
+          `edit_order.html?event=${shortCode}`;
 
         const expired = ev.deadline && new Date(ev.deadline) < new Date();
         const badge = document.getElementById("resBadge");
@@ -121,55 +128,71 @@
         badge.className = "badge " + (expired ? "badge-closed" : "badge-open");
 
         const groups = {};
-        (ev.orders || []).forEach((o) => {
-          if (!groups[o.customer]) groups[o.customer] = [];
-          groups[o.customer].push(o);
+        (ev.orders || []).forEach((order) => {
+          if (!groups[order.customer]) groups[order.customer] = [];
+          groups[order.customer].push(order);
         });
-        const con = document.getElementById("resByPerson");
+
+        const container = document.getElementById("resByPerson");
         if (!Object.keys(groups).length) {
-          con.innerHTML = '<div class="empty-state">目前尚無人下單。</div>';
+          container.innerHTML = '<div class="empty-state">目前還沒有訂單。</div>';
         } else {
-          con.innerHTML = Object.entries(groups)
+          container.innerHTML = Object.entries(groups)
             .map(
               ([name, items]) => `
-            <div class="person-block">
-              <div class="person-name">${esc(name)}</div>
-              ${items
-                .map(
-                  (o) => `
-                <div class="order-item">
-                  <div>
-                    <div class="order-item-name">${esc(o.name)}</div>
-                    <div class="order-item-spec">${esc(o.suger || o.spec_a || "")}／${esc(o.ice || o.spec_b || "")}</div>
-                  </div>
-                  <span class="order-item-qty">x${esc(o.qty)}</span>
-                </div>`,
-                )
-                .join("")}
-            </div>`,
+                <div class="person-block">
+                  <div class="person-name">${esc(name)}</div>
+                  ${items
+                    .map(
+                      (order) => `
+                        <div class="order-item">
+                          <div>
+                            <div class="order-item-name">${esc(order.name)}</div>
+                            <div class="order-item-spec">${esc(order.suger || order.spec_a || "")} / ${esc(order.ice || order.spec_b || "")}</div>
+                          </div>
+                          <span class="order-item-qty">x${esc(order.qty)}</span>
+                        </div>
+                      `,
+                    )
+                    .join("")}
+                </div>
+              `,
             )
             .join("");
         }
+
         document.getElementById("resultArea").style.display = "block";
       }
 
       async function doSearch() {
         const id = document.getElementById("searchInput").value.trim();
-        if (!id) return alert("請輸入訂單編號");
+        if (!id) {
+          alert("請先輸入訂單代碼");
+          return;
+        }
+
         showLoading(true);
         try {
+          const resolvedId = await resolveEventId(supabase, id);
+          if (!resolvedId) {
+            alert("找不到這筆訂單，請確認代碼是否正確。");
+            return;
+          }
+
           const { data, error } = await supabase
             .from("events")
             .select("*, orders(*)")
-            .eq("id", id)
+            .eq("id", resolvedId)
             .single();
+
           if (error || !data) {
-            alert("找不到此訂單，請確認編號是否正確。");
+            alert("找不到這筆訂單，請確認代碼是否正確。");
             return;
           }
+
           render(data);
-        } catch (e) {
-          alert("查詢失敗：" + e.message);
+        } catch (error) {
+          alert(`查詢失敗：${error.message}`);
         } finally {
           showLoading(false);
         }
@@ -178,20 +201,24 @@
       document.getElementById("searchBtn").onclick = doSearch;
       document
         .getElementById("searchInput")
-        .addEventListener("keypress", (e) => {
-          if (e.key === "Enter") doSearch();
+        .addEventListener("keypress", (event) => {
+          if (event.key === "Enter") doSearch();
         });
+
       document.getElementById("clearBtn").onclick = () => {
         document.getElementById("resultArea").style.display = "none";
         document.getElementById("searchInput").value = "";
       };
+
       document.getElementById("copyIdBtn").onclick = () => {
         navigator.clipboard
           .writeText(document.getElementById("resEventId").textContent)
           .then(() => {
             const btn = document.getElementById("copyIdBtn");
-            btn.textContent = "✓";
-            setTimeout(() => (btn.textContent = "複製"), 1800);
+            btn.textContent = "已複製";
+            setTimeout(() => {
+              btn.textContent = "複製";
+            }, 1800);
           });
       };
 

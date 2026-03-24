@@ -3,3 +3,7 @@ dist/
 .env
 .vscode/
 .idea/
+.venv/
+.venv-ocr/
+__pycache__/
+*.py[cod]

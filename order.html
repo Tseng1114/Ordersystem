@@ -10,6 +10,35 @@
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      .success-screen {
+        display: none;
+        text-align: center;
+        padding: 48px 20px 32px;
+      }
+      .success-svg-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .success-screen h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 8px;
+      }
+      .success-screen p {
+        color: #64748b;
+        margin: 0 0 28px;
+        font-size: 0.95rem;
+      }
+      .success-screen .actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    </style>
   </head>
   <body>
     <div class="wrap">
@@ -46,35 +75,26 @@
         <section id="menuSection" class="menu-section hidden">
           <div class="menu-section-head">
             <h2 class="menu-section-title">菜單</h2>
-            <a
-              id="menuOpenLink"
-              class="menu-open-link"
-              href="menu.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              另開菜單
-            </a>
+            <a id="menuOpenLink" class="menu-open-link" href="menu.html" target="_blank" rel="noreferrer">另開菜單</a>
           </div>
           <div class="menu-frame-wrap">
-            <iframe
-              id="menuEmbedFrame"
-              class="menu-embed-frame"
-              title="店家菜單"
-              loading="lazy"
-            ></iframe>
+            <iframe id="menuEmbedFrame" class="menu-embed-frame" title="店家菜單" loading="lazy"></iframe>
           </div>
         </section>
 
         <div id="successScreen" class="success-screen">
-          <div class="success-icon">✓</div>
+          <div class="success-svg-wrap">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle class="success-circle" cx="40" cy="40" r="36" fill="#dcfce7" stroke="#15803d" stroke-width="2.5"/>
+              <polyline class="success-check" points="24,41 35,52 56,30"
+                stroke="#15803d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
           <h2>訂單送出成功</h2>
           <p>你可以回到首頁，或直接查看這張訂單的彙整結果。</p>
           <div class="actions">
             <a href="index.html" class="back-home">回首頁</a>
-            <button type="button" class="primary" id="goSummaryBtn">
-              查看訂單彙整
-            </button>
+            <button type="button" class="primary" id="goSummaryBtn">查看訂單彙整</button>
           </div>
         </div>
       </div>
@@ -90,9 +110,7 @@
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">
-          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
-        </p>
+        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
       </div>
     </footer>
 
@@ -110,97 +128,47 @@
       let isExpired = false;
       let itemListCounter = 0;
 
-      const SUGAR_OPTIONS = [
-        "正常糖",
-        "少糖",
-        "半糖",
-        "微糖",
-        "二分糖",
-        "一分糖",
-        "無糖",
-      ];
-
-      const ICE_OPTIONS = [
-        "正常冰",
-        "少冰",
-        "微冰",
-        "去冰",
-        "完全去冰",
-        "溫",
-        "熱",
-        "常溫",
-      ];
+      const SUGAR_OPTIONS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
+      const ICE_OPTIONS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
 
       function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show
-          ? "flex"
-          : "none";
+        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
       }
 
       function buildSelect(className, options, selectedValue) {
-        return `
-          <select class="${className}">
-            ${options
-              .map(
-                (option) =>
-                  `<option${option === selectedValue ? " selected" : ""}>${option}</option>`,
-              )
-              .join("")}
-          </select>
-        `;
+        return `<select class="${className}">${options.map((o) =>
+          `<option${o === selectedValue ? " selected" : ""}>${o}</option>`).join("")}</select>`;
       }
 
       function buildItemField() {
         const shopMeta = currentShop?.[1];
         const menuItems = shopMeta?.menuItems || [];
-
         if (menuItems.length > 0) {
           itemListCounter += 1;
           const listId = `item-suggestions-${itemListCounter}`;
           return `
-            <input
-              class="item-input"
-              list="${listId}"
-              placeholder="可輸入搜尋或直接輸入其他品項"
-              required
-            >
+            <input class="item-input" list="${listId}"
+              placeholder="可輸入搜尋或直接輸入其他品項" required>
             <datalist id="${listId}">
-              ${menuItems
-                .map((item) => `<option value="${item}"></option>`)
-                .join("")}
-            </datalist>
-          `;
+              ${menuItems.map((item) => `<option value="${item}"></option>`).join("")}
+            </datalist>`;
         }
-
-        return `
-          <input
-            class="item-input"
-            placeholder="請輸入品項"
-            required
-          >
-        `;
+        return `<input class="item-input" placeholder="請輸入品項" required>`;
       }
 
       function buildAddonField() {
         const shopMeta = currentShop?.[1];
         const addonOptions = shopMeta?.addonOptions || ["無"];
-
         if (currentCategory === "food") {
           return '<input class="addon-input" placeholder="備註 / 規格">';
         }
-
-        return `
-          <select class="addon-input">
-            ${addonOptions
-              .map((option) => `<option value="${option}">${option}</option>`)
-              .join("")}
-          </select>
-        `;
+        return `<select class="addon-input">${addonOptions.map((o) =>
+          `<option value="${o}">${o}</option>`).join("")}</select>`;
       }
 
       function combineItemAndAddon(itemName, addonName) {
         const addon = addonName?.trim();
-        if (!addon || addon === "無") return itemName;
+        if (!addon || addon === "無" || addon === "不加料") return itemName;
         return `${itemName}（加料：${addon}）`;
       }
 
@@ -209,46 +177,25 @@
         const frame = document.getElementById("menuEmbedFrame");
         const link = document.getElementById("menuOpenLink");
         const [shopKey, shopMeta] = currentShop || [];
-
-        if (!shopMeta) {
-          section.classList.add("hidden");
-          frame.removeAttribute("src");
-          return;
-        }
-
+        if (!shopMeta) { section.classList.add("hidden"); frame.removeAttribute("src"); return; }
         frame.src = `menu.html?shop=${shopKey}&embed=1`;
         link.href = `menu.html?shop=${shopKey}`;
         section.classList.remove("hidden");
       }
 
       async function ensureEvent() {
-        if (!rawEventId) {
-          alert("無效訂單編號");
-          return;
-        }
-
+        if (!rawEventId) { alert("無效訂單編號"); return; }
         showLoading(true);
         try {
           resolvedEventId = await resolveEventId(supabase, rawEventId);
-          if (!resolvedEventId) {
-            alert("找不到這筆訂單");
-            return;
-          }
+          if (!resolvedEventId) { alert("找不到這筆訂單"); return; }
 
           const { data: ev, error } = await supabase
-            .from("events")
-            .select("*")
-            .eq("id", resolvedEventId)
-            .single();
-
-          if (error || !ev) {
-            alert("找不到這筆訂單");
-            return;
-          }
+            .from("events").select("*").eq("id", resolvedEventId).single();
+          if (error || !ev) { alert("找不到這筆訂單"); return; }
 
           currentCategory = ev.category || "drink";
           currentShop = findShopByName(ev.shop, currentCategory);
-
           document.querySelector(".page-title").textContent = `${ev.shop} - 下單`;
 
           if (currentCategory === "food") {
@@ -277,40 +224,30 @@
       function addRow() {
         const tr = document.createElement("tr");
         let middleCols = "";
-
         if (currentCategory === "food") {
           middleCols = `
             <td data-label="備註"><input class="addon-input" placeholder="備註 / 規格"></td>
             <td data-label="規格一"><input class="spec-a-input" placeholder="例如：大份"></td>
-            <td data-label="規格二"><input class="spec-b-input" placeholder="例如：加辣"></td>
-          `;
+            <td data-label="規格二"><input class="spec-b-input" placeholder="例如：加辣"></td>`;
         } else {
           middleCols = `
             <td data-label="加料">${buildAddonField()}</td>
             <td data-label="糖度">${buildSelect("spec-a-input", SUGAR_OPTIONS, "無糖")}</td>
-            <td data-label="冰量">${buildSelect("spec-b-input", ICE_OPTIONS, "完全去冰")}</td>
-          `;
+            <td data-label="冰量">${buildSelect("spec-b-input", ICE_OPTIONS, "完全去冰")}</td>`;
         }
-
         tr.innerHTML = `
           <td data-label="姓名"><input class="who" placeholder="姓名" required></td>
           <td data-label="品項">${buildItemField()}</td>
           ${middleCols}
           <td data-label="數量"><input class="qty" type="number" min="1" value="1"></td>
-          <td><button type="button" class="del-btn" onclick="this.closest('tr').remove()">刪除</button></td>
-        `;
-
+          <td><button type="button" class="del-btn" onclick="this.closest('tr').remove()">刪除</button></td>`;
         document.querySelector("#itemsTbl tbody").appendChild(tr);
       }
 
       async function submitOrder() {
         if (isExpired) return;
-
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
-        if (trs.length === 0) {
-          alert("請先新增至少一筆訂單");
-          return;
-        }
+        if (trs.length === 0) { alert("請先新增至少一筆訂單"); return; }
 
         const rows = trs.map((tr) => ({
           event_id: resolvedEventId,
@@ -325,8 +262,7 @@
         }));
 
         if (rows.some((row) => !row.customer || !row.name)) {
-          alert("請完整填寫姓名與品項");
-          return;
+          alert("請完整填寫姓名與品項"); return;
         }
 
         showLoading(true);
@@ -336,7 +272,13 @@
 
           document.getElementById("orderForm").style.display = "none";
           document.getElementById("menuSection").style.display = "none";
-          document.getElementById("successScreen").style.display = "block";
+          const screen = document.getElementById("successScreen");
+          screen.style.display = "block";
+          screen.querySelectorAll(".success-circle, .success-check").forEach((el) => {
+            el.style.animation = "none";
+            el.offsetHeight;
+            el.style.animation = "";
+          });
           document.getElementById("goSummaryBtn").onclick = () => {
             location.href = `summary.html?event=${resolvedEventId}`;
           };

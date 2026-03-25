@@ -41,18 +41,10 @@
 
         <div id="result" class="hidden">
           <hr class="divider" />
-
           <button id="directGoBtn" type="button">直接進入點餐</button>
-
           <hr class="divider" />
-
           <label>分享給其他人</label>
-          <textarea
-            id="shareMsg"
-            class="share-textarea"
-            readonly
-            rows="5"
-          ></textarea>
+          <textarea id="shareMsg" class="share-textarea" readonly rows="5"></textarea>
           <div class="actions action-gap">
             <button class="primary" id="copyBtn" type="button">複製分享訊息</button>
           </div>
@@ -78,46 +70,9 @@
       import { supabase } from "./config.js";
       import { getEventCode } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
-      initNavbar();
+      import { SHOPS } from "./shop-data.js";
 
-      const drinkShops = [
-        "迷客夏",
-        "大茗本味製茶堂",
-        "珍煮丹",
-        "得正",
-        "50嵐",
-        "米里米里",
-        "麻古茶坊",
-        "八曜和茶",
-        "有飲",
-        "青山茶行",
-        "清心福全",
-        "一沐日",
-        "波哥茶飲",
-        "双生綠豆沙牛奶",
-        "來日方茶",
-        "茶湯會",
-        "老賴茶棧",
-        "可不可熟成紅茶",
-        "宣福居",
-        "鶴茶樓",
-        "龜記",
-        "再睡5分鐘",
-      ];
-      const foodShops = [
-        "露西媽媽",
-        "桂記手工水餃",
-        "老曾牛肉麵",
-        "劉家鴨肉",
-        "作伙來",
-        "豐當歸鴨",
-        "牛族",
-        "丹丹漢堡",
-        "漢堡王",
-        "麥當勞",
-        "肯德基",
-        "阿珍炸雞",
-      ];
+      initNavbar();
 
       let currentCategory = "drink";
       const shopSelect = document.querySelector("#shopSelect");
@@ -128,14 +83,15 @@
 
       function updateShopList(category) {
         currentCategory = category;
-        const list = category === "drink" ? drinkShops : foodShops;
         shopSelect.innerHTML = '<option value="" selected>請選擇店家</option>';
-        list.forEach((shop) => {
-          const opt = document.createElement("option");
-          opt.value = shop;
-          opt.textContent = shop;
-          shopSelect.appendChild(opt);
-        });
+        Object.entries(SHOPS)
+          .filter(([, s]) => s.category === category)
+          .forEach(([, s]) => {
+            const opt = document.createElement("option");
+            opt.value = s.name;
+            opt.textContent = s.name;
+            shopSelect.appendChild(opt);
+          });
         shopSelect.innerHTML += '<option value="__other">其他（自訂）</option>';
       }
 
@@ -171,15 +127,13 @@
         try {
           const { data, error } = await supabase
             .from("events")
-            .insert([
-              {
-                title: shop + " 訂單",
-                shop: shop,
-                category: currentCategory,
-                deadline: deadline ? new Date(deadline).toISOString() : null,
-                status: "open",
-              },
-            ])
+            .insert([{
+              title: shop + " 訂單",
+              shop,
+              category: currentCategory,
+              deadline: deadline ? new Date(deadline).toISOString() : null,
+              status: "open",
+            }])
             .select();
 
           if (error) throw error;
@@ -196,14 +150,12 @@
           }
 
           const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n 點餐連結：${orderURL.toString()}`;
-
           document.querySelector("#shareMsg").value = finalMsg;
           document.querySelector("#result").classList.remove("hidden");
 
           document.getElementById("directGoBtn").onclick = () => {
             location.href = orderURL.toString();
           };
-
           document.querySelector("#copyBtn").onclick = async () => {
             await navigator.clipboard.writeText(finalMsg);
             alert("分享訊息已複製到剪貼簿！");

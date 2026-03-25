@@ -6,26 +6,31 @@ export async function resolveEventId(supabase, rawId) {
   const value = String(rawId || "").trim();
   if (!value) return null;
 
-  if (value.includes("-") || value.length > 8) {
-    return value;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(value)) return value;
+
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+
+    const matches = data.filter(item => 
+      item.id.toLowerCase().startsWith(value.toLowerCase())
+    );
+
+    if (matches.length === 0) return null;
+    if (matches.length > 1) {
+      alert("代碼重複，請使用完整連結");
+      return null;
+    }
+
+    return matches[0].id;
+  } catch (err) {
+    console.error("解析失敗:", err);
+    return null;
   }
-
-  const { data, error } = await supabase
-    .from("events")
-    .select("id")
-    .limit(500);
-
-  if (error) throw error;
-  if (!data || data.length === 0) return null;
-
-  const matches = data.filter((row) =>
-    row.id.replace(/-/g, "").toLowerCase().startsWith(value.toLowerCase())
-  );
-
-  if (matches.length === 0) return null;
-  if (matches.length > 1) {
-    throw new Error("訂單代碼重複，請改用完整訂單編號");
-  }
-
-  return matches[0].id;
 }

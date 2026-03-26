@@ -269,3 +269,13 @@ body {
     width: 100%;
   }
 }
+
+.page-wrap > .page-title.anim-fade-up,
+.page-wrap > .search-card.anim-fade-up,
+#resultArea > .result-card.anim-scale-in,
+#resultArea > .result-card.anim-fade-up {
+  animation: none !important;
+  opacity: 1 !important;
+  scale: 1 !important;
+  translate: 0 0 !important;
+}

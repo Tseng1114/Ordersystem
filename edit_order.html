@@ -7,11 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/edit_order_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
@@ -27,8 +28,8 @@
 
     <div id="lookupArea">
       <div class="lookup-wrap">
-        <h1 class="page-title">修改訂單</h1>
-        <div class="lookup-card">
+        <h1 class="page-title anim-fade-up">修改訂單</h1>
+        <div class="lookup-card anim-fade-up anim-fade-up-d1">
           <label for="eventIdInput">輸入訂單代碼</label>
           <div class="lookup-row">
             <input
@@ -45,7 +46,7 @@
 
     <div id="editArea" style="display: none">
       <div class="edit-wrap">
-        <div class="event-info-bar">
+        <div class="event-info-bar anim-fade-up">
           <div>
             <h2 id="infoShop">-</h2>
             <div class="meta" id="infoDeadline">-</div>
@@ -53,7 +54,7 @@
           <span id="infoBadge" class="badge badge-open">進行中</span>
         </div>
 
-        <div class="tabs">
+        <div class="tabs anim-fade-up anim-fade-up-d1">
           <button class="tab-btn active" type="button">訂單明細</button>
         </div>
 
@@ -113,8 +114,11 @@
       import { supabase } from "./config.js";
       import { resolveEventId } from "./event-utils.js";
       import { findShopByName } from "./shop-data.js";
+      import { showToast, overrideAlert, initRipple } from "./toast.js";
 
       initNavbar("edit");
+      overrideAlert();
+      initRipple(".btn-primary, .btn-ghost, .btn-danger, .btn-save-row");
 
       const SUGAR_OPTS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
       const ICE_OPTS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
@@ -223,7 +227,6 @@
         badge.textContent = locked ? "已截止" : "進行中";
         badge.className = "badge " + (locked ? "badge-closed" : "badge-open");
 
-        // ── BUG FIX: was `banner` (undefined), now `expiredBanner` ──
         const expiredBanner = document.getElementById("expiredBanner");
         if (locked) {
           expiredBanner.textContent = "此訂單已截止或關閉，無法新增或修改訂單內容。";
@@ -238,7 +241,14 @@
         renderOrders(locked);
 
         document.getElementById("lookupArea").style.display = "none";
-        document.getElementById("editArea").style.display = "block";
+        const editArea = document.getElementById("editArea");
+        editArea.style.display = "block";
+        editArea.querySelectorAll(".anim-fade-up").forEach((el, i) => {
+          el.style.animation = "none";
+          el.offsetHeight;
+          el.style.animation = "";
+          el.style.animationDelay = `${i * 60}ms`;
+        });
       }
 
       function renderOrders(locked = false) {
@@ -252,13 +262,14 @@
         }
 
         list.innerHTML = "";
-        orders.forEach((order) => {
+        orders.forEach((order, oi) => {
           const specA = order.suger || order.spec_a || "";
           const specB = order.ice || order.spec_b || "";
           const drinkMode = isDrinkEvent();
 
           const row = document.createElement("div");
-          row.className = "order-row";
+          row.className = "order-row anim-fade-up";
+          row.style.animationDelay = `${oi * 40}ms`;
           row.dataset.id = order.id;
           row.innerHTML = `
             <div class="row-view">
@@ -326,22 +337,23 @@
 
       async function loadEvent() {
         const id = document.getElementById("eventIdInput").value.trim();
-        if (!id) { alert("請先輸入訂單代碼"); return; }
+        if (!id) { showToast("請先輸入訂單代碼", "warning"); return; }
 
         showLoading(true);
         try {
           const resolvedId = await resolveEventId(supabase, id);
-          if (!resolvedId) { alert("找不到這筆訂單，請確認代碼是否正確。"); return; }
+          if (!resolvedId) { showToast("找不到這筆訂單，請確認代碼是否正確。", "error"); return; }
 
           const { data, error } = await supabase
             .from("events").select("*, orders(*)").eq("id", resolvedId).single();
 
-          if (error || !data) { alert("找不到這筆訂單，請確認代碼是否正確。"); return; }
+          if (error || !data) { showToast("找不到這筆訂單，請確認代碼是否正確。", "error"); return; }
 
           eventData = data;
           renderEditArea();
+          showToast(`已讀取 ${data.shop} 的訂單`, "success");
         } catch (error) {
-          alert(`讀取失敗：${error.message}`);
+          showToast(`讀取失敗：${error.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }
@@ -354,7 +366,7 @@
         const specB = row.querySelector(".f-specb").value || "";
         const qty = parseInt(row.querySelector(".f-qty").value, 10) || 1;
 
-        if (!customer || !name) { alert("請完整填寫姓名與品項"); return; }
+        if (!customer || !name) { showToast("請完整填寫姓名與品項", "warning"); return; }
 
         showLoading(true);
         try {
@@ -367,8 +379,9 @@
           const index = eventData.orders.findIndex((item) => item.id === orderId);
           if (index !== -1) eventData.orders[index] = data;
           renderOrders(isLocked());
+          showToast("訂單已儲存", "success");
         } catch (error) {
-          alert(`儲存失敗：${error.message}`);
+          showToast(`儲存失敗：${error.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }
@@ -383,8 +396,9 @@
           if (error) throw error;
           eventData.orders = eventData.orders.filter((item) => item.id !== orderId);
           renderOrders(isLocked());
+          showToast("已刪除", "success");
         } catch (error) {
-          alert(`刪除失敗：${error.message}`);
+          showToast(`刪除失敗：${error.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }
@@ -397,7 +411,7 @@
         const specB = document.getElementById("newSpecB").value || "";
         const qty = parseInt(document.getElementById("newQty").value, 10) || 1;
 
-        if (!customer || !name) { alert("請完整填寫姓名與品項"); return; }
+        if (!customer || !name) { showToast("請完整填寫姓名與品項", "warning"); return; }
 
         showLoading(true);
         try {
@@ -410,8 +424,9 @@
           eventData.orders.push(data);
           clearAddRow();
           renderOrders(isLocked());
+          showToast("新增成功", "success");
         } catch (error) {
-          alert(`新增失敗：${error.message}`);
+          showToast(`新增失敗：${error.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }

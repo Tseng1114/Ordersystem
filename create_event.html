@@ -4,20 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>建立訂單 - 曾可愛家族點餐系統</title>
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/create_event_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
     <div id="navbar-root"></div>
 
     <div class="wrap">
-      <h1 class="page-title">建立訂單</h1>
+      <h1 class="page-title anim-fade-up">建立訂單</h1>
 
-      <div id="createCard" class="card">
+      <div id="createCard" class="card anim-fade-up anim-fade-up-d1">
         <label>選擇訂單類型</label>
         <div class="category-toggle">
           <button type="button" id="btnDrink" class="toggle-btn active">飲料區</button>
@@ -71,8 +72,11 @@
       import { getEventCode } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       import { SHOPS } from "./shop-data.js";
+      import { showToast, overrideAlert, initRipple } from "./toast.js";
 
       initNavbar();
+      overrideAlert();
+      initRipple(".primary, .back-home, .toggle-btn, #directGoBtn");
 
       let currentCategory = "drink";
       const shopSelect = document.querySelector("#shopSelect");
@@ -121,9 +125,12 @@
         const shop = sel === "__other" ? shopOther.value.trim() : sel.trim();
         const deadline = document.querySelector("#deadline").value;
 
-        if (!shop) return alert("請選擇店家或輸入店名");
+        if (!shop) {
+          showToast("請選擇店家或輸入店名", "warning");
+          return;
+        }
 
-        document.getElementById("loadingOverlay").style.display = "block";
+        document.getElementById("loadingOverlay").style.display = "flex";
         try {
           const { data, error } = await supabase
             .from("events")
@@ -151,17 +158,21 @@
 
           const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n 點餐連結：${orderURL.toString()}`;
           document.querySelector("#shareMsg").value = finalMsg;
-          document.querySelector("#result").classList.remove("hidden");
+          const resultEl = document.querySelector("#result");
+          resultEl.classList.remove("hidden");
+          resultEl.classList.add("anim-fade-up");
+
+          showToast(`訂單建立成功！`, "success");
 
           document.getElementById("directGoBtn").onclick = () => {
             location.href = orderURL.toString();
           };
           document.querySelector("#copyBtn").onclick = async () => {
             await navigator.clipboard.writeText(finalMsg);
-            alert("分享訊息已複製到剪貼簿！");
+            showToast("分享訊息已複製到剪貼簿！", "success");
           };
         } catch (err) {
-          alert("建立失敗：" + err.message);
+          showToast("建立失敗：" + err.message, "error", 5000);
         } finally {
           document.getElementById("loadingOverlay").style.display = "none";
         }

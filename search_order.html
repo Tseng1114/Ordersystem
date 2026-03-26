@@ -6,15 +6,13 @@
     <title>查詢訂單 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/search_order_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
@@ -29,9 +27,9 @@
     </div>
 
     <div class="page-wrap">
-      <h1 class="page-title">查詢訂單</h1>
+      <h1 class="page-title anim-fade-up">查詢訂單</h1>
 
-      <div class="search-card">
+      <div class="search-card anim-fade-up anim-fade-up-d1">
         <label for="searchInput">輸入訂單代碼</label>
         <div class="search-group">
           <input
@@ -45,7 +43,7 @@
       </div>
 
       <div id="resultArea">
-        <div class="result-card">
+        <div class="result-card anim-scale-in">
           <div class="result-head">
             <h2 id="resShopName"></h2>
             <span id="resBadge" class="badge"></span>
@@ -69,9 +67,7 @@
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">
-          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
-        </p>
+        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
       </div>
     </footer>
 
@@ -79,8 +75,11 @@
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
       import { getEventCode, resolveEventId } from "./event-utils.js";
+      import { showToast, overrideAlert, initRipple } from "./toast.js";
 
       initNavbar("lookup");
+      overrideAlert();
+      initRipple(".search-btn, .btn, .copy-id-btn");
 
       function esc(str) {
         return String(str ?? "")
@@ -92,20 +91,14 @@
       }
 
       function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show
-          ? "flex"
-          : "none";
+        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
       }
 
       function formatTW(iso) {
         if (!iso) return "未設定";
         return new Date(iso).toLocaleString("zh-TW", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hour12: false,
           timeZone: "Asia/Taipei",
         });
       }
@@ -114,13 +107,9 @@
         const shortCode = getEventCode(ev.id);
         document.getElementById("resShopName").textContent = ev.shop;
         document.getElementById("resEventId").textContent = shortCode;
-        document.getElementById("resDeadline").textContent = formatTW(
-          ev.deadline,
-        );
-        document.getElementById("summaryLink").href =
-          `summary.html?event=${shortCode}`;
-        document.getElementById("editLink").href =
-          `edit_order.html?event=${shortCode}`;
+        document.getElementById("resDeadline").textContent = formatTW(ev.deadline);
+        document.getElementById("summaryLink").href = `summary.html?event=${shortCode}`;
+        document.getElementById("editLink").href = `edit_order.html?event=${shortCode}`;
 
         const expired = ev.deadline && new Date(ev.deadline) < new Date();
         const badge = document.getElementById("resBadge");
@@ -138,36 +127,35 @@
           container.innerHTML = '<div class="empty-state">目前還沒有訂單。</div>';
         } else {
           container.innerHTML = Object.entries(groups)
-            .map(
-              ([name, items]) => `
-                <div class="person-block">
-                  <div class="person-name">${esc(name)}</div>
-                  ${items
-                    .map(
-                      (order) => `
-                        <div class="order-item">
-                          <div>
-                            <div class="order-item-name">${esc(order.name)}</div>
-                            <div class="order-item-spec">${esc(order.suger || order.spec_a || "")} / ${esc(order.ice || order.spec_b || "")}</div>
-                          </div>
-                          <span class="order-item-qty">x${esc(order.qty)}</span>
-                        </div>
-                      `,
-                    )
-                    .join("")}
-                </div>
-              `,
-            )
-            .join("");
+            .map(([name, items], gi) => `
+              <div class="person-block anim-fade-up" style="animation-delay:${gi * 50}ms">
+                <div class="person-name">${esc(name)}</div>
+                ${items.map((order) => `
+                  <div class="order-item">
+                    <div>
+                      <div class="order-item-name">${esc(order.name)}</div>
+                      <div class="order-item-spec">${esc(order.suger || order.spec_a || "")} / ${esc(order.ice || order.spec_b || "")}</div>
+                    </div>
+                    <span class="order-item-qty">x${esc(order.qty)}</span>
+                  </div>
+                `).join("")}
+              </div>
+            `).join("");
         }
 
-        document.getElementById("resultArea").style.display = "block";
+        const resultArea = document.getElementById("resultArea");
+        resultArea.style.display = "block";
+        const card = resultArea.querySelector(".result-card");
+        card.style.animation = "none";
+        card.offsetHeight;
+        card.style.animation = "";
+        card.classList.add("anim-scale-in");
       }
 
       async function doSearch() {
         const id = document.getElementById("searchInput").value.trim();
         if (!id) {
-          alert("請先輸入訂單代碼");
+          showToast("請先輸入訂單代碼", "warning");
           return;
         }
 
@@ -175,7 +163,7 @@
         try {
           const resolvedId = await resolveEventId(supabase, id);
           if (!resolvedId) {
-            alert("找不到這筆訂單，請確認代碼是否正確。");
+            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
             return;
           }
 
@@ -186,24 +174,23 @@
             .single();
 
           if (error || !data) {
-            alert("找不到這筆訂單，請確認代碼是否正確。");
+            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
             return;
           }
 
           render(data);
+          showToast("查詢成功", "success");
         } catch (error) {
-          alert(`查詢失敗：${error.message}`);
+          showToast(`查詢失敗：${error.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }
       }
 
       document.getElementById("searchBtn").onclick = doSearch;
-      document
-        .getElementById("searchInput")
-        .addEventListener("keypress", (event) => {
-          if (event.key === "Enter") doSearch();
-        });
+      document.getElementById("searchInput").addEventListener("keypress", (event) => {
+        if (event.key === "Enter") doSearch();
+      });
 
       document.getElementById("clearBtn").onclick = () => {
         document.getElementById("resultArea").style.display = "none";
@@ -215,10 +202,9 @@
           .writeText(document.getElementById("resEventId").textContent)
           .then(() => {
             const btn = document.getElementById("copyIdBtn");
-            btn.textContent = "已複製";
-            setTimeout(() => {
-              btn.textContent = "複製";
-            }, 1800);
+            btn.textContent = "已複製 ✓";
+            showToast("訂單代碼已複製", "success");
+            setTimeout(() => { btn.textContent = "複製"; }, 1800);
           });
       };
 

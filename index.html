@@ -7,21 +7,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap " rel="stylesheet"/>
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/index_style.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
     <div id="navbar-root"></div>
 
     <div class="page-wrap">
-      <div class="title-wrap">
+      <div class="title-wrap anim-fade-up">
         <h1 class="title">曾可愛家族點餐系統</h1>
       </div>
 
-      <div class="announce-card">
+      <div class="announce-card anim-fade-up anim-fade-up-d1">
         <div class="announce-header">系統公告</div>
         <div id="announce-list"></div>
       </div>
@@ -54,7 +55,10 @@
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
+      import { initRipple } from "./toast.js";
+
       initNavbar();
+      initRipple(".fab, .modal-line-btn, .modal-close");
 
       const ANNOUNCEMENTS = [
         {
@@ -77,12 +81,10 @@
       list.innerHTML = ANNOUNCEMENTS.slice()
         .reverse()
         .map(
-          (a) => `
-        <div class="announce-item">
+          (a, i) => `
+        <div class="announce-item anim-fade-up" style="animation-delay:${i * 60 + 120}ms">
           <div class="announce-date">${a.date}</div>
-          <div class="announce-content">
-            ${a.text}
-          </div>
+          <div class="announce-content">${a.text}</div>
         </div>`,
         )
         .join("");
@@ -95,24 +97,23 @@
         fabTop.classList.toggle("show", window.scrollY > 300);
       });
 
-    const fabLine = document.getElementById("fabLine");
-    const lineModal = document.getElementById("lineModal");
-    const modalClose = document.getElementById("modalClose");
+      const fabLine = document.getElementById("fabLine");
+      const lineModal = document.getElementById("lineModal");
+      const modalClose = document.getElementById("modalClose");
 
-    fabLine.addEventListener("click", () => {
-        console.log("LINE button clicked");
+      fabLine.addEventListener("click", () => {
         lineModal.classList.add("show");
-    });
+      });
 
-    modalClose.addEventListener("click", () => {
+      modalClose.addEventListener("click", () => {
         lineModal.classList.remove("show");
-    });
+      });
 
-    lineModal.addEventListener("click", (e) => {
+      lineModal.addEventListener("click", (e) => {
         if (e.target === lineModal) {
-            lineModal.classList.remove("show");
+          lineModal.classList.remove("show");
         }
-    });
+      });
     </script>
   </body>
 </html>

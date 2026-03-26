@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <title>訂單彙整 - 曾可愛家族點餐系統</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/summary_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
@@ -16,9 +17,7 @@
     <div id="navbar-root"></div>
 
     <div class="marquee-bar">
-      <div class="marquee-content">
-        ⚠️ 系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！ ⚠️
-      </div>
+      <div class="marquee-content">⚠️ 系統不會儲存您的訂單編號，請務必點擊下方按鈕「複製編號」並妥善保存，以便日後查詢訂單明細！ ⚠️</div>
     </div>
 
     <div id="loadingOverlay">
@@ -29,10 +28,10 @@
     </div>
 
     <div class="wrap">
-      <div class="card">
+      <div class="card anim-fade-up">
         <h1 class="page-title">訂單彙整</h1>
 
-        <div class="id-copy-section">
+        <div class="id-copy-section anim-fade-up anim-fade-up-d1">
           <div class="id-label">訂單編號</div>
           <div class="id-display-row">
             <span id="targetOrderId">載入中...</span>
@@ -44,7 +43,7 @@
         <div id="eventInfo"></div>
 
         <div id="byPersonBox" class="by-person">
-          <div class="summary-tabs">
+          <div class="summary-tabs anim-fade-up anim-fade-up-d2">
             <button class="summary-tab active" id="tabByPerson">依人統計</button>
             <button class="summary-tab" id="tabByItem">依品項統計</button>
           </div>
@@ -52,7 +51,7 @@
           <div id="byItemList" class="hidden"></div>
         </div>
 
-        <div class="actions">
+        <div class="actions anim-fade-up anim-fade-up-d3">
           <a href="index.html" class="back-home">回首頁</a>
           <button id="btnReload" type="button" class="back-home">重新整理資料</button>
         </div>
@@ -70,8 +69,11 @@
       import { supabase } from "./config.js";
       import { getEventCode, resolveEventId } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
+      import { showToast, overrideAlert, initRipple, countUp, skeletonCards } from "./toast.js";
 
       initNavbar();
+      overrideAlert();
+      initRipple(".back-home, .copy-action-btn, .summary-tab, #btnReload");
 
       function esc(str) {
         return String(str ?? "")
@@ -90,7 +92,8 @@
         if (!displayEventCode) return;
         navigator.clipboard.writeText(displayEventCode).then(() => {
           copyToast.style.display = "block";
-          btnCopy.innerText = "已複製";
+          btnCopy.innerText = "已複製 ✓";
+          showToast("訂單編號已複製到剪貼簿", "success");
           setTimeout(() => {
             copyToast.style.display = "none";
             btnCopy.innerText = "複製編號";
@@ -113,18 +116,20 @@
 
       async function load() {
         if (!rawEventId) {
-          alert("網址缺少訂單編號，請重新從首頁進入。");
-          location.href = "index.html";
+          showToast("網址缺少訂單編號，請重新從首頁進入。", "error", 5000);
+          setTimeout(() => { location.href = "index.html"; }, 2000);
           return;
         }
 
         showLoading(true);
+        document.getElementById("byPersonList").innerHTML = skeletonCards(3);
 
         try {
           resolvedEventId = await resolveEventId(supabase, rawEventId);
           if (!resolvedEventId) {
             document.getElementById("eventInfo").innerHTML =
               `<p class="state-error">找不到此訂單，請確認編號是否正確。</p>`;
+            showToast("找不到此訂單", "error");
             return;
           }
 
@@ -144,7 +149,7 @@
           displayEventCode = getEventCode(ev.id);
           targetOrderId.innerText = displayEventCode;
           document.getElementById("eventInfo").innerHTML = `
-            <div class="meta-container">
+            <div class="meta-container anim-scale-in">
               <h2 class="meta-shop">${esc(ev.shop)}</h2>
               <p class="meta-deadline">截止時間：${formatTWTime(ev.deadline)}</p>
             </div>`;
@@ -162,7 +167,7 @@
               groups[o.customer].push(o);
             });
 
-            Object.keys(groups).sort().forEach((name) => {
+            Object.keys(groups).sort().forEach((name, gi) => {
               const items = groups[name]
                 .map((o) => `
                   <li>
@@ -171,7 +176,8 @@
                   </li>`)
                 .join("");
               const div = document.createElement("div");
-              div.className = "person";
+              div.className = "person anim-fade-up";
+              div.style.animationDelay = `${gi * 50}ms`;
               div.innerHTML = `<h4>${esc(name)}</h4><ul>${items}</ul>`;
               listEl.appendChild(div);
             });
@@ -191,14 +197,16 @@
           } else {
             Object.values(itemGroups)
               .sort((a, b) => b.qty - a.qty)
-              .forEach((item) => {
+              .forEach((item, ii) => {
                 const div = document.createElement("div");
-                div.className = "person";
+                div.className = "person anim-fade-up";
+                div.style.animationDelay = `${ii * 50}ms`;
+                const qtySpan = `<span class="order-qty count-target" data-target="${item.qty}">0</span>`;
                 div.innerHTML = `
                   <h4>${esc(item.name)}</h4>
                   <ul><li>
                     <span>${esc(item.suger)}／${esc(item.ice)}</span>
-                    <span class="order-qty">x${item.qty}</span>
+                    <span class="order-qty">x${qtySpan}</span>
                   </li></ul>`;
                 itemListEl.appendChild(div);
               });
@@ -215,10 +223,16 @@
             document.getElementById("byPersonList").classList.add("hidden");
             document.getElementById("tabByItem").classList.add("active");
             document.getElementById("tabByPerson").classList.remove("active");
+            document.querySelectorAll(".count-target").forEach((el) => {
+              const target = parseInt(el.dataset.target, 10);
+              countUp(el, target, 500);
+            });
           };
 
+          showToast(`已讀取 ${orders.length} 筆訂單`, "success");
+
         } catch (err) {
-          alert("讀取失敗：" + err.message);
+          showToast("讀取失敗：" + err.message, "error", 5000);
         } finally {
           showLoading(false);
         }

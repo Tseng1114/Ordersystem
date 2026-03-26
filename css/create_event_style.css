@@ -9,6 +9,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   margin: 0;
   font-family: "Noto Sans TC", sans-serif;
@@ -17,10 +22,11 @@ body {
   background-size: 32px 32px;
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .wrap {
+  width: 100%;
   max-width: 520px;
   margin: 0 auto;
   padding: 48px 20px 80px;
@@ -200,4 +206,13 @@ button.primary:active {
     box-shadow: 4px 4px 0 var(--text-primary);
     padding: 24px 20px;
   }
+}
+
+.wrap > .page-title.anim-fade-up,
+.wrap > .card.anim-fade-up,
+.wrap > .card.anim-scale-in {
+  animation: none !important;
+  opacity: 1 !important;
+  scale: 1 !important;
+  translate: 0 0 !important;
 }

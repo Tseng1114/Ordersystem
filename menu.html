@@ -7,10 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="css/navbar_style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/menu_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
@@ -50,9 +51,15 @@
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
+      import { initLightbox, initRipple, animateIn } from "./toast.js";
+
       const params = new URLSearchParams(location.search);
       const isEmbed = params.get("embed") === "1";
-      if (!isEmbed) initNavbar();
+      if (!isEmbed) {
+        initNavbar();
+        initLightbox(".menu-img-wrap");
+        initRipple(".tab-btn, .menu-back-btn, .shop-card");
+      }
     </script>
 
     <script>
@@ -200,21 +207,20 @@
           logo: "hechaloutea_logo.jpeg",
           imgs: ["hechaloutea_menu.webp"],
         },
-        guiji:{
+        guiji: {
           name: "龜記",
           sub: "guiji",
           type: "drinks",
           logo: "guiji_logo.jpg",
           imgs: ["guiji_menu.jpg"],
         },
-        napteazzz:{
+        napteazzz: {
           name: "再睡5分鐘",
           sub: "napteazzz",
           type: "drinks",
           logo: "npateazzz_logo.png",
           imgs: ["napteazzz_menu.avif"],
         },
-
         // meals
         lucymama: {
           name: "露西媽媽",
@@ -312,21 +318,22 @@
 
       function renderGrid(gridId, type) {
         const grid = document.getElementById(gridId);
-        Object.entries(SHOPS)
-          .filter(([, s]) => s.type === type)
-          .forEach(([key, s]) => {
-            const logoDir = type === "drinks" ? "drinks" : "meals";
-            const el = document.createElement("div");
-            el.className = "shop-card";
-            el.innerHTML = `
-              <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" />
-              <div class="shop-info">
-                <b>${s.name}</b>
-                ${s.sub ? `<small>${s.sub}</small>` : ""}
-              </div>`;
-            el.addEventListener("click", () => openShop(key));
-            grid.appendChild(el);
-          });
+        const entries = Object.entries(SHOPS).filter(([, s]) => s.type === type);
+        entries.forEach(([key, s], i) => {
+          const logoDir = type === "drinks" ? "drinks" : "meals";
+          const el = document.createElement("div");
+          el.className = "shop-card";
+          el.style.animationDelay = `${i * 45}ms`;
+          el.classList.add("anim-fade-up");
+          el.innerHTML = `
+            <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" />
+            <div class="shop-info">
+              <b>${s.name}</b>
+              ${s.sub ? `<small>${s.sub}</small>` : ""}
+            </div>`;
+          el.addEventListener("click", () => openShop(key));
+          grid.appendChild(el);
+        });
       }
 
       renderGrid("drinkGrid", "drinks");
@@ -334,14 +341,18 @@
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          document
-            .querySelectorAll(".section-panel")
-            .forEach((p) => p.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".section-panel").forEach((p) => p.classList.remove("active"));
           btn.classList.add("active");
-          document.getElementById(btn.dataset.target).classList.add("active");
+          const panel = document.getElementById(btn.dataset.target);
+          panel.classList.add("active");
+          panel.querySelectorAll(".shop-card").forEach((card, i) => {
+            card.style.animation = "none";
+            card.offsetHeight;
+            card.style.animation = "";
+            card.style.animationDelay = `${i * 40}ms`;
+            card.classList.add("anim-fade-up");
+          });
 
           const t = btn.dataset.target === "drinkPanel" ? "drink" : "food";
           history.replaceState(null, "", `menu.html?type=${t}`);
@@ -351,12 +362,10 @@
       function openShop(key) {
         const shop = SHOPS[key];
         if (!shop) return;
-
         if (shop.url) {
           window.open(shop.url, "_blank");
           return;
         }
-
         const suffix = IS_EMBED ? "&embed=1" : "";
         history.pushState({ shop: key }, "", `menu.html?shop=${key}${suffix}`);
         showMenuView(key);
@@ -374,18 +383,21 @@
         document.getElementById("menuShopTitle").textContent = shop.name;
         const wrap = document.getElementById("menuImgs");
         wrap.innerHTML = "";
-        shop.imgs.forEach((img) => {
+
+        shop.imgs.forEach((imgSrc, i) => {
           const el = document.createElement("img");
-          el.src = `menus/${shop.type}/${img}`;
+          el.src = `menus/${shop.type}/${imgSrc}`;
           el.alt = shop.name + " 菜單";
+          el.title = "點擊放大";
+          el.style.animationDelay = `${i * 80}ms`;
+          el.classList.add("anim-scale-in");
           wrap.appendChild(el);
         });
+
         document.getElementById("listView").style.display = "none";
         document.getElementById("menuView").style.display = "block";
         document.querySelector(".footer").style.display = "none";
-        if (!IS_EMBED) {
-          window.scrollTo(0, 0);
-        }
+        if (!IS_EMBED) window.scrollTo(0, 0);
         reportEmbedHeight();
       }
 
@@ -422,6 +434,7 @@
           if (type === "food") document.getElementById("tabFood").click();
         }
       })();
+
       function syncStickyTop() {
         const nb = document.querySelector(".nb__bar");
         if (!nb) return;
@@ -474,10 +487,7 @@
         const reportHeight = () => {
           if (window.parent === window) return;
           const height = document.documentElement.scrollHeight;
-          window.parent.postMessage(
-            { type: "menu-embed-height", height },
-            "*",
-          );
+          window.parent.postMessage({ type: "menu-embed-height", height }, "*");
         };
 
         window.addEventListener("load", reportHeight);

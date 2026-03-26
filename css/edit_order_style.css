@@ -452,13 +452,19 @@ body {
   }
 }
 
+@keyframes shellFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .lookup-wrap > .page-title.anim-fade-up,
 .lookup-wrap > .lookup-card.anim-fade-up,
 .edit-wrap > .event-info-bar.anim-fade-up,
 .edit-wrap > .tabs.anim-fade-up,
 .edit-wrap > .anim-scale-in {
-  animation: none !important;
-  opacity: 1 !important;
-  scale: 1 !important;
-  translate: 0 0 !important;
+  animation: shellFadeIn 0.38s ease both !important;
 }

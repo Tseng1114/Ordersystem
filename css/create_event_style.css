@@ -103,6 +103,22 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
+.input-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.field-error {
+  margin: 6px 2px 0;
+  color: #dc2626;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.hidden.field-error {
+  display: none;
+}
+
 .share-textarea {
   resize: none;
   background: #f8fafc;
@@ -208,11 +224,20 @@ button.primary:active {
   }
 }
 
-.wrap > .page-title.anim-fade-up,
+@keyframes shellFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.wrap > .page-title.anim-fade-up {
+  animation: shellFadeIn 0.35s ease both !important;
+}
+
 .wrap > .card.anim-fade-up,
 .wrap > .card.anim-scale-in {
-  animation: none !important;
-  opacity: 1 !important;
-  scale: 1 !important;
-  translate: 0 0 !important;
+  animation: shellFadeIn 0.42s ease both !important;
 }

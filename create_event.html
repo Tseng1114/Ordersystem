@@ -21,30 +21,33 @@
       <div id="createCard" class="card anim-fade-up anim-fade-up-d1">
         <label>選擇訂單類型</label>
         <div class="category-toggle">
-          <button type="button" id="btnDrink" class="toggle-btn active">飲料區</button>
-          <button type="button" id="btnFood" class="toggle-btn">餐點區</button>
+          <button type="button" id="btnDrink" class="toggle-btn active">飲料</button>
+          <button type="button" id="btnFood" class="toggle-btn">餐點</button>
         </div>
 
         <label for="shopSelect">店家</label>
-        <select id="shopSelect" class="select-like"></select>
+        <select id="shopSelect" class="select-like" required></select>
+        <p id="shopError" class="field-error hidden" role="alert">請先選擇店家。</p>
 
         <div id="otherBox" class="hidden">
           <input id="shopOther" placeholder="請輸入店家名稱" />
+          <p id="shopOtherError" class="field-error hidden" role="alert">請輸入店家名稱。</p>
         </div>
 
         <label for="deadline">截止時間</label>
-        <input id="deadline" type="datetime-local" />
+        <input id="deadline" type="datetime-local" required />
+        <p id="deadlineError" class="field-error hidden" role="alert">請先選擇截止時間。</p>
 
         <div class="actions">
-          <a class="back-home" href="index.html">回首頁</a>
+          <a class="back-home" href="index.html">返回首頁</a>
           <button class="primary" id="createBtn" type="button">建立訂單</button>
         </div>
 
         <div id="result" class="hidden">
           <hr class="divider" />
-          <button id="directGoBtn" type="button">直接進入點餐</button>
+          <button id="directGoBtn" type="button">直接前往下單頁</button>
           <hr class="divider" />
-          <label>分享給其他人</label>
+          <label>分享訊息範本</label>
           <textarea id="shareMsg" class="share-textarea" readonly rows="5"></textarea>
           <div class="actions action-gap">
             <button class="primary" id="copyBtn" type="button">複製分享訊息</button>
@@ -56,14 +59,14 @@
     <div id="loadingOverlay">
       <div class="spinner-box">
         <div class="spinner"></div>
-        <div class="spinner-text">處理中，請稍候...</div>
+        <div class="spinner-text">建立訂單中，請稍候...</div>
       </div>
     </div>
 
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。</p>
+        <p class="disclaimer">本系統僅供內部點餐使用，實際商品與價格請以店家公告為準。</p>
       </div>
     </footer>
 
@@ -72,7 +75,7 @@
       import { getEventCode } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       import { SHOPS } from "./shop-data.js";
-      import { showToast, overrideAlert, initRipple } from "./toast.js";
+      import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
 
       initNavbar();
       overrideAlert();
@@ -82,21 +85,59 @@
       const shopSelect = document.querySelector("#shopSelect");
       const otherBox = document.querySelector("#otherBox");
       const shopOther = document.querySelector("#shopOther");
+      const deadlineInput = document.querySelector("#deadline");
       const btnDrink = document.getElementById("btnDrink");
       const btnFood = document.getElementById("btnFood");
+      const shopError = document.getElementById("shopError");
+      const shopOtherError = document.getElementById("shopOtherError");
+      const deadlineError = document.getElementById("deadlineError");
+
+      function setFieldError(inputEl, errorEl, message) {
+        const hasError = Boolean(message);
+        inputEl.classList.toggle("input-error", hasError);
+        errorEl.textContent = message || "";
+        errorEl.classList.toggle("hidden", !hasError);
+      }
+
+      function validateForm() {
+        const selectedShop = shopSelect.value;
+        const isCustomShop = selectedShop === "__other";
+        const shop = isCustomShop ? shopOther.value.trim() : selectedShop.trim();
+        const deadline = deadlineInput.value;
+
+        setFieldError(shopSelect, shopError, !selectedShop ? "請先選擇店家。" : "");
+        setFieldError(shopOther, shopOtherError, isCustomShop && !shop ? "請輸入店家名稱。" : "");
+        setFieldError(deadlineInput, deadlineError, !deadline ? "請先選擇截止時間。" : "");
+
+        const firstInvalidField =
+          (!selectedShop && shopSelect) ||
+          (isCustomShop && !shop && shopOther) ||
+          (!deadline && deadlineInput);
+
+        return {
+          isValid: Boolean(selectedShop && shop && deadline),
+          shop,
+          deadline,
+          firstInvalidField,
+        };
+      }
 
       function updateShopList(category) {
         currentCategory = category;
         shopSelect.innerHTML = '<option value="" selected>請選擇店家</option>';
         Object.entries(SHOPS)
-          .filter(([, s]) => s.category === category)
-          .forEach(([, s]) => {
+          .filter(([, shop]) => shop.category === category)
+          .forEach(([, shop]) => {
             const opt = document.createElement("option");
-            opt.value = s.name;
-            opt.textContent = s.name;
+            opt.value = shop.name;
+            opt.textContent = shop.name;
             shopSelect.appendChild(opt);
           });
         shopSelect.innerHTML += '<option value="__other">其他（自訂）</option>';
+
+        otherBox.classList.add("hidden");
+        shopOther.value = "";
+        validateForm();
       }
 
       btnDrink.onclick = () => {
@@ -117,16 +158,20 @@
         } else {
           otherBox.classList.add("hidden");
           shopOther.value = "";
+          setFieldError(shopOther, shopOtherError, "");
         }
+        validateForm();
       });
 
-      async function createEvent() {
-        const sel = shopSelect.value;
-        const shop = sel === "__other" ? shopOther.value.trim() : sel.trim();
-        const deadline = document.querySelector("#deadline").value;
+      shopOther.addEventListener("input", validateForm);
+      deadlineInput.addEventListener("input", validateForm);
 
-        if (!shop) {
-          showToast("請選擇店家或輸入店名", "warning");
+      async function createEvent() {
+        const { isValid, shop, deadline, firstInvalidField } = validateForm();
+
+        if (!isValid) {
+          showToast("請先補齊店家與截止時間後再建立訂單。", "warning");
+          firstInvalidField?.focus();
           return;
         }
 
@@ -134,13 +179,15 @@
         try {
           const { data, error } = await supabase
             .from("events")
-            .insert([{
-              title: shop + " 訂單",
-              shop,
-              category: currentCategory,
-              deadline: deadline ? new Date(deadline).toISOString() : null,
-              status: "open",
-            }])
+            .insert([
+              {
+                title: `${shop} 訂單`,
+                shop,
+                category: currentCategory,
+                deadline: new Date(deadline).toISOString(),
+                status: "open",
+              },
+            ])
             .select();
 
           if (error) throw error;
@@ -150,29 +197,26 @@
           const orderURL = new URL("order.html", location.href);
           orderURL.searchParams.set("event", shortId);
 
-          let deadlineText = "無期限";
-          if (deadline) {
-            const d = new Date(deadline);
-            deadlineText = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-          }
+          const d = new Date(deadline);
+          const deadlineText = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
-          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n 點餐連結：${orderURL.toString()}`;
+          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n點餐連結：${orderURL.toString()}`;
           document.querySelector("#shareMsg").value = finalMsg;
           const resultEl = document.querySelector("#result");
           resultEl.classList.remove("hidden");
           resultEl.classList.add("anim-fade-up");
 
-          showToast(`訂單建立成功！`, "success");
+          showToast("訂單建立成功。", "success");
 
           document.getElementById("directGoBtn").onclick = () => {
             location.href = orderURL.toString();
           };
           document.querySelector("#copyBtn").onclick = async () => {
             await navigator.clipboard.writeText(finalMsg);
-            showToast("分享訊息已複製到剪貼簿！", "success");
+            showToast("分享訊息已複製到剪貼簿。", "success");
           };
         } catch (err) {
-          showToast("建立失敗：" + err.message, "error", 5000);
+          showToast(`建立訂單失敗：${err.message}`, "error", 5000);
         } finally {
           document.getElementById("loadingOverlay").style.display = "none";
         }

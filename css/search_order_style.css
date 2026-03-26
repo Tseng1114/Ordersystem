@@ -270,12 +270,21 @@ body {
   }
 }
 
-.page-wrap > .page-title.anim-fade-up,
+@keyframes shellFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-wrap > .page-title.anim-fade-up {
+  animation: shellFadeIn 0.35s ease both !important;
+}
+
 .page-wrap > .search-card.anim-fade-up,
 #resultArea > .result-card.anim-scale-in,
 #resultArea > .result-card.anim-fade-up {
-  animation: none !important;
-  opacity: 1 !important;
-  scale: 1 !important;
-  translate: 0 0 !important;
+  animation: shellFadeIn 0.42s ease both !important;
 }

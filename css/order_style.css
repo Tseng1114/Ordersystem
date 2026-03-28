@@ -14,7 +14,10 @@ body {
   padding: 40px 20px;
 }
 
-.wrap { max-width: 900px; margin: 0 auto; }
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+}
 
 .page-title {
   text-align: center;
@@ -50,23 +53,30 @@ td {
   border-bottom: 1px solid #eee;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
   font-family: "Noto Sans TC", sans-serif;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
   outline: none;
 }
 
-input.qty { width: 60px; text-align: center; }
+input.qty {
+  width: 60px;
+  text-align: center;
+}
 
 .actions {
   display: flex;
@@ -75,7 +85,10 @@ input.qty { width: 60px; text-align: center; }
   margin-top: 20px;
 }
 
-button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
+button {
+  cursor: pointer;
+  font-family: "Noto Sans TC", sans-serif;
+}
 
 .primary {
   background: var(--text-primary);
@@ -164,7 +177,55 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
   display: none;
 }
 
-.expired-banner.show { display: block; }
+.expired-banner.show {
+  display: block;
+}
+
+.countdown-bar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff7ed;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #92400e;
+  transition:
+    background 0.4s,
+    border-color 0.4s,
+    color 0.4s;
+}
+
+.countdown-bar.show {
+  display: flex;
+}
+
+.countdown-bar.urgent {
+  background: #fef2f2;
+  border-color: #e11d48;
+  color: #be123c;
+  animation: urgentPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.18);
+  }
+}
+
+.countdown-time {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  font-size: 1.05rem;
+}
 
 .menu-section {
   border-top: 1px solid #e2e8f0;
@@ -180,7 +241,9 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
   margin-bottom: 14px;
 }
 
-.menu-section-title { margin: 0; }
+.menu-section-title {
+  margin: 0;
+}
 
 .menu-open-link {
   color: var(--text-primary);
@@ -213,6 +276,38 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
   width: 100%;
 }
 
+.success-screen {
+  display: none;
+  text-align: center;
+  padding: 48px 20px 32px;
+}
+
+.success-svg-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.success-screen h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+.success-screen p {
+  color: #64748b;
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+}
+
+.success-screen .actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 600px) {
   .actions {
     flex-direction: column;
@@ -230,7 +325,9 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
     box-sizing: border-box;
   }
 
-  #itemsTbl thead { display: none; }
+  #itemsTbl thead {
+    display: none;
+  }
 
   #itemsTbl tbody tr {
     display: block;
@@ -257,7 +354,9 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
     gap: 8px;
   }
 
-  #itemsTbl td:last-child { border-bottom: none; }
+  #itemsTbl td:last-child {
+    border-bottom: none;
+  }
 
   #itemsTbl td::before {
     content: attr(data-label);
@@ -269,8 +368,13 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
     flex-shrink: 0;
   }
 
-  input, select { flex: 1; }
-  input.qty { max-width: 80px; }
+  input,
+  select {
+    flex: 1;
+  }
+  input.qty {
+    max-width: 80px;
+  }
 
   .del-btn {
     width: 100%;
@@ -283,5 +387,11 @@ button { cursor: pointer; font-family: "Noto Sans TC", sans-serif; }
   .menu-section-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .countdown-bar {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
   }
 }

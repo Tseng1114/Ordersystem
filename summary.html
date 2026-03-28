@@ -29,7 +29,13 @@
 
     <div class="wrap">
       <div class="card anim-fade-up">
-        <h1 class="page-title">訂單彙整</h1>
+        <h1 class="page-title">
+          訂單彙整
+          <span class="realtime-badge connecting" id="realtimeBadge">
+            <span class="realtime-dot"></span>
+            <span id="realtimeLabel">連線中</span>
+          </span>
+        </h1>
 
         <div class="id-copy-section anim-fade-up anim-fade-up-d1">
           <div class="id-label">訂單編號</div>
@@ -84,9 +90,15 @@
       const rawEventId = new URLSearchParams(location.search).get("event");
       let resolvedEventId = null;
       let displayEventCode = rawEventId || "";
+      let allOrders = [];        
+      let realtimeChannel = null;  
+      let currentTab = "person";   
+
       const btnCopy = document.getElementById("btnCopy");
       const copyToast = document.getElementById("copyToast");
       const targetOrderId = document.getElementById("targetOrderId");
+      const realtimeBadge = document.getElementById("realtimeBadge");
+      const realtimeLabel = document.getElementById("realtimeLabel");
 
       btnCopy.onclick = () => {
         if (!displayEventCode) return;
@@ -112,6 +124,194 @@
           hour: "2-digit", minute: "2-digit", hour12: false,
           timeZone: "Asia/Taipei",
         });
+      }
+
+      function setRealtimeStatus(status) {
+        realtimeBadge.className = "realtime-badge";
+        if (status === "connected") {
+          realtimeBadge.classList.add();   
+          realtimeLabel.textContent = "即時同步中";
+        } else if (status === "connecting") {
+          realtimeBadge.classList.add("connecting");
+          realtimeLabel.textContent = "連線中";
+        } else {
+          realtimeBadge.classList.add("error");
+          realtimeLabel.textContent = "已中斷";
+        }
+      }
+
+      function renderByPerson(orders, highlightId = null) {
+        const listEl = document.getElementById("byPersonList");
+        listEl.innerHTML = "";
+
+        if (!orders.length) {
+          listEl.innerHTML = '<p class="state-empty">目前尚無人下單。</p>';
+          return;
+        }
+
+        const groups = {};
+        orders.forEach((o) => {
+          if (!groups[o.customer]) groups[o.customer] = [];
+          groups[o.customer].push(o);
+        });
+
+        Object.keys(groups).sort().forEach((name, gi) => {
+          const items = groups[name]
+            .map((o) => `
+              <li>
+                <span>${esc(o.name)} (${esc(o.suger)}／${esc(o.ice)})</span>
+                <span style="font-weight:bold;">x${o.qty}</span>
+              </li>`)
+            .join("");
+          const div = document.createElement("div");
+          div.className = "person anim-fade-up";
+          div.style.animationDelay = `${gi * 50}ms`;
+          if (highlightId && groups[name].some((o) => o.id === highlightId)) {
+            div.classList.add("new-entry");
+          }
+          div.innerHTML = `<h4>${esc(name)}</h4><ul>${items}</ul>`;
+          listEl.appendChild(div);
+        });
+      }
+
+      function renderByItem(orders) {
+        const itemListEl = document.getElementById("byItemList");
+        itemListEl.innerHTML = "";
+
+        if (!orders.length) {
+          itemListEl.innerHTML = '<p class="state-empty">目前尚無人下單。</p>';
+          return;
+        }
+
+        const itemGroups = {};
+        orders.forEach((o) => {
+          const key = `${o.name}__${o.suger}__${o.ice}`;
+          if (!itemGroups[key]) itemGroups[key] = { name: o.name, suger: o.suger, ice: o.ice, qty: 0 };
+          itemGroups[key].qty += o.qty;
+        });
+
+        Object.values(itemGroups)
+          .sort((a, b) => b.qty - a.qty)
+          .forEach((item, ii) => {
+            const div = document.createElement("div");
+            div.className = "person anim-fade-up";
+            div.style.animationDelay = `${ii * 50}ms`;
+            const qtySpan = `<span class="order-qty count-target" data-target="${item.qty}">0</span>`;
+            div.innerHTML = `
+              <h4>${esc(item.name)}</h4>
+              <ul><li>
+                <span>${esc(item.suger)}／${esc(item.ice)}</span>
+                <span class="order-qty">x${qtySpan}</span>
+              </li></ul>`;
+            itemListEl.appendChild(div);
+          });
+      }
+
+      function setupTabs() {
+        document.getElementById("tabByPerson").onclick = () => {
+          currentTab = "person";
+          document.getElementById("byPersonList").classList.remove("hidden");
+          document.getElementById("byItemList").classList.add("hidden");
+          document.getElementById("tabByPerson").classList.add("active");
+          document.getElementById("tabByItem").classList.remove("active");
+        };
+        document.getElementById("tabByItem").onclick = () => {
+          currentTab = "item";
+          document.getElementById("byItemList").classList.remove("hidden");
+          document.getElementById("byPersonList").classList.add("hidden");
+          document.getElementById("tabByItem").classList.add("active");
+          document.getElementById("tabByPerson").classList.remove("active");
+          document.querySelectorAll(".count-target").forEach((el) => {
+            const target = parseInt(el.dataset.target, 10);
+            countUp(el, target, 500);
+          });
+        };
+      }
+
+      function handleNewOrder(newOrder) {
+        if (allOrders.some((o) => o.id === newOrder.id)) return;
+        allOrders.push(newOrder);
+
+        renderByPerson(allOrders, newOrder.id);
+        renderByItem(allOrders);
+
+        if (currentTab === "item") {
+          document.querySelectorAll(".count-target").forEach((el) => {
+            const target = parseInt(el.dataset.target, 10);
+            countUp(el, target, 400);
+          });
+        }
+
+        showToast(`${newOrder.customer} 新增了一筆訂單`, "info");
+      }
+
+      function handleDeleteOrder(oldOrder) {
+        allOrders = allOrders.filter((o) => o.id !== oldOrder.id);
+        renderByPerson(allOrders);
+        renderByItem(allOrders);
+        if (currentTab === "item") {
+          document.querySelectorAll(".count-target").forEach((el) => {
+            const target = parseInt(el.dataset.target, 10);
+            countUp(el, target, 400);
+          });
+        }
+        showToast("有一筆訂單被刪除", "warning");
+      }
+
+      function handleUpdateOrder(updatedOrder) {
+        const idx = allOrders.findIndex((o) => o.id === updatedOrder.id);
+        if (idx !== -1) allOrders[idx] = updatedOrder;
+        renderByPerson(allOrders);
+        renderByItem(allOrders);
+      }
+
+      function subscribeRealtime(eventId) {
+        if (realtimeChannel) {
+          supabase.removeChannel(realtimeChannel);
+        }
+
+        setRealtimeStatus("connecting");
+
+        realtimeChannel = supabase
+          .channel(`orders-${eventId}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "orders",
+              filter: `event_id=eq.${eventId}`,
+            },
+            (payload) => handleNewOrder(payload.new)
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "DELETE",
+              schema: "public",
+              table: "orders",
+              filter: `event_id=eq.${eventId}`,
+            },
+            (payload) => handleDeleteOrder(payload.old)
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "UPDATE",
+              schema: "public",
+              table: "orders",
+              filter: `event_id=eq.${eventId}`,
+            },
+            (payload) => handleUpdateOrder(payload.new)
+          )
+          .subscribe((status) => {
+            if (status === "SUBSCRIBED") {
+              setRealtimeStatus("connected");
+            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+              setRealtimeStatus("error");
+              showToast("即時同步連線失敗，請手動重新整理", "error", 5000);
+            }
+          });
       }
 
       async function load() {
@@ -154,82 +354,14 @@
               <p class="meta-deadline">截止時間：${formatTWTime(ev.deadline)}</p>
             </div>`;
 
-          const orders = ev.orders || [];
-          const listEl = document.getElementById("byPersonList");
-          listEl.innerHTML = "";
+          allOrders = ev.orders || [];
+          renderByPerson(allOrders);
+          renderByItem(allOrders);
+          setupTabs();
 
-          if (orders.length === 0) {
-            listEl.innerHTML = '<p class="state-empty">目前尚無人下單。</p>';
-          } else {
-            const groups = {};
-            orders.forEach((o) => {
-              if (!groups[o.customer]) groups[o.customer] = [];
-              groups[o.customer].push(o);
-            });
+          subscribeRealtime(resolvedEventId);
 
-            Object.keys(groups).sort().forEach((name, gi) => {
-              const items = groups[name]
-                .map((o) => `
-                  <li>
-                    <span>${esc(o.name)} (${esc(o.suger)}／${esc(o.ice)})</span>
-                    <span style="font-weight:bold;">x${o.qty}</span>
-                  </li>`)
-                .join("");
-              const div = document.createElement("div");
-              div.className = "person anim-fade-up";
-              div.style.animationDelay = `${gi * 50}ms`;
-              div.innerHTML = `<h4>${esc(name)}</h4><ul>${items}</ul>`;
-              listEl.appendChild(div);
-            });
-          }
-
-          const itemGroups = {};
-          orders.forEach((o) => {
-            const key = `${o.name}__${o.suger}__${o.ice}`;
-            if (!itemGroups[key]) itemGroups[key] = { name: o.name, suger: o.suger, ice: o.ice, qty: 0 };
-            itemGroups[key].qty += o.qty;
-          });
-
-          const itemListEl = document.getElementById("byItemList");
-          itemListEl.innerHTML = "";
-          if (orders.length === 0) {
-            itemListEl.innerHTML = '<p class="state-empty">目前尚無人下單。</p>';
-          } else {
-            Object.values(itemGroups)
-              .sort((a, b) => b.qty - a.qty)
-              .forEach((item, ii) => {
-                const div = document.createElement("div");
-                div.className = "person anim-fade-up";
-                div.style.animationDelay = `${ii * 50}ms`;
-                const qtySpan = `<span class="order-qty count-target" data-target="${item.qty}">0</span>`;
-                div.innerHTML = `
-                  <h4>${esc(item.name)}</h4>
-                  <ul><li>
-                    <span>${esc(item.suger)}／${esc(item.ice)}</span>
-                    <span class="order-qty">x${qtySpan}</span>
-                  </li></ul>`;
-                itemListEl.appendChild(div);
-              });
-          }
-
-          document.getElementById("tabByPerson").onclick = () => {
-            document.getElementById("byPersonList").classList.remove("hidden");
-            document.getElementById("byItemList").classList.add("hidden");
-            document.getElementById("tabByPerson").classList.add("active");
-            document.getElementById("tabByItem").classList.remove("active");
-          };
-          document.getElementById("tabByItem").onclick = () => {
-            document.getElementById("byItemList").classList.remove("hidden");
-            document.getElementById("byPersonList").classList.add("hidden");
-            document.getElementById("tabByItem").classList.add("active");
-            document.getElementById("tabByPerson").classList.remove("active");
-            document.querySelectorAll(".count-target").forEach((el) => {
-              const target = parseInt(el.dataset.target, 10);
-              countUp(el, target, 500);
-            });
-          };
-
-          showToast(`已讀取 ${orders.length} 筆訂單`, "success");
+          showToast(`已讀取 ${allOrders.length} 筆訂單`, "success");
 
         } catch (err) {
           showToast("讀取失敗：" + err.message, "error", 5000);
@@ -240,6 +372,10 @@
 
       document.getElementById("btnReload").onclick = () => load();
       document.addEventListener("DOMContentLoaded", load);
+
+      window.addEventListener("beforeunload", () => {
+        if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+      });
     </script>
   </body>
 </html>

@@ -10,35 +10,6 @@
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-      .success-screen {
-        display: none;
-        text-align: center;
-        padding: 48px 20px 32px;
-      }
-      .success-svg-wrap {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-      }
-      .success-screen h2 {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 8px;
-      }
-      .success-screen p {
-        color: #64748b;
-        margin: 0 0 28px;
-        font-size: 0.95rem;
-      }
-      .success-screen .actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-    </style>
   </head>
   <body>
     <div class="wrap">
@@ -47,6 +18,11 @@
       <div class="card">
         <div id="expiredBanner" class="expired-banner">
           此訂單已超過截止時間，目前不能再新增或送出訂單。
+        </div>
+
+        <div class="countdown-bar" id="countdownBar">
+          <span>距離截止：</span>
+          <span class="countdown-time" id="countdownTime">--:--:--</span>
         </div>
 
         <div id="orderForm">
@@ -127,6 +103,8 @@
       let currentShop = null;
       let isExpired = false;
       let itemListCounter = 0;
+      let countdownTimer = null;      
+      let deadlineDate = null;        
 
       const SUGAR_OPTIONS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
       const ICE_OPTIONS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
@@ -183,6 +161,56 @@
         section.classList.remove("hidden");
       }
 
+      function formatCountdown(ms) {
+        if (ms <= 0) return "已截止";
+        const totalSec = Math.floor(ms / 1000);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        if (h > 0) {
+          return `${h} 小時 ${String(m).padStart(2, "0")} 分 ${String(s).padStart(2, "0")} 秒`;
+        }
+        return `${String(m).padStart(2, "0")} 分 ${String(s).padStart(2, "0")} 秒`;
+      }
+
+      function startCountdown(deadline) {
+        deadlineDate = new Date(deadline);
+        const bar = document.getElementById("countdownBar");
+        const timeEl = document.getElementById("countdownTime");
+
+        bar.classList.add("show");
+
+        function tick() {
+          const remaining = deadlineDate - Date.now();
+          if (remaining <= 0) {
+            timeEl.textContent = "已截止";
+            bar.classList.add("urgent");
+            clearInterval(countdownTimer);
+            if (!isExpired) {
+              isExpired = true;
+              const submitBtn = document.getElementById("submitBtn");
+              submitBtn.disabled = true;
+              submitBtn.innerText = "已截止";
+              submitBtn.classList.add("btn-disabled");
+              document.getElementById("addItem").classList.add("hidden");
+              document.getElementById("expiredBanner").classList.add("show");
+            }
+            return;
+          }
+
+          timeEl.textContent = formatCountdown(remaining);
+
+          if (remaining < 10 * 60 * 1000) {
+            bar.classList.add("urgent");
+          } else {
+            bar.classList.remove("urgent");
+          }
+        }
+
+        tick();
+        countdownTimer = setInterval(tick, 1000);
+      }
+
       async function ensureEvent() {
         if (!rawEventId) { alert("無效訂單編號"); return; }
         showLoading(true);
@@ -206,6 +234,10 @@
           }
 
           renderEmbeddedMenu();
+
+          if (ev.deadline) {
+            startCountdown(ev.deadline);
+          }
 
           if (ev.deadline && new Date() > new Date(ev.deadline)) {
             isExpired = true;
@@ -270,6 +302,9 @@
           const { error } = await supabase.from("orders").insert(rows);
           if (error) throw error;
 
+          clearInterval(countdownTimer);
+          document.getElementById("countdownBar").classList.remove("show");
+
           document.getElementById("orderForm").style.display = "none";
           document.getElementById("menuSection").style.display = "none";
           const screen = document.getElementById("successScreen");
@@ -309,6 +344,10 @@
 
         addItemBtn.onclick = addRow;
         document.getElementById("submitBtn").onclick = submitOrder;
+      });
+
+      window.addEventListener("beforeunload", () => {
+        clearInterval(countdownTimer);
       });
     </script>
   </body>

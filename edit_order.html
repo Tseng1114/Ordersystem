@@ -6,7 +6,10 @@
     <title>修改訂單 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
@@ -14,7 +17,6 @@
     <link rel="stylesheet" href="css/edit_order_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
     <div id="navbar-root"></div>
@@ -22,7 +24,7 @@
     <div id="loadingOverlay">
       <div class="spinner-box">
         <div class="spinner"></div>
-        <div class="spinner-text">載入中...</div>
+        <div class="spinner-text">讀取中...</div>
       </div>
     </div>
 
@@ -30,13 +32,13 @@
       <div class="lookup-wrap">
         <h1 class="page-title anim-fade-up">修改訂單</h1>
         <div class="lookup-card anim-fade-up anim-fade-up-d1">
-          <label for="eventIdInput">輸入訂單代碼</label>
+          <label for="eventIdInput">訂單代碼</label>
           <div class="lookup-row">
             <input
               id="eventIdInput"
               class="id-input"
               type="text"
-              placeholder="請輸入短代碼或完整訂單編號"
+              placeholder="請輸入訂單代碼"
             />
             <button class="btn-primary" id="loadBtn">讀取</button>
           </div>
@@ -63,7 +65,7 @@
 
           <div class="orders-toolbar">
             <h3 id="ordersCount">共 0 筆訂單</h3>
-            <button class="btn-primary btn-sm" id="showAddRowBtn">＋新增一筆</button>
+            <button class="btn-primary btn-sm" id="showAddRowBtn">+新增一筆</button>
           </div>
 
           <div class="add-row-card" id="addRowCard">
@@ -73,10 +75,14 @@
                 <input id="newCustomer" placeholder="請輸入姓名" />
               </div>
               <div class="edit-field full">
-                <label id="newNameLabel">品項名稱</label>
+                <label id="newNameLabel">品項</label>
                 <div id="newNameWrap">
                   <input id="newName" placeholder="請輸入品項" />
                 </div>
+              </div>
+              <div class="edit-field" id="newAddonField">
+                <label id="newAddonLabel">加料</label>
+                <select id="newAddon"></select>
               </div>
               <div class="edit-field">
                 <label id="newSpecALabel">糖度</label>
@@ -105,7 +111,9 @@
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
       </div>
     </footer>
 
@@ -124,12 +132,14 @@
       const ICE_OPTS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
 
       let eventData = null;
-      let itemListCounter = 0;
 
       function esc(str) {
         return String(str ?? "")
-          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function showLoading(show) {
@@ -139,8 +149,12 @@
       function formatTW(iso) {
         if (!iso) return "未設定";
         return new Date(iso).toLocaleString("zh-TW", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit", hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
           timeZone: "Asia/Taipei",
         });
       }
@@ -149,73 +163,179 @@
         return eventData?.category !== "food";
       }
 
+      function getShopMeta() {
+        return findShopByName(eventData?.shop, eventData?.category)?.[1] || null;
+      }
+
       function getCurrentDrinkItems() {
-        const shopEntry = findShopByName(eventData?.shop, eventData?.category);
-        return shopEntry?.[1]?.menuItems || [];
+        return getShopMeta()?.menuItems || [];
       }
 
-      function nextItemListId() {
-        itemListCounter += 1;
-        return `edit-item-suggestions-${itemListCounter}`;
+      function getCurrentDrinkAddons() {
+        return getShopMeta()?.addonOptions || ["不加料"];
       }
 
-      function buildSearchableItemField(className, currentValue = "") {
+      function parseItemAndAddon(name = "") {
+        const text = String(name || "").trim();
+        const match = text.match(/^(.*?)(?:（加料：(.+?)）)?$/);
+        return {
+          itemName: match?.[1]?.trim() || "",
+          addonName: match?.[2]?.trim() || "不加料",
+        };
+      }
+
+      function combineItemAndAddon(itemName, addonName) {
+        const item = String(itemName || "").trim();
+        const addon = String(addonName || "").trim();
+        if (!addon || addon === "不加料" || addon === "無") return item;
+        return `${item}（加料：${addon}）`;
+      }
+
+      function buildItemSelector(fieldClass, currentValue = "", inputId = "") {
         const items = getCurrentDrinkItems();
         if (!items.length) {
-          return `<input class="${className}" value="${esc(currentValue)}" placeholder="請輸入品項" />`;
+          return `<input class="${fieldClass}"${inputId ? ` id="${inputId}"` : ""} value="${esc(currentValue)}" placeholder="請輸入品項" />`;
         }
-        const listId = nextItemListId();
+
+        const hasCurrentValue = items.includes(currentValue);
         return `
-          <input class="${className}" list="${listId}" value="${esc(currentValue)}" placeholder="可輸入搜尋或直接輸入其他品項" />
-          <datalist id="${listId}">
-            ${items.map((item) => `<option value="${esc(item)}"></option>`).join("")}
-          </datalist>`;
+          <select class="${fieldClass} item-select">
+            <option value="">請選擇品項</option>
+            ${items.map((item) => `<option value="${esc(item)}"${item === currentValue ? " selected" : ""}>${esc(item)}</option>`).join("")}
+            <option value="__custom"${!hasCurrentValue && currentValue ? " selected" : ""}>其他（自訂）</option>
+          </select>
+          <input
+            class="${fieldClass} item-custom-input${!hasCurrentValue && currentValue ? "" : " hidden"}"
+            ${inputId ? `id="${inputId}"` : ""}
+            value="${esc(hasCurrentValue ? "" : currentValue)}"
+            placeholder="請輸入自訂品項"
+          />`;
+      }
+
+      function buildAddonSelector(fieldClass, currentValue = "不加料", inputId = "") {
+        const addons = getCurrentDrinkAddons();
+        const hasCurrentValue = addons.includes(currentValue);
+        return `
+          <select class="${fieldClass} addon-select">
+            ${addons.map((item) => `<option value="${esc(item)}"${item === currentValue ? " selected" : ""}>${esc(item)}</option>`).join("")}
+            <option value="__custom"${!hasCurrentValue && currentValue ? " selected" : ""}>其他（自訂）</option>
+          </select>
+          <input
+            class="${fieldClass} addon-custom-input${!hasCurrentValue && currentValue ? "" : " hidden"}"
+            ${inputId ? `id="${inputId}"` : ""}
+            value="${esc(hasCurrentValue ? "" : currentValue)}"
+            placeholder="請輸入自訂加料"
+          />`;
+      }
+
+      function syncCustomInput(container, selectSelector, inputSelector) {
+        const select = container.querySelector(selectSelector);
+        const customInput = container.querySelector(inputSelector);
+        if (!select || !customInput) return;
+
+        const isCustom = select.value === "__custom";
+        customInput.classList.toggle("hidden", !isCustom);
+        customInput.disabled = !isCustom;
+        if (!isCustom) customInput.value = "";
+      }
+
+      function getSelectOrCustomValue(container, selector, customSelector) {
+        const field = container.querySelector(selector);
+        if (!field) return "";
+        if (field.matches("select")) {
+          if (field.value === "__custom") {
+            return container.querySelector(customSelector)?.value.trim() || "";
+          }
+          return field.value.trim();
+        }
+        return field.value.trim();
       }
 
       function setupAddRow() {
         const drinkMode = isDrinkEvent();
-        document.getElementById("newNameLabel").textContent = drinkMode ? "品項名稱" : "餐點名稱";
+        document.getElementById("newNameLabel").textContent = drinkMode ? "品項" : "餐點名稱";
         document.getElementById("newSpecALabel").textContent = drinkMode ? "糖度" : "規格一";
         document.getElementById("newSpecBLabel").textContent = drinkMode ? "冰量" : "規格二";
 
         const newNameWrap = document.getElementById("newNameWrap");
         newNameWrap.innerHTML = drinkMode
-          ? buildSearchableItemField("new-name-input")
+          ? buildItemSelector("new-name-input", "", "newName")
           : '<input id="newName" placeholder="請輸入品項" />';
-        newNameWrap.querySelector("input").id = "newName";
+
+        const newAddonField = document.getElementById("newAddonField");
+        if (drinkMode) {
+          newAddonField.classList.remove("full");
+          newAddonField.innerHTML = `
+            <label id="newAddonLabel">加料</label>
+            ${buildAddonSelector("new-addon-input", "不加料", "newAddon")}
+          `;
+          newNameWrap.querySelector(".item-select")?.addEventListener("change", () => {
+            syncCustomInput(newNameWrap, ".item-select", ".item-custom-input");
+          });
+          newAddonField.querySelector(".addon-select")?.addEventListener("change", () => {
+            syncCustomInput(newAddonField, ".addon-select", ".addon-custom-input");
+          });
+          syncCustomInput(newNameWrap, ".item-select", ".item-custom-input");
+          syncCustomInput(newAddonField, ".addon-select", ".addon-custom-input");
+        } else {
+          newAddonField.classList.add("full");
+          newAddonField.innerHTML = `
+            <label id="newAddonLabel">備註 / 規格</label>
+            <input id="newAddon" placeholder="請輸入備註 / 規格" />
+          `;
+        }
 
         const specA = document.getElementById("newSpecA");
         const specB = document.getElementById("newSpecB");
-
         if (drinkMode) {
           const sa = document.createElement("select");
           sa.id = "newSpecA";
-          sa.innerHTML = SUGAR_OPTS.map((o) => `<option>${o}</option>`).join("");
+          sa.innerHTML = SUGAR_OPTS.map((item) => `<option value="${item}">${item}</option>`).join("");
           specA.replaceWith(sa);
+
           const sb = document.createElement("select");
           sb.id = "newSpecB";
-          sb.innerHTML = ICE_OPTS.map((o) => `<option>${o}</option>`).join("");
+          sb.innerHTML = ICE_OPTS.map((item) => `<option value="${item}">${item}</option>`).join("");
           specB.replaceWith(sb);
         } else {
           const ia = document.createElement("input");
-          ia.id = "newSpecA"; ia.placeholder = "例如：大份";
+          ia.id = "newSpecA";
+          ia.placeholder = "例如：大份";
           specA.replaceWith(ia);
+
           const ib = document.createElement("input");
-          ib.id = "newSpecB"; ib.placeholder = "例如：加辣";
+          ib.id = "newSpecB";
+          ib.placeholder = "例如：加麵";
           specB.replaceWith(ib);
         }
       }
 
       function clearAddRow() {
         document.getElementById("newCustomer").value = "";
-        document.getElementById("newName").value = "";
         document.getElementById("newQty").value = "1";
+
+        const newNameWrap = document.getElementById("newNameWrap");
+        const nameSelect = newNameWrap.querySelector(".item-select");
+        const nameInput = newNameWrap.querySelector(".item-custom-input, #newName");
+        if (nameSelect) nameSelect.value = "";
+        if (nameInput) nameInput.value = "";
+        syncCustomInput(newNameWrap, ".item-select", ".item-custom-input");
+
+        const newAddonField = document.getElementById("newAddonField");
+        const addonSelect = newAddonField.querySelector(".addon-select");
+        const addonInput = newAddonField.querySelector(".addon-custom-input, #newAddon");
+        if (addonSelect) addonSelect.value = "不加料";
+        if (addonInput) addonInput.value = addonSelect ? "" : "";
+        syncCustomInput(newAddonField, ".addon-select", ".addon-custom-input");
+
         document.getElementById("addRowCard").classList.remove("show");
       }
 
       function isLocked() {
-        return (eventData.deadline && new Date(eventData.deadline) < new Date()) ||
-          eventData.status === "closed";
+        return (
+          (eventData.deadline && new Date(eventData.deadline) < new Date()) ||
+          eventData.status === "closed"
+        );
       }
 
       function renderEditArea() {
@@ -229,7 +349,7 @@
 
         const expiredBanner = document.getElementById("expiredBanner");
         if (locked) {
-          expiredBanner.textContent = "此訂單已截止或關閉，無法新增或修改訂單內容。";
+          expiredBanner.textContent = "此訂單已截止或已關閉，目前無法新增、修改或刪除。";
           expiredBanner.classList.add("show");
           document.getElementById("showAddRowBtn").style.display = "none";
         } else {
@@ -241,14 +361,7 @@
         renderOrders(locked);
 
         document.getElementById("lookupArea").style.display = "none";
-        const editArea = document.getElementById("editArea");
-        editArea.style.display = "block";
-        editArea.querySelectorAll(".anim-fade-up").forEach((el, i) => {
-          el.style.animation = "none";
-          el.offsetHeight;
-          el.style.animation = "";
-          el.style.animationDelay = `${i * 60}ms`;
-        });
+        document.getElementById("editArea").style.display = "block";
       }
 
       function renderOrders(locked = false) {
@@ -262,14 +375,15 @@
         }
 
         list.innerHTML = "";
-        orders.forEach((order, oi) => {
+        orders.forEach((order, index) => {
           const specA = order.suger || order.spec_a || "";
           const specB = order.ice || order.spec_b || "";
           const drinkMode = isDrinkEvent();
+          const { itemName, addonName } = parseItemAndAddon(order.name);
 
           const row = document.createElement("div");
           row.className = "order-row anim-fade-up";
-          row.style.animationDelay = `${oi * 40}ms`;
+          row.style.animationDelay = `${index * 40}ms`;
           row.dataset.id = order.id;
           row.innerHTML = `
             <div class="row-view">
@@ -289,21 +403,35 @@
               </div>
               <div class="edit-field">
                 <label>${drinkMode ? "品項" : "餐點名稱"}</label>
-                ${drinkMode
-                  ? buildSearchableItemField("f-name", order.name)
-                  : `<input class="f-name" value="${esc(order.name)}" />`}
+                ${
+                  drinkMode
+                    ? buildItemSelector("f-name", itemName)
+                    : `<input class="f-name" value="${esc(itemName)}" />`
+                }
+              </div>
+              <div class="edit-field${drinkMode ? "" : " full"}">
+                <label>${drinkMode ? "加料" : "備註 / 規格"}</label>
+                ${
+                  drinkMode
+                    ? buildAddonSelector("f-addon", addonName)
+                    : `<input class="f-addon" value="${esc(addonName === "不加料" ? "" : addonName)}" placeholder="請輸入備註 / 規格" />`
+                }
               </div>
               <div class="edit-field">
                 <label>${drinkMode ? "糖度" : "規格一"}</label>
-                ${drinkMode
-                  ? `<select class="f-speca">${SUGAR_OPTS.map((item) => `<option${item === specA ? " selected" : ""}>${item}</option>`).join("")}</select>`
-                  : `<input class="f-speca" value="${esc(specA)}" placeholder="例如：大份" />`}
+                ${
+                  drinkMode
+                    ? `<select class="f-speca">${SUGAR_OPTS.map((item) => `<option value="${item}"${item === specA ? " selected" : ""}>${item}</option>`).join("")}</select>`
+                    : `<input class="f-speca" value="${esc(specA)}" placeholder="例如：大份" />`
+                }
               </div>
               <div class="edit-field">
                 <label>${drinkMode ? "冰量" : "規格二"}</label>
-                ${drinkMode
-                  ? `<select class="f-specb">${ICE_OPTS.map((item) => `<option${item === specB ? " selected" : ""}>${item}</option>`).join("")}</select>`
-                  : `<input class="f-specb" value="${esc(specB)}" placeholder="例如：加辣" />`}
+                ${
+                  drinkMode
+                    ? `<select class="f-specb">${ICE_OPTS.map((item) => `<option value="${item}"${item === specB ? " selected" : ""}>${item}</option>`).join("")}</select>`
+                    : `<input class="f-specb" value="${esc(specB)}" placeholder="例如：加麵" />`
+                }
               </div>
               <div class="edit-field">
                 <label>數量</label>
@@ -313,7 +441,8 @@
                 <button class="btn-ghost cancel-edit-btn">取消</button>
                 <button class="btn-primary save-edit-btn">儲存</button>
               </div>
-            </div>`;
+            </div>
+          `;
 
           if (!locked) {
             row.querySelector(".edit-btn").addEventListener("click", () => {
@@ -322,6 +451,15 @@
             });
             row.querySelector(".del-btn").addEventListener("click", () => deleteRow(order.id));
           }
+
+          row.querySelector(".item-select")?.addEventListener("change", () => {
+            syncCustomInput(row, ".item-select", ".item-custom-input");
+          });
+          row.querySelector(".addon-select")?.addEventListener("change", () => {
+            syncCustomInput(row, ".addon-select", ".addon-custom-input");
+          });
+          syncCustomInput(row, ".item-select", ".item-custom-input");
+          syncCustomInput(row, ".addon-select", ".addon-custom-input");
 
           row.querySelector(".cancel-edit-btn").addEventListener("click", () => {
             row.classList.remove("editing");
@@ -337,17 +475,29 @@
 
       async function loadEvent() {
         const id = document.getElementById("eventIdInput").value.trim();
-        if (!id) { showToast("請先輸入訂單代碼", "warning"); return; }
+        if (!id) {
+          showToast("請先輸入訂單代碼", "warning");
+          return;
+        }
 
         showLoading(true);
         try {
           const resolvedId = await resolveEventId(supabase, id);
-          if (!resolvedId) { showToast("找不到這筆訂單，請確認代碼是否正確。", "error"); return; }
+          if (!resolvedId) {
+            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
+            return;
+          }
 
           const { data, error } = await supabase
-            .from("events").select("*, orders(*)").eq("id", resolvedId).single();
+            .from("events")
+            .select("*, orders(*)")
+            .eq("id", resolvedId)
+            .single();
 
-          if (error || !data) { showToast("找不到這筆訂單，請確認代碼是否正確。", "error"); return; }
+          if (error || !data) {
+            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
+            return;
+          }
 
           eventData = data;
           renderEditArea();
@@ -361,19 +511,26 @@
 
       async function saveRow(row, orderId) {
         const customer = row.querySelector(".f-customer").value.trim();
-        const name = row.querySelector(".f-name").value.trim();
+        const itemName = getSelectOrCustomValue(row, ".f-name", ".f-name.item-custom-input");
+        const addonName = getSelectOrCustomValue(row, ".f-addon", ".f-addon.addon-custom-input");
         const specA = row.querySelector(".f-speca").value || "";
         const specB = row.querySelector(".f-specb").value || "";
         const qty = parseInt(row.querySelector(".f-qty").value, 10) || 1;
+        const name = isDrinkEvent() ? combineItemAndAddon(itemName, addonName) : itemName;
 
-        if (!customer || !name) { showToast("請完整填寫姓名與品項", "warning"); return; }
+        if (!customer || !name) {
+          showToast("請完整填寫姓名與品項", "warning");
+          return;
+        }
 
         showLoading(true);
         try {
           const { data, error } = await supabase
             .from("orders")
             .update({ customer, name, suger: specA, ice: specB, qty })
-            .eq("id", orderId).select().single();
+            .eq("id", orderId)
+            .select()
+            .single();
 
           if (error) throw error;
           const index = eventData.orders.findIndex((item) => item.id === orderId);
@@ -406,19 +563,33 @@
 
       async function addRow() {
         const customer = document.getElementById("newCustomer").value.trim();
-        const name = document.getElementById("newName").value.trim();
+        const itemName = getSelectOrCustomValue(
+          document.getElementById("newNameWrap"),
+          ".new-name-input",
+          ".new-name-input.item-custom-input",
+        );
+        const addonName = getSelectOrCustomValue(
+          document.getElementById("newAddonField"),
+          ".new-addon-input",
+          ".new-addon-input.addon-custom-input",
+        );
         const specA = document.getElementById("newSpecA").value || "";
         const specB = document.getElementById("newSpecB").value || "";
         const qty = parseInt(document.getElementById("newQty").value, 10) || 1;
+        const name = isDrinkEvent() ? combineItemAndAddon(itemName, addonName) : itemName;
 
-        if (!customer || !name) { showToast("請完整填寫姓名與品項", "warning"); return; }
+        if (!customer || !name) {
+          showToast("請完整填寫姓名與品項", "warning");
+          return;
+        }
 
         showLoading(true);
         try {
           const { data, error } = await supabase
             .from("orders")
             .insert([{ event_id: eventData.id, customer, name, suger: specA, ice: specB, qty }])
-            .select().single();
+            .select()
+            .single();
 
           if (error) throw error;
           eventData.orders.push(data);
@@ -439,8 +610,8 @@
       document.getElementById("cancelAddBtn").addEventListener("click", clearAddRow);
       document.getElementById("confirmAddBtn").addEventListener("click", addRow);
       document.getElementById("loadBtn").addEventListener("click", loadEvent);
-      document.getElementById("eventIdInput").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") loadEvent();
+      document.getElementById("eventIdInput").addEventListener("keypress", (event) => {
+        if (event.key === "Enter") loadEvent();
       });
 
       const urlEvent = new URLSearchParams(location.search).get("event");

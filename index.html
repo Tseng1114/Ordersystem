@@ -6,7 +6,10 @@
     <title>首頁 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap " rel="stylesheet"/>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/index_style.css" />
@@ -23,33 +26,104 @@
       </div>
 
       <div class="announce-card anim-fade-up anim-fade-up-d1">
-        <div class="announce-header">系統公告</div>
+        <div class="announce-header">最新公告</div>
         <div id="announce-list"></div>
       </div>
+
+      <section class="guide-card anim-fade-up anim-fade-up-d2">
+        <div class="guide-header">使用流程</div>
+        <p class="guide-intro">
+          從建立訂單到分享、下單與修改，一頁看懂整個點餐流程。
+        </p>
+
+        <div class="flow-lane">
+          <div class="flow-lane-head">
+            <span class="flow-badge">主揪</span>
+            <h2>發起與管理流程</h2>
+          </div>
+          <div class="flow-chart">
+            <article class="flow-node">
+              <span class="flow-node-no">01</span>
+              <h3>建立訂單</h3>
+              <p>選擇店家與截止時間，建立這次的點餐活動。</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <article class="flow-node">
+              <span class="flow-node-no">02</span>
+              <h3>分享連結</h3>
+              <p>把連結貼到群組，讓大家可以直接進入下單頁。</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <article class="flow-node">
+              <span class="flow-node-no">03</span>
+              <h3>查看摘要</h3>
+              <p>隨時確認目前有哪些人下單、各品項有幾份。</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <article class="flow-node">
+              <span class="flow-node-no">04</span>
+              <h3>必要時修改</h3>
+              <p>若有人填錯內容，可在截止前進入修改訂單頁調整。</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="flow-lane flow-lane-soft">
+          <div class="flow-lane-head">
+            <span class="flow-badge flow-badge-soft">點餐者</span>
+            <h2>填單流程</h2>
+          </div>
+          <div class="flow-chart flow-chart-compact">
+            <article class="flow-node">
+              <span class="flow-node-no">01</span>
+              <h3>打開連結</h3>
+              <p>從主揪分享的網址進入對應的訂單頁面。</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <article class="flow-node">
+              <span class="flow-node-no">02</span>
+              <h3>選擇餐點</h3>
+              <p>填寫姓名、品項、糖冰或規格，確認數量後送出。</p>
+            </article>
+            <div class="flow-arrow" aria-hidden="true"></div>
+            <article class="flow-node">
+              <span class="flow-node-no">03</span>
+              <h3>截止前調整</h3>
+              <p>如果需要修正內容，可在截止前請主揪協助修改。</p>
+            </article>
+          </div>
+        </div>
+      </section>
     </div>
 
     <div class="fab-group">
       <button class="fab fab-line" id="fabLine" title="加入 LINE Bot">
         <img src="./line_icon/line_icon.jpeg" alt="LINE" class="fab-line-img" />
       </button>
-      <button class="fab fab-top" id="fabTop" title="回到頂端">↑</button>
+      <button class="fab fab-top" id="fabTop" title="回到頂部">↑</button>
     </div>
 
     <div class="modal-overlay" id="lineModal">
       <div class="modal-box">
-        <button class="modal-close" id="modalClose">✕</button>
-        <h2>加入小九 LINE Bot</h2>
-        <p>掃描 QR code 或點下方按鈕加入，<br />即可查詢訂單明細！</p>
+        <button class="modal-close" id="modalClose">×</button>
+        <h2>加入官方 LINE Bot</h2>
+        <p>
+          掃描 QR code 或點下方按鈕加入 LINE，
+          <br />
+          之後也可以透過它查詢訂單資訊。
+        </p>
         <img src="./linebot_qrcode/preview.webp" alt="LINE Bot QR Code" />
         <br />
-        <a class="modal-line-btn" href="https://line.me/R/ti/p/@962ujidb" target="_blank">開啟 LINE 加入</a>
+        <a class="modal-line-btn" href="https://line.me/R/ti/p/@962ujidb" target="_blank">前往加入 LINE</a>
       </div>
     </div>
 
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p class="disclaimer">
+          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
+        </p>
       </div>
     </footer>
 
@@ -63,17 +137,19 @@
       const ANNOUNCEMENTS = [
         {
           date: "2026/03/10",
-          text: "加入小九 LINE Bot，可直接透過 LINE 查詢訂單明細，點右下角綠色按鈕加入",
+          text: "加入官方 LINE Bot 後，可以更快查詢訂單與修改相關資訊。",
         },
         {
           date: "2026/03/12",
-          text: "修改訂單功能尚未完成，請勿使用。目前點擊下去會導到首頁",
+          text: "修改訂單頁面已優化，現在可以更順手調整內容。",
         },
-        { date: "2026/03/13", 
-          text: "修改訂單功能已更新完成" 
+        {
+          date: "2026/03/13",
+          text: "建立訂單時已補上必要欄位驗證，避免漏填店家或截止時間。",
         },
-        { date: "2026/03/24", 
-          text: "根據每一間店，新增品項下拉選單" 
+        {
+          date: "2026/03/24",
+          text: "首頁新增流程圖式使用流程，第一次使用也能快速上手。",
         },
       ];
 
@@ -81,18 +157,20 @@
       list.innerHTML = ANNOUNCEMENTS.slice()
         .reverse()
         .map(
-          (a, i) => `
-        <div class="announce-item anim-fade-up" style="animation-delay:${i * 60 + 120}ms">
-          <div class="announce-date">${a.date}</div>
-          <div class="announce-content">${a.text}</div>
-        </div>`,
+          (item, index) => `
+            <div class="announce-item anim-fade-up" style="animation-delay:${index * 60 + 120}ms">
+              <div class="announce-date">${item.date}</div>
+              <div class="announce-content">${item.text}</div>
+            </div>
+          `,
         )
         .join("");
 
       const fabTop = document.getElementById("fabTop");
-      fabTop.addEventListener("click", () =>
-        window.scrollTo({ top: 0, behavior: "smooth" }),
-      );
+      fabTop.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
       window.addEventListener("scroll", () => {
         fabTop.classList.toggle("show", window.scrollY > 300);
       });
@@ -109,8 +187,8 @@
         lineModal.classList.remove("show");
       });
 
-      lineModal.addEventListener("click", (e) => {
-        if (e.target === lineModal) {
+      lineModal.addEventListener("click", (event) => {
+        if (event.target === lineModal) {
           lineModal.classList.remove("show");
         }
       });

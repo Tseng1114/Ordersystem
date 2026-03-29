@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
     <div class="wrap">
@@ -105,6 +104,7 @@
       let itemListCounter = 0;
       let countdownTimer = null;      
       let deadlineDate = null;        
+      let menuLoadTimer = null;
 
       const SUGAR_OPTIONS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
       const ICE_OPTIONS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
@@ -156,9 +156,17 @@
         const link = document.getElementById("menuOpenLink");
         const [shopKey, shopMeta] = currentShop || [];
         if (!shopMeta) { section.classList.add("hidden"); frame.removeAttribute("src"); return; }
-        frame.src = `menu.html?shop=${shopKey}&embed=1`;
+        frame.removeAttribute("src");
         link.href = `menu.html?shop=${shopKey}`;
         section.classList.remove("hidden");
+
+        if (menuLoadTimer) {
+          clearTimeout(menuLoadTimer);
+        }
+
+        menuLoadTimer = setTimeout(() => {
+          frame.src = `menu.html?shop=${shopKey}&embed=1`;
+        }, 350);
       }
 
       function formatCountdown(ms) {
@@ -347,6 +355,9 @@
       });
 
       window.addEventListener("beforeunload", () => {
+        if (menuLoadTimer) {
+          clearTimeout(menuLoadTimer);
+        }
         clearInterval(countdownTimer);
       });
     </script>

@@ -22,11 +22,21 @@ export function showToast(message, type = "info", duration = 3200) {
   const container = getToastContainer();
   const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <span class="toast-icon">${TOAST_ICONS[type] ?? "*"}</span>
-    <span class="toast-msg">${message}</span>
-    <button class="toast-close" aria-label="Close">x</button>
-  `;
+  const icon = document.createElement("span");
+  icon.className = "toast-icon";
+  icon.textContent = TOAST_ICONS[type] ?? "*";
+
+  const text = document.createElement("span");
+  text.className = "toast-msg";
+  text.textContent = String(message ?? "");
+
+  const closeButton = document.createElement("button");
+  closeButton.className = "toast-close";
+  closeButton.setAttribute("aria-label", "Close");
+  closeButton.type = "button";
+  closeButton.textContent = "x";
+
+  toast.append(icon, text, closeButton);
 
   const close = () => {
     if (!toast.isConnected) return;
@@ -36,7 +46,7 @@ export function showToast(message, type = "info", duration = 3200) {
     });
   };
 
-  toast.querySelector(".toast-close").addEventListener("click", close);
+  closeButton.addEventListener("click", close);
   container.appendChild(toast);
 
   requestAnimationFrame(() => {

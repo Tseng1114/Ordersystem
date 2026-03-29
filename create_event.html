@@ -188,19 +188,22 @@
                 status: "open",
               },
             ])
-            .select();
+            .select("id")
+            .single();
 
           if (error) throw error;
 
-          const id = data[0].id;
+          const id = data.id;
           const shortId = getEventCode(id);
           const orderURL = new URL("order.html", location.href);
-          orderURL.searchParams.set("event", shortId);
+          const shareOrderURL = new URL("order.html", location.href);
+          orderURL.searchParams.set("event", id);
+          shareOrderURL.searchParams.set("event", shortId);
 
           const d = new Date(deadline);
           const deadlineText = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
-          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n點餐連結：${orderURL.toString()}`;
+          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n點餐連結：${shareOrderURL.toString()}`;
           document.querySelector("#shareMsg").value = finalMsg;
           const resultEl = document.querySelector("#result");
           resultEl.classList.remove("hidden");

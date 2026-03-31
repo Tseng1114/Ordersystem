@@ -78,6 +78,7 @@
     <script type="module">
       import { initNavbar } from "./navbar.js";
       import { initRipple } from "./ui-utils.js";
+      import usageFlowHtml from "./usage_flow.html?raw";
 
       initNavbar();
       initRipple(".fab, .modal-line-btn, .modal-close, .sw-btn, .sw-dot");
@@ -227,16 +228,11 @@
         goTo(0);
       }
 
-      async function loadUsageFlow() {
+      function loadUsageFlow() {
         const slot = document.getElementById("usage-flow-slot");
 
         try {
-          const response = await fetch("./usage_flow.html");
-          if (!response.ok) {
-            throw new Error(`Failed to load usage flow: ${response.status}`);
-          }
-
-          slot.innerHTML = await response.text();
+          slot.innerHTML = usageFlowHtml;
           const section = slot.querySelector(".howto-section");
           if (section) initUsageFlow(section);
         } catch (error) {

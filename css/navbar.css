@@ -1,8 +1,8 @@
 :root {
-  --nb-bg: #0f172a;
-  --nb-accent: #f59e0b;
-  --nb-text: #e2e8f0;
-  --nb-dropdown-bg: #1e293b;
+  --nb-bg: #4b433e;
+  --nb-accent: #e3d5ca;
+  --nb-text: #f8f4ef;
+  --nb-dropdown-bg: #5a514b;
   --nb-height: 58px;
 }
 
@@ -15,8 +15,8 @@
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
-  border-bottom: 2px solid var(--nb-accent);
+  box-shadow: 0 10px 30px rgba(75, 67, 62, 0.18);
+  border-bottom: 1px solid rgba(227, 213, 202, 0.4);
   box-sizing: border-box;
 }
 
@@ -76,7 +76,7 @@
 .nb__group:hover .nb__group-btn,
 .nb__group:focus-within .nb__group-btn {
   color: var(--nb-accent);
-  background: rgba(245,158,11,0.07);
+  background: rgba(227,213,202,0.12);
   border-bottom-color: var(--nb-accent);
 }
 
@@ -91,9 +91,9 @@
   left: 0;
   min-width: 150px;
   background: var(--nb-dropdown-bg);
-  border: 1px solid rgba(245,158,11,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  box-shadow: 0 18px 34px rgba(75, 67, 62, 0.2);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
@@ -122,14 +122,14 @@
 }
 
 .nb__dropdown a:hover {
-  background: rgba(245,158,11,0.13);
+  background: rgba(227,213,202,0.12);
   color: var(--nb-accent);
   border-left-color: var(--nb-accent);
 }
 
 .nb__dropdown a.nb__active {
   color: var(--nb-accent);
-  background: rgba(245,158,11,0.1);
+  background: rgba(227,213,202,0.1);
   border-left-color: var(--nb-accent);
   font-weight: 600;
 }
@@ -164,8 +164,8 @@
     background: var(--nb-bg);
     flex-direction: column;
     align-items: stretch;
-    border-top: 1px solid rgba(245,158,11,0.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 16px 36px rgba(75,67,62,0.22);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
@@ -202,7 +202,7 @@
     box-shadow: none;
     border: none;
     border-radius: 0;
-    background: rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.03);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.25s ease;

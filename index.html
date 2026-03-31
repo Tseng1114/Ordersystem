@@ -13,117 +13,65 @@
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/index_style.css" />
+    <link rel="stylesheet" href="css/usage_flow.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <div id="navbar-root"></div>
 
     <div class="page-wrap">
       <div class="title-wrap anim-fade-up">
-        <h1 class="title">曾可愛家族點餐系統</h1>
+        <h1 class="title">首頁</h1>
       </div>
 
-      <div class="announce-card anim-fade-up anim-fade-up-d1">
-        <div class="announce-header">最新公告</div>
+      <section class="announce-card anim-fade-up anim-fade-up-d1" aria-labelledby="announce-title">
+        <div class="announce-header-wrap">
+          <div>
+            <p class="announce-eyebrow">Update Feed</p>
+            <div class="announce-header" id="announce-title">最新公告</div>
+          </div>
+        </div>
         <div id="announce-list"></div>
-      </div>
-
-      <section class="guide-card anim-fade-up anim-fade-up-d2">
-        <div class="guide-header">使用流程</div>
-        <p class="guide-intro">
-          從建立訂單到分享、下單與修改，一頁看懂整個點餐流程。
-        </p>
-
-        <div class="flow-lane">
-          <div class="flow-lane-head">
-            <span class="flow-badge">主揪</span>
-            <h2>發起與管理流程</h2>
-          </div>
-          <div class="flow-chart">
-            <article class="flow-node">
-              <span class="flow-node-no">01</span>
-              <h3>建立訂單</h3>
-              <p>選擇店家與截止時間，建立這次的點餐活動。</p>
-            </article>
-            <div class="flow-arrow" aria-hidden="true"></div>
-            <article class="flow-node">
-              <span class="flow-node-no">02</span>
-              <h3>分享連結</h3>
-              <p>把連結貼到群組，讓大家可以直接進入下單頁。</p>
-            </article>
-            <div class="flow-arrow" aria-hidden="true"></div>
-            <article class="flow-node">
-              <span class="flow-node-no">03</span>
-              <h3>查看摘要</h3>
-              <p>隨時確認目前有哪些人下單、各品項有幾份。</p>
-            </article>
-            <div class="flow-arrow" aria-hidden="true"></div>
-            <article class="flow-node">
-              <span class="flow-node-no">04</span>
-              <h3>必要時修改</h3>
-              <p>若有人填錯內容，可在截止前進入修改訂單頁調整。</p>
-            </article>
-          </div>
-        </div>
-
-        <div class="flow-lane flow-lane-soft">
-          <div class="flow-lane-head">
-            <span class="flow-badge flow-badge-soft">點餐者</span>
-            <h2>填單流程</h2>
-          </div>
-          <div class="flow-chart flow-chart-compact">
-            <article class="flow-node">
-              <span class="flow-node-no">01</span>
-              <h3>打開連結</h3>
-              <p>從主揪分享的網址進入對應的訂單頁面。</p>
-            </article>
-            <div class="flow-arrow" aria-hidden="true"></div>
-            <article class="flow-node">
-              <span class="flow-node-no">02</span>
-              <h3>選擇餐點</h3>
-              <p>填寫姓名、品項、糖冰或規格，確認數量後送出。</p>
-            </article>
-            <div class="flow-arrow" aria-hidden="true"></div>
-            <article class="flow-node">
-              <span class="flow-node-no">03</span>
-              <h3>截止前調整</h3>
-              <p>如果需要修正內容，可在截止前請主揪協助修改。</p>
-            </article>
-          </div>
-        </div>
       </section>
+
+      <div id="usage-flow-slot"></div>
     </div>
 
     <div class="fab-group">
-      <button class="fab fab-line" id="fabLine" title="加入 LINE Bot">
-        <img src="./line_icon/line_icon.jpeg" alt="LINE" class="fab-line-img" />
+      <button class="fab fab-line" id="fabLine" title="加入 LINE Bot" type="button">
+        <img src="/line_icon/line_icon.jpeg" alt="LINE" class="fab-line-img" />
       </button>
-      <button class="fab fab-top" id="fabTop" title="回到頂部">↑</button>
+      <button class="fab fab-top" id="fabTop" title="回到頂部" type="button">↑</button>
     </div>
 
     <div class="modal-overlay" id="lineModal">
       <div class="modal-box">
-        <button class="modal-close" id="modalClose">×</button>
-        <h2>加入官方 LINE Bot</h2>
+        <button class="modal-close" id="modalClose" type="button">×</button>
+        <h2>加入 LINE Bot</h2>
         <p>
-          掃描 QR code 或點下方按鈕加入 LINE，
+          掃描下方 QR Code 就能快速加入，
           <br />
-          之後也可以透過它查詢訂單資訊。
+          之後可直接在 LINE 中查詢訂單資訊。
         </p>
-        <img src="./linebot_qrcode/preview.webp" alt="LINE Bot QR Code" />
+        <img src="/linebot_qrcode/preview.webp" alt="LINE Bot QR Code" />
         <br />
-        <a class="modal-line-btn" href="https://line.me/R/ti/p/@962ujidb" target="_blank">前往加入 LINE</a>
+        <a
+          class="modal-line-btn"
+          href="https://line.me/R/ti/p/@962ujidb"
+          target="_blank"
+          rel="noreferrer"
+        >
+          前往 LINE 加入
+        </a>
       </div>
     </div>
 
     <footer class="footer">
       <div class="footer-content">
         <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">
-          本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。
-        </p>
+        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
       </div>
     </footer>
 
@@ -132,41 +80,79 @@
       import { initRipple } from "./ui-utils.js";
 
       initNavbar();
-      initRipple(".fab, .modal-line-btn, .modal-close");
+      initRipple(".fab, .modal-line-btn, .modal-close, .sw-btn, .sw-dot");
 
       const ANNOUNCEMENTS = [
         {
-          date: "2026/03/10",
-          text: "加入官方 LINE Bot 後，可以更快查詢訂單與修改相關資訊。",
+          date: "2026/03/31",
+          tag: "新功能",
+          title: "首頁加入使用流程導覽",
+          text: "第一次使用的使用者現在可以直接在首頁快速了解建立訂單、分享、填單與查詢流程。",
         },
         {
-          date: "2026/03/12",
-          text: "修改訂單頁面已優化，現在可以更順手調整內容。",
+          date: "2026/03/23",
+          tag: "優化",
+          title: "加入各家店的品項(飲料)",
+          text: "提供下拉式選單，增加使用者體驗，減少輸入錯誤的機會，讓填單更順暢。",
         },
         {
           date: "2026/03/13",
-          text: "建立訂單時已補上必要欄位驗證，避免漏填店家或截止時間。",
+          tag: "優化",
+          title: "查詢入口調整完成",
+          text: "查詢頁與後續整理流程更直覺，主揪可以更快找到訂單、統計頁與編輯頁。",
         },
         {
-          date: "2026/03/24",
-          text: "首頁新增流程圖式使用流程，第一次使用也能快速上手。",
+          date: "2026/03/12",
+          tag: "優化",
+          title: "建立訂單流程更順",
+          text: "建立後可直接取得分享連結與訂單代碼，轉貼到群組時更方便。",
+        },
+        {
+          date: "2026/03/10",
+          tag: "新功能",
+          title: "LINE Bot 已上線",
+          text: "現在可以透過 LINE 查詢活動資訊與訂單狀態，減少來回切換頁面的次數。",
         },
       ];
 
-      const list = document.getElementById("announce-list");
-      list.innerHTML = ANNOUNCEMENTS.slice()
-        .reverse()
-        .map(
-          (item, index) => `
-            <div class="announce-item anim-fade-up" style="animation-delay:${index * 60 + 120}ms">
-              <div class="announce-date">${item.date}</div>
-              <div class="announce-content">${item.text}</div>
-            </div>
-          `,
-        )
-        .join("");
+      const announceList = document.getElementById("announce-list");
+      const [featuredAnnouncement, ...timelineAnnouncements] = ANNOUNCEMENTS;
+
+      announceList.innerHTML = `
+        <article class="announce-featured anim-fade-up" style="animation-delay:120ms">
+          <div class="announce-featured-head">
+            <span class="announce-tag announce-tag-featured">${featuredAnnouncement.tag}</span>
+            <span class="announce-date">${featuredAnnouncement.date}</span>
+          </div>
+          <h3 class="announce-featured-title">${featuredAnnouncement.title}</h3>
+          <p class="announce-featured-content">${featuredAnnouncement.text}</p>
+        </article>
+        <div class="announce-timeline">
+          ${timelineAnnouncements
+            .map(
+              (item, index) => `
+                <article class="announce-item anim-fade-up" style="animation-delay:${index * 70 + 180}ms">
+                  <div class="announce-line-dot" aria-hidden="true"></div>
+                  <div class="announce-body">
+                    <div class="announce-meta">
+                      <span class="announce-tag">${item.tag}</span>
+                      <span class="announce-date">${item.date}</span>
+                    </div>
+                    <h3 class="announce-item-title">${item.title}</h3>
+                    <p class="announce-content">${item.text}</p>
+                  </div>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
+      `;
 
       const fabTop = document.getElementById("fabTop");
+      const fabLine = document.getElementById("fabLine");
+      const lineModal = document.getElementById("lineModal");
+      const modalClose = document.getElementById("modalClose");
+
       fabTop.addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
@@ -175,23 +161,98 @@
         fabTop.classList.toggle("show", window.scrollY > 300);
       });
 
-      const fabLine = document.getElementById("fabLine");
-      const lineModal = document.getElementById("lineModal");
-      const modalClose = document.getElementById("modalClose");
-
-      fabLine.addEventListener("click", () => {
-        lineModal.classList.add("show");
-      });
-
-      modalClose.addEventListener("click", () => {
-        lineModal.classList.remove("show");
-      });
-
+      fabLine.addEventListener("click", () => lineModal.classList.add("show"));
+      modalClose.addEventListener("click", () => lineModal.classList.remove("show"));
       lineModal.addEventListener("click", (event) => {
         if (event.target === lineModal) {
           lineModal.classList.remove("show");
         }
       });
+
+      function initUsageFlow(root) {
+        const track = root.querySelector(".sw-track");
+        const progress = root.querySelector(".sw-progress-fill");
+        const counter = root.querySelector(".sw-counter");
+        const prevButton = root.querySelector('[data-action="prev"]');
+        const nextButton = root.querySelector('[data-action="next"]');
+        const dots = [...root.querySelectorAll(".sw-dot")];
+        const viewport = root.querySelector(".sw-viewport");
+        const total = dots.length;
+        let current = 0;
+        let touchStartX = 0;
+
+        function goTo(index) {
+          current = Math.max(0, Math.min(total - 1, index));
+          track.style.transform = `translateX(-${current * 100}%)`;
+          progress.style.width = `${((current + 1) / total) * 100}%`;
+          counter.textContent = `${current + 1} / ${total}`;
+          prevButton.disabled = current === 0;
+          nextButton.disabled = current === total - 1;
+          dots.forEach((dot, dotIndex) => {
+            dot.classList.toggle("active", dotIndex === current);
+          });
+        }
+
+        prevButton.addEventListener("click", () => goTo(current - 1));
+        nextButton.addEventListener("click", () => goTo(current + 1));
+        dots.forEach((dot, index) => {
+          dot.addEventListener("click", () => goTo(index));
+        });
+
+        viewport.addEventListener(
+          "touchstart",
+          (event) => {
+            touchStartX = event.touches[0].clientX;
+          },
+          { passive: true },
+        );
+
+        viewport.addEventListener(
+          "touchend",
+          (event) => {
+            const diff = touchStartX - event.changedTouches[0].clientX;
+            if (Math.abs(diff) > 40) {
+              goTo(diff > 0 ? current + 1 : current - 1);
+            }
+          },
+          { passive: true },
+        );
+
+        document.addEventListener("keydown", (event) => {
+          if (!root.isConnected) return;
+          if (event.key === "ArrowRight") goTo(current + 1);
+          if (event.key === "ArrowLeft") goTo(current - 1);
+        });
+
+        goTo(0);
+      }
+
+      async function loadUsageFlow() {
+        const slot = document.getElementById("usage-flow-slot");
+
+        try {
+          const response = await fetch("./usage_flow.html");
+          if (!response.ok) {
+            throw new Error(`Failed to load usage flow: ${response.status}`);
+          }
+
+          slot.innerHTML = await response.text();
+          const section = slot.querySelector(".howto-section");
+          if (section) initUsageFlow(section);
+        } catch (error) {
+          console.error(error);
+          slot.innerHTML = `
+            <section class="announce-card anim-fade-up anim-fade-up-d2">
+              <div class="announce-header">使用流程</div>
+              <div class="announce-content">
+                流程區塊載入失敗，請稍後重新整理頁面。
+              </div>
+            </section>
+          `;
+        }
+      }
+
+      loadUsageFlow();
     </script>
   </body>
 </html>

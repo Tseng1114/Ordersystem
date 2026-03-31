@@ -7,10 +7,10 @@
 }
 body {
   font-family: "Noto Sans TC", sans-serif;
-  background: #f1f5f9;
-  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background: #edede9;
+  background-image: radial-gradient(#d6ccc2 1px, transparent 1px);
   background-size: 32px 32px;
-  color: #1e293b;
+  color: #4b433e;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -29,10 +29,10 @@ body {
 }
 
 .search-card {
-  background: #fff;
-  border: 2px solid #1e293b;
+  background: #f5ebe0;
+  border: 1.5px solid #d6ccc2;
   border-radius: 20px;
-  box-shadow: 6px 6px 0 #1e293b;
+  box-shadow: 0 18px 40px rgba(75, 67, 62, 0.08);
   padding: 32px 28px;
   margin-bottom: 24px;
 }
@@ -40,7 +40,7 @@ body {
   display: block;
   font-weight: 700;
   font-size: 0.88rem;
-  color: #475569;
+  color: #7b736c;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -53,8 +53,8 @@ body {
   flex: 1;
   height: 44px;
   padding: 0 14px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
+  border: 1.5px solid #d6ccc2;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-family: "Noto Sans TC", sans-serif;
   outline: none;
@@ -76,17 +76,17 @@ body {
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
-  background: #1e293b;
+  background: #4b433e;
   color: #fff;
   border: none;
   cursor: pointer;
-  box-shadow: 3px 3px 0 rgba(30, 41, 59, 0.2);
+  box-shadow: 0 14px 24px rgba(75, 67, 62, 0.14);
   transition: all 0.15s;
   white-space: nowrap;
 }
 .search-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 rgba(30, 41, 59, 0.25);
+  box-shadow: 0 18px 28px rgba(75, 67, 62, 0.18);
 }
 .search-btn:active {
   transform: translate(1px, 1px);
@@ -97,10 +97,10 @@ body {
   display: none;
 }
 .result-card {
-  background: #fff;
-  border: 2px solid #1e293b;
+  background: #f5ebe0;
+  border: 1.5px solid #d6ccc2;
   border-radius: 20px;
-  box-shadow: 6px 6px 0 #1e293b;
+  box-shadow: 0 18px 40px rgba(75, 67, 62, 0.08);
   padding: 32px 28px;
 }
 
@@ -115,7 +115,7 @@ body {
 .result-head h2 {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #4b433e;
   margin: 0;
 }
 
@@ -123,8 +123,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background: #f8f1e8;
+  border: 1px dashed #d6ccc2;
   border-radius: 8px;
   padding: 8px 14px;
   margin-bottom: 10px;
@@ -132,11 +132,11 @@ body {
 .id-row code {
   flex: 1;
   font-size: 0.82rem;
-  color: #475569;
+  color: #7b736c;
   word-break: break-all;
 }
 .copy-id-btn {
-  background: #e2e8f0;
+  background: #e3d5ca;
   border: none;
   border-radius: 6px;
   padding: 4px 10px;
@@ -147,12 +147,12 @@ body {
   transition: background 0.15s;
 }
 .copy-id-btn:hover {
-  background: #cbd5e1;
+  background: #d5bdaf;
 }
 
 .meta-row {
   font-size: 0.87rem;
-  color: #64748b;
+  color: #7b736c;
   margin-bottom: 4px;
 }
 .meta-row span {
@@ -165,7 +165,7 @@ body {
 }
 .person-name {
   font-weight: 700;
-  color: #0f172a;
+  color: #4b433e;
   font-size: 0.97rem;
   margin-bottom: 6px;
   display: flex;
@@ -182,8 +182,8 @@ body {
   flex-shrink: 0;
 }
 .order-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #f8f1e8;
+  border: 1px solid #d6ccc2;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.88rem;
@@ -198,7 +198,7 @@ body {
   font-weight: 600;
 }
 .order-item-spec {
-  color: #64748b;
+  color: #7b736c;
   font-size: 0.82rem;
 }
 .order-item-qty {
@@ -231,20 +231,20 @@ body {
   cursor: pointer;
   transition: all 0.15s;
   text-decoration: none;
-  border: 1.5px solid #1e293b;
+  border: 1.5px solid #bca99b;
   white-space: nowrap;
 }
 .btn-ghost {
-  background: #f1f5f9;
-  color: #475569;
-  box-shadow: 2px 2px 0 #1e293b;
+  background: #e3d5ca;
+  color: #6b635d;
+  box-shadow: 0 10px 18px rgba(75, 67, 62, 0.1);
 }
 .btn-ghost:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 #1e293b;
+  box-shadow: 0 14px 22px rgba(75, 67, 62, 0.12);
 }
 .btn-dark {
-  background: #1e293b;
+  background: #4b433e;
   color: #fff;
   box-shadow: 2px 2px 0 rgba(30, 41, 59, 0.4);
 }
@@ -260,7 +260,7 @@ body {
   .search-card,
   .result-card {
     padding: 24px 20px;
-    box-shadow: 4px 4px 0 #1e293b;
+    box-shadow: 0 14px 24px rgba(75, 67, 62, 0.12);
   }
   .result-footer {
     flex-direction: column;

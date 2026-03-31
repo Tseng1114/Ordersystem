@@ -3,12 +3,12 @@
 }
 body {
   font-family: "Noto Sans TC", sans-serif;
-  background: #f1f5f9;
-  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background: #edede9;
+  background-image: radial-gradient(#d6ccc2 1px, transparent 1px);
   background-size: 32px 32px;
   min-height: 100vh;
   margin: 0;
-  color: #1e293b;
+  color: #4b433e;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -16,11 +16,12 @@ body {
   position: sticky;
   top: var(--nb-height, 58px);
   z-index: 500;
-  background: #fff;
-  border-bottom: 2px solid #1e293b;
+  background: rgba(255, 253, 248, 0.92);
+  border-bottom: 1.5px solid #d7ddd6;
   display: flex;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+  backdrop-filter: blur(10px);
 }
 .tab-btn {
   padding: 0.9rem 2.5rem;
@@ -31,7 +32,7 @@ body {
   font-family: "Noto Sans TC", sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  color: #64748b;
+  color: #667085;
   cursor: pointer;
   transition: all 0.18s;
   display: flex;
@@ -39,12 +40,12 @@ body {
   gap: 6px;
 }
 .tab-btn.active {
-  color: #0f172a;
+  color: #1f2937;
   border-bottom-color: #f59e0b;
 }
 .tab-btn:hover:not(.active) {
   color: #334155;
-  background: #f8fafc;
+  background: #faf7f0;
 }
 
 .list-wrap {
@@ -62,7 +63,7 @@ body {
 .section-title {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #1f2937;
   margin: 0 0 1.4rem;
   display: flex;
   align-items: center;
@@ -93,19 +94,19 @@ body {
   align-items: center;
   gap: 14px;
   padding: 18px 16px;
-  background: #fff;
-  border: 1.5px solid #1e293b;
+  background: #fffdf8;
+  border: 1.5px solid #d7ddd6;
   border-radius: 14px;
   text-decoration: none;
-  color: #1e293b;
-  box-shadow: 4px 4px 0 #1e293b;
+  color: #1f2937;
+  box-shadow: 0 16px 26px rgba(31, 41, 55, 0.08);
   transition: all 0.17s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .shop-card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #1e293b;
-  background: #fffbeb;
+  box-shadow: 0 20px 30px rgba(31, 41, 55, 0.12);
+  background: #fff8eb;
 }
 .shop-logo {
   width: 54px;
@@ -113,7 +114,7 @@ body {
   flex-shrink: 0;
   object-fit: contain;
   border-radius: 10px;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid #e7e2d8;
   padding: 5px;
   background: #fff;
 }
@@ -126,21 +127,21 @@ body {
 .shop-info small {
   display: block;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #667085;
 }
 
 #menuView {
   display: none;
 }
 .menu-header {
-  background: #0f172a;
+  background: linear-gradient(135deg, #1f2937, #334155);
   color: #fff;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 54px;
-  border-bottom: 2px solid #f59e0b;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.32);
   position: sticky;
   top: var(--nb-height, 58px);
   z-index: 500;
@@ -148,7 +149,7 @@ body {
 .menu-back-btn {
   background: none;
   border: none;
-  color: #f59e0b;
+  color: #ffd27a;
   font-family: "Noto Sans TC", sans-serif;
   font-size: 0.93rem;
   font-weight: 600;
@@ -162,7 +163,7 @@ body {
   flex-shrink: 0;
 }
 .menu-back-btn:hover {
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(255, 210, 122, 0.14);
 }
 #menuShopTitle {
   font-size: 1.05rem;
@@ -182,8 +183,8 @@ body {
 .menu-img-wrap img {
   width: 100%;
   border-radius: 14px;
-  border: 1.5px solid #1e293b;
-  box-shadow: 4px 4px 0 #1e293b;
+  border: 1.5px solid #d7ddd6;
+  box-shadow: 0 18px 32px rgba(31, 41, 55, 0.1);
   display: block;
 }
 

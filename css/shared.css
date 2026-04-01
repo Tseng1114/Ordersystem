@@ -1,15 +1,16 @@
 :root {
-  --navy: #4b433e;
-  --navy-soft: #6b635d;
-  --accent: #d5bdaf;
-  --accent-light: #f5ebe0;
-  --bg-body: #ededE9;
-  --white: #f5ebe0;
-  --surface-soft: #e3d5ca;
-  --border-color: #d6ccc2;
-  --text-main: #3f3a36;
-  --muted-text: #7b736c;
-  --radius: 24px;
+  --navy: #1a1008;
+  --navy-soft: #3d2200;
+  --accent: #ff6b1a;
+  --accent-light: #fff0e8;
+  --accent-mid: #ffd8c0;
+  --bg-body: #ffffff;
+  --white: #ffffff;
+  --surface-soft: #fff7f2;
+  --border-color: #ffe0cc;
+  --text-main: #1a1008;
+  --text-muted: #8a6a5a;
+  --radius: 16px;
   --transition-bounce: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   --transition-smooth: all 0.18s ease;
 }
@@ -39,7 +40,7 @@
   height: 5px;
   background: var(--accent);
   border-radius: 10px;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .badge {
@@ -65,7 +66,7 @@
 
 .divider {
   border: none;
-  border-top: 2px dashed #d8ddd6;
+  border-top: 2px dashed var(--accent-mid);
   margin: 32px 0;
 }
 
@@ -73,8 +74,8 @@
   text-align: center;
   padding: 48px 24px;
   font-size: 0.85rem;
-  color: var(--muted-text);
-  border-top: 1px solid #e7e2d8;
+  color: var(--text-muted);
+  border-top: 1px solid var(--accent-mid);
 }
 
 .footer p + p { margin-top: 6px; }
@@ -88,11 +89,11 @@
 
 .empty-state {
   text-align: center;
-  color: #94a3b8;
+  color: #8a6a5a;
   padding: 4rem 20px;
   font-size: 1rem;
   background: var(--white);
-  border: 2px dashed #d8ddd6;
+  border: 2px dashed var(--accent-mid);
   border-radius: var(--radius);
   margin: 20px 0;
 }

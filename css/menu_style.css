@@ -3,12 +3,10 @@
 }
 body {
   font-family: "Noto Sans TC", sans-serif;
-  background: #edede9;
-  background-image: radial-gradient(#d6ccc2 1px, transparent 1px);
-  background-size: 32px 32px;
+  background: #ffffff;
   min-height: 100vh;
   margin: 0;
-  color: #4b433e;
+  color: #1a1008;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -16,11 +14,11 @@ body {
   position: sticky;
   top: var(--nb-height, 58px);
   z-index: 500;
-  background: rgba(255, 253, 248, 0.92);
-  border-bottom: 1.5px solid #d7ddd6;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1.5px solid #ffe0cc;
   display: flex;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+  box-shadow: 0 6px 20px rgba(255, 107, 26, 0.08);
   backdrop-filter: blur(10px);
 }
 .tab-btn {
@@ -32,7 +30,7 @@ body {
   font-family: "Noto Sans TC", sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  color: #667085;
+  color: #8a6a5a;
   cursor: pointer;
   transition: all 0.18s;
   display: flex;
@@ -40,12 +38,12 @@ body {
   gap: 6px;
 }
 .tab-btn.active {
-  color: #1f2937;
-  border-bottom-color: #f59e0b;
+  color: #1a1008;
+  border-bottom-color: #ff6b1a;
 }
 .tab-btn:hover:not(.active) {
-  color: #334155;
-  background: #faf7f0;
+  color: #1a1008;
+  background: #fff7f2;
 }
 
 .list-wrap {
@@ -53,27 +51,27 @@ body {
   margin: 0 auto;
   padding: 2.5rem 1.5rem 5rem;
 }
-.section-title::before {
-  content: "";
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(to right, #f59e0b, transparent);
-  border-radius: 2px;
-}
 .section-title {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #1f2937;
+  color: #1a1008;
   margin: 0 0 1.4rem;
   display: flex;
   align-items: center;
   gap: 10px;
 }
+.section-title::before {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, #ff6b1a, transparent);
+  border-radius: 2px;
+}
 .section-title::after {
   content: "";
   flex: 1;
   height: 2px;
-  background: linear-gradient(to right, #f59e0b, transparent);
+  background: linear-gradient(to right, #ff6b1a, transparent);
   border-radius: 2px;
 }
 
@@ -94,19 +92,20 @@ body {
   align-items: center;
   gap: 14px;
   padding: 18px 16px;
-  background: #fffdf8;
-  border: 1.5px solid #d7ddd6;
+  background: #ffffff;
+  border: 1.5px solid #ffe0cc;
   border-radius: 14px;
   text-decoration: none;
-  color: #1f2937;
-  box-shadow: 0 16px 26px rgba(31, 41, 55, 0.08);
+  color: #1a1008;
+  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.08);
   transition: all 0.17s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .shop-card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 0 20px 30px rgba(31, 41, 55, 0.12);
-  background: #fff8eb;
+  box-shadow: 0 14px 28px rgba(255, 107, 26, 0.14);
+  background: #fff7f2;
+  border-color: #ff6b1a;
 }
 .shop-logo {
   width: 54px;
@@ -114,7 +113,7 @@ body {
   flex-shrink: 0;
   object-fit: contain;
   border-radius: 10px;
-  border: 1.5px solid #e7e2d8;
+  border: 1.5px solid #ffe0cc;
   padding: 5px;
   background: #fff;
 }
@@ -127,21 +126,21 @@ body {
 .shop-info small {
   display: block;
   font-size: 0.78rem;
-  color: #667085;
+  color: #8a6a5a;
 }
 
 #menuView {
   display: none;
 }
 .menu-header {
-  background: linear-gradient(135deg, #1f2937, #334155);
+  background: #ff6b1a;
   color: #fff;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 54px;
-  border-bottom: 1px solid rgba(245, 158, 11, 0.32);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   position: sticky;
   top: var(--nb-height, 58px);
   z-index: 500;
@@ -149,7 +148,7 @@ body {
 .menu-back-btn {
   background: none;
   border: none;
-  color: #ffd27a;
+  color: #ffffff;
   font-family: "Noto Sans TC", sans-serif;
   font-size: 0.93rem;
   font-weight: 600;
@@ -163,7 +162,7 @@ body {
   flex-shrink: 0;
 }
 .menu-back-btn:hover {
-  background: rgba(255, 210, 122, 0.14);
+  background: rgba(255, 255, 255, 0.18);
 }
 #menuShopTitle {
   font-size: 1.05rem;
@@ -183,8 +182,8 @@ body {
 .menu-img-wrap img {
   width: 100%;
   border-radius: 14px;
-  border: 1.5px solid #d7ddd6;
-  box-shadow: 0 18px 32px rgba(31, 41, 55, 0.1);
+  border: 1.5px solid #ffe0cc;
+  box-shadow: 0 10px 24px rgba(255, 107, 26, 0.08);
   display: block;
 }
 

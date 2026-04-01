@@ -1,11 +1,11 @@
 :root {
-  --bg-body: #edede9;
-  --text-primary: #4b433e;
-  --text-muted: #7b736c;
-  --accent: #d5bdaf;
-  --surface: #f5ebe0;
-  --surface-soft: #e3d5ca;
-  --line: #d6ccc2;
+  --bg-body: #ffffff;
+  --text-primary: #1a1008;
+  --text-muted: #8a6a5a;
+  --accent: #ff6b1a;
+  --surface: #ffffff;
+  --surface-soft: #fff7f2;
+  --line: #ffe0cc;
   --radius: 16px;
 }
 
@@ -22,8 +22,6 @@ body {
   margin: 0;
   font-family: "Noto Sans TC", sans-serif;
   background-color: var(--bg-body);
-  background-image: radial-gradient(#d6ccc2 1px, transparent 1px);
-  background-size: 32px 32px;
   color: var(--text-primary);
   min-height: 100vh;
   overflow-y: scroll;
@@ -38,9 +36,9 @@ body {
 
 .card {
   background: var(--surface);
-  border: 1.5px solid #d6ccc2;
+  border: 1.5px solid var(--line);
   border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(75, 67, 62, 0.08);
+  box-shadow: 0 18px 40px rgba(255, 107, 26, 0.08);
   padding: 32px 28px;
 }
 
@@ -80,9 +78,9 @@ body {
   transition: all 0.18s;
 }
 .toggle-btn.active {
-  background: var(--text-primary);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(30, 41, 59, 0.2);
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(255, 107, 26, 0.3);
 }
 
 input,
@@ -94,17 +92,15 @@ select,
   border-radius: 12px;
   font-size: 0.95rem;
   font-family: "Noto Sans TC", sans-serif;
-  background: #fdfaf6;
+  background: #fffaf8;
   color: var(--text-primary);
-  transition:
-    border-color 0.18s,
-    box-shadow 0.18s;
+  transition: border-color 0.18s, box-shadow 0.18s;
   outline: none;
 }
 input:focus,
 select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 107, 26, 0.15);
 }
 
 .input-error {
@@ -125,7 +121,7 @@ select:focus {
 
 .share-textarea {
   resize: none;
-  background: #f8f1e8;
+  background: var(--surface-soft);
   font-size: 0.88rem;
   line-height: 1.6;
 }
@@ -149,15 +145,16 @@ select:focus {
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
-  background: #e3d5ca;
-  color: var(--text-muted);
-  border: 1.5px solid var(--line);
+  background: #fff0e8;
+  color: #c44a00;
+  border: 1.5px solid #ffe0cc;
   white-space: nowrap;
   transition: all 0.15s;
 }
 .back-home:hover {
-  background: #d6ccc2;
-  border-color: #c7b9ad;
+  background: #ffd8c0;
+  border-color: #ffc39e;
+  transform: translate(-1px, -1px);
 }
 
 button.primary {
@@ -171,43 +168,43 @@ button.primary {
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
-  background: var(--text-primary);
-  color: #fff;
+  background: #ff6b1a;
+  color: #ffffff;
   border: none;
   cursor: pointer;
-  box-shadow: 0 14px 24px rgba(75, 67, 62, 0.14);
+  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.3);
   transition: all 0.15s;
 }
 button.primary:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 0 18px 28px rgba(75, 67, 62, 0.18);
+  box-shadow: 0 14px 28px rgba(255, 107, 26, 0.35);
 }
 button.primary:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 rgba(30, 41, 59, 0.2);
+  box-shadow: 1px 1px 0 rgba(180, 70, 0, 0.3);
 }
 
 #directGoBtn {
   width: 100%;
   height: 52px;
   border-radius: 50px;
-  background: linear-gradient(135deg, #d5bdaf, #c6aa99);
-  color: #3f3a36;
-  border: 1.5px solid rgba(75, 67, 62, 0.14);
+  background: #ff6b1a;
+  color: #ffffff;
+  border: none;
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  box-shadow: 0 18px 28px rgba(213, 189, 175, 0.28);
+  box-shadow: 0 12px 28px rgba(255, 107, 26, 0.3);
   transition: all 0.15s;
 }
 #directGoBtn:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 0 24px 32px rgba(213, 189, 175, 0.34);
+  box-shadow: 0 20px 32px rgba(255, 107, 26, 0.35);
 }
 #directGoBtn:active {
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--text-primary);
+  box-shadow: 2px 2px 0 rgba(180, 70, 0, 0.3);
 }
 
 #otherBox input {
@@ -223,18 +220,14 @@ button.primary:active {
     padding: 32px 16px 60px;
   }
   .card {
-    box-shadow: 4px 4px 0 var(--text-primary);
+    box-shadow: 4px 4px 0 var(--line);
     padding: 24px 20px;
   }
 }
 
 @keyframes shellFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .wrap > .page-title.anim-fade-up {

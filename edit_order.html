@@ -6,10 +6,7 @@
     <title>修改訂單 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
@@ -117,7 +114,7 @@
     <script type="module">
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
-      import { resolveEventId } from "./event-utils.js";
+      import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { findShopByName } from "./shop-data.js";
       import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
 
@@ -479,16 +476,16 @@
 
         showLoading(true);
         try {
-          const resolvedId = await resolveEventId(supabase, id);
-          if (!resolvedId) {
-            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
+          const resolved = await resolveEventId(supabase, id);
+          if (!resolved.id) {
+            showToast(getResolveEventMessage(resolved.reason), "error");
             return;
           }
 
           const { data, error } = await supabase
             .from("events")
             .select("*, orders(*)")
-            .eq("id", resolvedId)
+            .eq("id", resolved.id)
             .single();
 
           if (error || !data) {

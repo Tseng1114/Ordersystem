@@ -72,7 +72,7 @@
     <script type="module">
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
-      import { getEventCode, resolveEventId } from "./event-utils.js";
+      import { getEventCode, getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
 
       initNavbar("lookup");
@@ -159,16 +159,16 @@
 
         showLoading(true);
         try {
-          const resolvedId = await resolveEventId(supabase, id);
-          if (!resolvedId) {
-            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
+          const resolved = await resolveEventId(supabase, id);
+          if (!resolved.id) {
+            showToast(getResolveEventMessage(resolved.reason), "error");
             return;
           }
 
           const { data, error } = await supabase
             .from("events")
             .select("*, orders(*)")
-            .eq("id", resolvedId)
+            .eq("id", resolved.id)
             .single();
 
           if (error || !data) {

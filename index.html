@@ -6,10 +6,7 @@
     <title>首頁 - 曾可愛家族點餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/index_style.css" />
@@ -37,6 +34,8 @@
       </section>
 
       <div id="usage-flow-slot"></div>
+
+      <div id="linebot-guide-slot"></div>
     </div>
 
     <div class="fab-group">
@@ -79,6 +78,7 @@
       import { initNavbar } from "./navbar.js";
       import { initRipple } from "./ui-utils.js";
       import usageFlowHtml from "./usage_flow.html?raw";
+      import linebotGuideHtml from "./linebot_guide.html?raw";
 
       initNavbar();
       initRipple(".fab, .modal-line-btn, .modal-close, .sw-btn, .sw-dot");
@@ -219,8 +219,7 @@
           { passive: true },
         );
 
-        document.addEventListener("keydown", (event) => {
-          if (!root.isConnected) return;
+        root.addEventListener("keydown", (event) => {
           if (event.key === "ArrowRight") goTo(current + 1);
           if (event.key === "ArrowLeft") goTo(current - 1);
         });
@@ -248,7 +247,20 @@
         }
       }
 
+      function loadLinebotGuide() {
+        const slot = document.getElementById("linebot-guide-slot");
+
+        try {
+          slot.innerHTML = linebotGuideHtml;
+          const section = slot.querySelector(".howto-section");
+          if (section) initUsageFlow(section);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
       loadUsageFlow();
+      loadLinebotGuide();
     </script>
   </body>
 </html>

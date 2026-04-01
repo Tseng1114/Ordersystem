@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
+    <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
@@ -91,8 +92,12 @@
 
     <script type="module">
       import { supabase } from "./config.js";
-      import { resolveEventId } from "./event-utils.js";
+      import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { findShopByName } from "./shop-data.js";
+      import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
+
+      overrideAlert();
+      initRipple(".primary, .add, .back-home, .del-btn");
 
       const urlParams = new URLSearchParams(window.location.search);
       const rawEventId = urlParams.get("event");
@@ -220,15 +225,25 @@
       }
 
       async function ensureEvent() {
-        if (!rawEventId) { alert("無效訂單編號"); return; }
+        if (!rawEventId) {
+          showToast("無效訂單編號", "error");
+          return;
+        }
         showLoading(true);
         try {
-          resolvedEventId = await resolveEventId(supabase, rawEventId);
-          if (!resolvedEventId) { alert("找不到這筆訂單"); return; }
+          const resolved = await resolveEventId(supabase, rawEventId);
+          if (!resolved.id) {
+            showToast(getResolveEventMessage(resolved.reason), "error");
+            return;
+          }
+          resolvedEventId = resolved.id;
 
           const { data: ev, error } = await supabase
             .from("events").select("*").eq("id", resolvedEventId).single();
-          if (error || !ev) { alert("找不到這筆訂單"); return; }
+          if (error || !ev) {
+            showToast("找不到這筆訂單", "error");
+            return;
+          }
 
           currentCategory = ev.category || "drink";
           currentShop = findShopByName(ev.shop, currentCategory);
@@ -287,7 +302,10 @@
       async function submitOrder() {
         if (isExpired) return;
         const trs = [...document.querySelectorAll("#itemsTbl tbody tr")];
-        if (trs.length === 0) { alert("請先新增至少一筆訂單"); return; }
+        if (trs.length === 0) {
+          showToast("請先新增至少一筆訂單", "warning");
+          return;
+        }
 
         const rows = trs.map((tr) => ({
           event_id: resolvedEventId,
@@ -302,7 +320,8 @@
         }));
 
         if (rows.some((row) => !row.customer || !row.name)) {
-          alert("請完整填寫姓名與品項"); return;
+          showToast("請完整填寫姓名與品項", "warning");
+          return;
         }
 
         showLoading(true);
@@ -326,7 +345,7 @@
             location.href = `summary.html?event=${resolvedEventId}`;
           };
         } catch (err) {
-          alert(`送出失敗：${err.message}`);
+          showToast(`送出失敗：${err.message}`, "error", 5000);
         } finally {
           showLoading(false);
         }

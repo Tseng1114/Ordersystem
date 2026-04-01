@@ -7,10 +7,8 @@
 }
 body {
   font-family: "Noto Sans TC", sans-serif;
-  background: #edede9;
-  background-image: radial-gradient(#d6ccc2 1px, transparent 1px);
-  background-size: 32px 32px;
-  color: #4b433e;
+  background: #ffffff;
+  color: #1a1008;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -29,10 +27,10 @@ body {
 }
 
 .search-card {
-  background: #f5ebe0;
-  border: 1.5px solid #d6ccc2;
+  background: #ffffff;
+  border: 1.5px solid #ffe0cc;
   border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(75, 67, 62, 0.08);
+  box-shadow: 0 18px 40px rgba(255, 107, 26, 0.08);
   padding: 32px 28px;
   margin-bottom: 24px;
 }
@@ -40,7 +38,7 @@ body {
   display: block;
   font-weight: 700;
   font-size: 0.88rem;
-  color: #7b736c;
+  color: #8a6a5a;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -53,18 +51,18 @@ body {
   flex: 1;
   height: 44px;
   padding: 0 14px;
-  border: 1.5px solid #d6ccc2;
+  border: 1.5px solid #ffe0cc;
   border-radius: 12px;
   font-size: 0.95rem;
   font-family: "Noto Sans TC", sans-serif;
   outline: none;
-  transition:
-    border-color 0.18s,
-    box-shadow 0.18s;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  background: #fffaf8;
+  color: #1a1008;
 }
 .search-input:focus {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  border-color: #ff6b1a;
+  box-shadow: 0 0 0 3px rgba(255, 107, 26, 0.15);
 }
 .search-btn {
   display: inline-flex;
@@ -76,31 +74,30 @@ body {
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
-  background: #4b433e;
-  color: #fff;
+  background: #ff6b1a;
+  color: #ffffff;
   border: none;
   cursor: pointer;
-  box-shadow: 0 14px 24px rgba(75, 67, 62, 0.14);
+  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.3);
   transition: all 0.15s;
   white-space: nowrap;
 }
 .search-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 0 18px 28px rgba(75, 67, 62, 0.18);
+  box-shadow: 0 14px 24px rgba(255, 107, 26, 0.35);
 }
 .search-btn:active {
   transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 rgba(30, 41, 59, 0.15);
 }
 
 #resultArea {
   display: none;
 }
 .result-card {
-  background: #f5ebe0;
-  border: 1.5px solid #d6ccc2;
+  background: #ffffff;
+  border: 1.5px solid #ffe0cc;
   border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(75, 67, 62, 0.08);
+  box-shadow: 0 18px 40px rgba(255, 107, 26, 0.08);
   padding: 32px 28px;
 }
 
@@ -115,7 +112,7 @@ body {
 .result-head h2 {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #4b433e;
+  color: #1a1008;
   margin: 0;
 }
 
@@ -123,8 +120,8 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f8f1e8;
-  border: 1px dashed #d6ccc2;
+  background: #fff7f2;
+  border: 1px dashed #ffe0cc;
   border-radius: 8px;
   padding: 8px 14px;
   margin-bottom: 10px;
@@ -132,32 +129,33 @@ body {
 .id-row code {
   flex: 1;
   font-size: 0.82rem;
-  color: #7b736c;
+  color: #8a6a5a;
   word-break: break-all;
 }
 .copy-id-btn {
-  background: #e3d5ca;
-  border: none;
+  background: #fff0e8;
+  border: 1px solid #ffe0cc;
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 0.8rem;
   cursor: pointer;
   font-family: "Noto Sans TC", sans-serif;
   font-weight: 600;
+  color: #c44a00;
   transition: background 0.15s;
 }
 .copy-id-btn:hover {
-  background: #d5bdaf;
+  background: #ffd8c0;
 }
 
 .meta-row {
   font-size: 0.87rem;
-  color: #7b736c;
+  color: #8a6a5a;
   margin-bottom: 4px;
 }
 .meta-row span {
   font-weight: 600;
-  color: #334155;
+  color: #1a1008;
 }
 
 .person-block {
@@ -165,7 +163,7 @@ body {
 }
 .person-name {
   font-weight: 700;
-  color: #4b433e;
+  color: #1a1008;
   font-size: 0.97rem;
   margin-bottom: 6px;
   display: flex;
@@ -178,16 +176,16 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: #ff6b1a;
   flex-shrink: 0;
 }
 .order-item {
-  background: #f8f1e8;
-  border: 1px solid #d6ccc2;
+  background: #fff7f2;
+  border: 1px solid #ffe0cc;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.88rem;
-  color: #334155;
+  color: #1a1008;
   margin-bottom: 5px;
   display: flex;
   justify-content: space-between;
@@ -198,12 +196,12 @@ body {
   font-weight: 600;
 }
 .order-item-spec {
-  color: #7b736c;
+  color: #8a6a5a;
   font-size: 0.82rem;
 }
 .order-item-qty {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fff0e8;
+  color: #c44a00;
   font-weight: 700;
   font-size: 0.8rem;
   padding: 2px 10px;
@@ -216,7 +214,7 @@ body {
   gap: 8px;
   margin-top: 20px;
   flex-wrap: wrap;
-  justify-self: center;
+  justify-content: center;
 }
 .btn {
   display: inline-flex;
@@ -231,26 +229,27 @@ body {
   cursor: pointer;
   transition: all 0.15s;
   text-decoration: none;
-  border: 1.5px solid #bca99b;
+  border: none;
   white-space: nowrap;
 }
 .btn-ghost {
-  background: #e3d5ca;
-  color: #6b635d;
-  box-shadow: 0 10px 18px rgba(75, 67, 62, 0.1);
+  background: #fff0e8;
+  color: #c44a00;
+  border: 1px solid #ffe0cc;
+  box-shadow: 0 6px 14px rgba(255, 107, 26, 0.08);
 }
 .btn-ghost:hover {
+  background: #ffd8c0;
   transform: translate(-1px, -1px);
-  box-shadow: 0 14px 22px rgba(75, 67, 62, 0.12);
 }
 .btn-dark {
-  background: #4b433e;
-  color: #fff;
-  box-shadow: 2px 2px 0 rgba(30, 41, 59, 0.4);
+  background: #ff6b1a;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.3);
 }
 .btn-dark:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 rgba(30, 41, 59, 0.45);
+  box-shadow: 0 14px 24px rgba(255, 107, 26, 0.35);
 }
 
 @media (max-width: 480px) {
@@ -260,7 +259,6 @@ body {
   .search-card,
   .result-card {
     padding: 24px 20px;
-    box-shadow: 0 14px 24px rgba(75, 67, 62, 0.12);
   }
   .result-footer {
     flex-direction: column;
@@ -271,18 +269,11 @@ body {
 }
 
 @keyframes shellFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.page-wrap > .page-title.anim-fade-up {
-  animation: shellFadeIn 0.35s ease both !important;
-}
-
+.page-wrap > .page-title.anim-fade-up,
 .page-wrap > .search-card.anim-fade-up,
 #resultArea > .result-card.anim-scale-in,
 #resultArea > .result-card.anim-fade-up {

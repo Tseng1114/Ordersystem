@@ -282,14 +282,6 @@ body {
   color: var(--navy);
 }
 
-.announce-subtitle {
-  max-width: 320px;
-  text-align: right;
-  color: var(--muted);
-  line-height: 1.8;
-  font-size: 0.92rem;
-}
-
 .announce-featured {
   background: linear-gradient(135deg, #4b433e, #6b635d);
   color: #fff;

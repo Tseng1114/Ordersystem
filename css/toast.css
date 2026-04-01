@@ -37,10 +37,12 @@
 }
 
 .toast.show {
+  opacity: 1;
   transform: translateY(0) scale(1);
 }
 
 .toast.hide {
+  opacity: 0;
   transform: translateY(-120%) scale(0.9);
   transition: opacity 0.22s ease, transform 0.22s ease;
 }

@@ -72,7 +72,7 @@
 
     <script type="module">
       import { supabase } from "./config.js";
-      import { getEventCode, resolveEventId } from "./event-utils.js";
+      import { getEventCode, getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       import { showToast, overrideAlert, initRipple, countUp, skeletonCards } from "./ui-utils.js";
 
@@ -324,13 +324,14 @@
         document.getElementById("byPersonList").innerHTML = skeletonCards(3);
 
         try {
-          resolvedEventId = await resolveEventId(supabase, rawEventId);
-          if (!resolvedEventId) {
+          const resolved = await resolveEventId(supabase, rawEventId);
+          if (!resolved.id) {
             document.getElementById("eventInfo").innerHTML =
-              `<p class="state-error">找不到此訂單，請確認編號是否正確。</p>`;
-            showToast("找不到此訂單", "error");
+              `<p class="state-error">${getResolveEventMessage(resolved.reason)}</p>`;
+            showToast(getResolveEventMessage(resolved.reason), "error");
             return;
           }
+          resolvedEventId = resolved.id;
 
           const { data: results, error } = await supabase
             .from("events")

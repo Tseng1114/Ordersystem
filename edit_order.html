@@ -115,7 +115,7 @@
       import { initNavbar } from "./navbar.js";
       import { supabase } from "./config.js";
       import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { findShopByName } from "./shop-data.js";
+      import { loadShopCatalogByName } from "./menu-catalog.js";
       import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
 
       initNavbar("edit");
@@ -126,6 +126,12 @@
       const ICE_OPTS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
 
       let eventData = null;
+      let currentShopCatalog = {
+        shopKey: null,
+        shopMeta: null,
+        menuItems: [],
+        addonOptions: [],
+      };
 
       function esc(str) {
         return String(str ?? "")
@@ -158,15 +164,15 @@
       }
 
       function getShopMeta() {
-        return findShopByName(eventData?.shop, eventData?.category)?.[1] || null;
+        return currentShopCatalog.shopMeta || null;
       }
 
       function getCurrentDrinkItems() {
-        return getShopMeta()?.menuItems || [];
+        return currentShopCatalog.menuItems || [];
       }
 
       function getCurrentDrinkAddons() {
-        return getShopMeta()?.addonOptions || ["不加料"];
+        return currentShopCatalog.addonOptions || ["不加料"];
       }
 
       function parseItemAndAddon(name = "") {
@@ -494,6 +500,10 @@
           }
 
           eventData = data;
+          currentShopCatalog = await loadShopCatalogByName(data.shop, data.category);
+          if (currentShopCatalog.catalogError) {
+            showToast("品項資料暫時無法載入，先提供手動輸入。", "warning", 4000);
+          }
           renderEditArea();
           showToast(`已讀取 ${data.shop} 的訂單`, "success");
         } catch (error) {

@@ -93,7 +93,7 @@
     <script type="module">
       import { supabase } from "./config.js";
       import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { findShopByName } from "./shop-data.js";
+      import { loadShopCatalogByName } from "./menu-catalog.js";
       import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
 
       overrideAlert();
@@ -104,7 +104,12 @@
 
       let resolvedEventId = null;
       let currentCategory = "drink";
-      let currentShop = null;
+      let currentShopCatalog = {
+        shopKey: null,
+        shopMeta: null,
+        menuItems: [],
+        addonOptions: [],
+      };
       let isExpired = false;
       let itemListCounter = 0;
       let countdownTimer = null;      
@@ -124,8 +129,7 @@
       }
 
       function buildItemField() {
-        const shopMeta = currentShop?.[1];
-        const menuItems = shopMeta?.menuItems || [];
+        const menuItems = currentShopCatalog.menuItems || [];
         if (menuItems.length > 0) {
           itemListCounter += 1;
           const listId = `item-suggestions-${itemListCounter}`;
@@ -140,8 +144,7 @@
       }
 
       function buildAddonField() {
-        const shopMeta = currentShop?.[1];
-        const addonOptions = shopMeta?.addonOptions || ["無"];
+        const addonOptions = currentShopCatalog.addonOptions || ["無"];
         if (currentCategory === "food") {
           return '<input class="addon-input" placeholder="備註 / 規格">';
         }
@@ -159,7 +162,7 @@
         const section = document.getElementById("menuSection");
         const frame = document.getElementById("menuEmbedFrame");
         const link = document.getElementById("menuOpenLink");
-        const [shopKey, shopMeta] = currentShop || [];
+        const { shopKey, shopMeta } = currentShopCatalog;
         if (!shopMeta) { section.classList.add("hidden"); frame.removeAttribute("src"); return; }
         frame.removeAttribute("src");
         link.href = `menu.html?shop=${shopKey}`;
@@ -246,7 +249,10 @@
           }
 
           currentCategory = ev.category || "drink";
-          currentShop = findShopByName(ev.shop, currentCategory);
+          currentShopCatalog = await loadShopCatalogByName(ev.shop, currentCategory);
+          if (currentShopCatalog.catalogError) {
+            showToast("品項資料暫時無法載入，先提供手動輸入。", "warning", 4000);
+          }
           document.querySelector(".page-title").textContent = `${ev.shop} - 下單`;
 
           if (currentCategory === "food") {

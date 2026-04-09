@@ -49,21 +49,10 @@
       <div class="modal-box">
         <button class="modal-close" id="modalClose" type="button">×</button>
         <h2>加入 LINE Bot</h2>
-        <p>
-          掃描下方 QR Code 就能快速加入，
-          <br />
-          之後可直接在 LINE 中查詢訂單資訊。
-        </p>
+        <p>掃描下方 QR Code 就能快速加入，<br />之後可直接在 LINE 中查詢訂單資訊。</p>
         <img src="/linebot_qrcode/preview.webp" alt="LINE Bot QR Code" />
         <br />
-        <a
-          class="modal-line-btn"
-          href="https://line.me/R/ti/p/@962ujidb"
-          target="_blank"
-          rel="noreferrer"
-        >
-          前往 LINE 加入
-        </a>
+        <a class="modal-line-btn" href="https://line.me/R/ti/p/@962ujidb" target="_blank" rel="noreferrer">前往 LINE 加入</a>
       </div>
     </div>
 
@@ -84,6 +73,12 @@
       initRipple(".fab, .modal-line-btn, .modal-close, .sw-btn, .sw-dot");
 
       const ANNOUNCEMENTS = [
+        {
+          date: "2026/04/09",
+          tag: "優化",
+          title: "新增手搖店菜單",
+          text: "新增三家手搖飲菜單(coco都可/TEA TOP第一味/五桐號)",
+        },
         {
           date: "2026/03/31",
           tag: "新功能",

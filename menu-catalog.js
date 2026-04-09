@@ -2,39 +2,12 @@ import { supabase } from "./config.js";
 import { findShopByName } from "./shop-data.js";
 
 const catalogCache = new Map();
-const STORAGE_PREFIX = "shop-catalog:";
 
 function normalizeStringArray(value) {
   if (!Array.isArray(value)) return [];
   return value
     .map((item) => String(item ?? "").trim())
     .filter(Boolean);
-}
-
-function getStorageKey(shopKey) {
-  return `${STORAGE_PREFIX}${shopKey}`;
-}
-
-function readCatalogFromStorage(shopKey) {
-  try {
-    const raw = window.sessionStorage.getItem(getStorageKey(shopKey));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return {
-      menuItems: normalizeStringArray(parsed.menuItems),
-      addonOptions: normalizeStringArray(parsed.addonOptions),
-    };
-  } catch {
-    return null;
-  }
-}
-
-function writeCatalogToStorage(shopKey, catalog) {
-  try {
-    window.sessionStorage.setItem(getStorageKey(shopKey), JSON.stringify(catalog));
-  } catch {
-    // Ignore storage failures so ordering still works in private/incognito modes.
-  }
 }
 
 export async function loadShopCatalogByName(shopName, category) {
@@ -56,17 +29,6 @@ export async function loadShopCatalogByName(shopName, category) {
       shopKey,
       shopMeta,
       ...catalogCache.get(shopKey),
-      catalogError: null,
-    };
-  }
-
-  const storedCatalog = readCatalogFromStorage(shopKey);
-  if (storedCatalog) {
-    catalogCache.set(shopKey, storedCatalog);
-    return {
-      shopKey,
-      shopMeta,
-      ...storedCatalog,
       catalogError: null,
     };
   }
@@ -94,7 +56,6 @@ export async function loadShopCatalogByName(shopName, category) {
   };
 
   catalogCache.set(shopKey, catalog);
-  writeCatalogToStorage(shopKey, catalog);
 
   return {
     shopKey,

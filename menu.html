@@ -221,6 +221,27 @@
           logo: "npateazzz_logo.png",
           imgs: ["napteazzz_menu.avif"],
         },
+        coco: {
+          name: "CoCo都可",
+          sub: "CoCo",
+          type: "drinks",
+          logo: "coco_logo.jpg",
+          imgs: ["coco_menu.webp"],
+        },
+        teatop: {
+          name: "TEA TOP第一味",
+          sub: "TEA TOP",
+          type: "drinks",
+          logo: "teatop_logo.png",
+          imgs: ["teatop_menu.jpg"],
+        },
+        wootea: {
+          name: "五桐號",
+          sub: "WooTea",
+          type: "drinks",
+          logo: "wootea_logo.png",
+          imgs: ["wootea_menu.jpg"],
+        },
         // meals
         lucymama: {
           name: "露西媽媽",
@@ -269,12 +290,7 @@
           sub: "",
           type: "meals",
           logo: "niuzu_logo.jpg",
-          imgs: [
-            "niuzu_menu1.jpg",
-            "niuzu_menu2.jpg",
-            "niuzu_menu3.jpg",
-            "niuzu_menu4.jpg",
-          ],
+          imgs: ["niuzu_menu1.jpg","niuzu_menu2.jpg","niuzu_menu3.jpg","niuzu_menu4.jpg",],
         },
         dandanburger: {
           name: "丹丹漢堡",
@@ -295,7 +311,7 @@
           sub: "",
           type: "meals",
           logo: "burgerking_logo.png",
-          imgs: [],
+          imgs: [""],
           url: "https://www.burgerking.com.tw/",
         },
         mcdonalds: {
@@ -318,7 +334,9 @@
 
       function renderGrid(gridId, type) {
         const grid = document.getElementById(gridId);
-        const entries = Object.entries(SHOPS).filter(([, s]) => s.type === type);
+        const entries = Object.entries(SHOPS).filter(
+          ([, s]) => s.type === type,
+        );
         entries.forEach(([key, s], i) => {
           const logoDir = type === "drinks" ? "drinks" : "meals";
           const el = document.createElement("div");
@@ -341,8 +359,12 @@
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-          document.querySelectorAll(".section-panel").forEach((p) => p.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".section-panel")
+            .forEach((p) => p.classList.remove("active"));
           btn.classList.add("active");
           const panel = document.getElementById(btn.dataset.target);
           panel.classList.add("active");

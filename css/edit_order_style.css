@@ -6,7 +6,7 @@
   padding: 0;
 }
 body {
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   background: #ffffff;
   color: #1a1008;
   min-height: 100vh;
@@ -19,11 +19,11 @@ body {
   padding: 48px 20px 80px;
 }
 .page-title {
-  text-align: center;
-  font-size: 1.8rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
   font-weight: 800;
-  margin-bottom: 28px;
-  letter-spacing: -0.02em;
+  margin-bottom: 36px;
+  letter-spacing: 0.01em;
 }
 .lookup-card {
   background: #ffffff;
@@ -52,7 +52,7 @@ body {
   border: 1.5px solid #ffe0cc;
   border-radius: 12px;
   font-size: 0.95rem;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   background: #fffaf8;
   color: #1a1008;
   outline: none;
@@ -72,7 +72,7 @@ body {
   height: 44px;
   padding: 0 20px;
   border-radius: 50px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.95rem;
   background: #ff6b1a;
@@ -94,7 +94,7 @@ body {
   height: 44px;
   padding: 0 20px;
   border-radius: 50px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.9rem;
   background: #fff0e8;
@@ -116,7 +116,7 @@ body {
   height: 34px;
   padding: 0 14px;
   border-radius: 8px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.82rem;
   background: #fee2e2;
@@ -135,7 +135,7 @@ body {
   height: 34px;
   padding: 0 14px;
   border-radius: 8px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.82rem;
   background: #dcfce7;
@@ -192,7 +192,7 @@ body {
   border: none;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 600;
   color: #8a6a5a;
@@ -303,7 +303,7 @@ body {
   border: 1.5px solid #ffe0cc;
   border-radius: 8px;
   font-size: 0.88rem;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   outline: none;
   transition: border-color 0.15s;
 }

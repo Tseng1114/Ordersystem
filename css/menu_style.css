@@ -121,12 +121,6 @@ body {
   display: block;
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 3px;
-}
-.shop-info small {
-  display: block;
-  font-size: 0.78rem;
-  color: #8a6a5a;
 }
 
 #menuView {
@@ -141,9 +135,7 @@ body {
   gap: 12px;
   height: 54px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  position: sticky;
-  top: var(--nb-height, 58px);
-  z-index: 500;
+  position: static;
 }
 .menu-back-btn {
   background: none;

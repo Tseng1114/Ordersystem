@@ -167,6 +167,20 @@ export const SHOPS = {
     logo: "teatop_logo.png",
     imgs: ["teatop_menu.jpg"],
   },
+  toptiertea: {
+    name: "特好喝",
+    sub: "TOP TIER TEA",
+    category: "drink",
+    logo: "toptiertea_logo.webp",
+    imgs: ["toptiertea_menu.webp"],
+  },
+  "19teahouse": {
+    name: "拾汣茶屋",
+    sub: "19teahouse",
+    category: "drink",
+    logo: "19teahouse_logo.png",
+    imgs: ["19teahouse_menu.png"],
+  },
   wootea: {
     name: "五桐號",
     sub: "WooTea",

@@ -127,14 +127,6 @@ export function initRipple(
   });
 }
 
-export function animateIn(selector, animClass = "anim-fade-up", staggerMs = 60) {
-  const elements = document.querySelectorAll(selector);
-  elements.forEach((element, index) => {
-    element.style.animationDelay = `${index * staggerMs}ms`;
-    element.classList.add(animClass);
-  });
-}
-
 export function countUp(element, target, durationMs = 600) {
   const start = performance.now();
 

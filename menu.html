@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>菜單 - 曾可愛家族點餐系統</title>
+    <title>菜單 - 訂餐系統</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
@@ -44,299 +44,38 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
-        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
+        <p>c 2025 - 2026 曾可愛家族點餐系統</p>
       </div>
     </footer>
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
-      import { initLightbox, initRipple, animateIn } from "./ui-utils.js";
+      import { initLightbox, initRipple } from "./ui-utils.js";
+      import { SHOPS as SHOP_DATA } from "./shop-data.js";
 
       const params = new URLSearchParams(location.search);
       const isEmbed = params.get("embed") === "1";
+
       if (!isEmbed) {
-        initNavbar();
+        initNavbar("menu");
         initLightbox(".menu-img-wrap");
         initRipple(".tab-btn, .menu-back-btn, .shop-card");
       }
-    </script>
 
-    <script>
-      const PAGE_PARAMS = new URLSearchParams(location.search);
-      const IS_EMBED = PAGE_PARAMS.get("embed") === "1";
-      const SHOPS = {
-        // drinks
-        milksha: {
-          name: "迷客夏",
-          sub: "Milksha",
-          type: "drinks",
-          logo: "milksha_logo.png",
-          imgs: ["milksha_menu.jpg"],
-        },
-        damingtea: {
-          name: "大茗本味製茶堂",
-          sub: "DAMING",
-          type: "drinks",
-          logo: "damingtea_logo.png",
-          imgs: ["damingtea_menu.png"],
-        },
-        truedan: {
-          name: "珍煮丹",
-          sub: "TRUEDAN",
-          type: "drinks",
-          logo: "truedan_logo.png",
-          imgs: ["truedan_menu.jpg"],
-        },
-        dejeng: {
-          name: "得正",
-          sub: "Dejeng",
-          type: "drinks",
-          logo: "dejeng_logo.png",
-          imgs: ["dejeng_menu.jpg"],
-        },
-        "50lan": {
-          name: "50嵐",
-          sub: "",
-          type: "drinks",
-          logo: "50lan_logo.png",
-          imgs: ["50lan_menu.jpg"],
-        },
-        minimini: {
-          name: "米里米里",
-          sub: "MINI-MINI",
-          type: "drinks",
-          logo: "minimini_logo.png",
-          imgs: ["minimini_menu.jpg"],
-        },
-        macutea: {
-          name: "麻古茶坊",
-          sub: "MACU",
-          type: "drinks",
-          logo: "macutea_logo.png",
-          imgs: ["macutea_menu.jpg"],
-        },
-        "8yotea": {
-          name: "八曜和茶",
-          sub: "ハチヨウワチヤ",
-          type: "drinks",
-          logo: "8yotea_logo.png",
-          imgs: ["8yotea_menu.jpg"],
-        },
-        youindrink: {
-          name: "有飲",
-          sub: "You in",
-          type: "drinks",
-          logo: "youindrink_logo.png",
-          imgs: ["youindrink_menu.webp"],
-        },
-        chingshanteashop: {
-          name: "青山茶行",
-          sub: "",
-          type: "drinks",
-          logo: "chingshanteashop_logo.jpg",
-          imgs: ["chingshanteashop_menu.jpg"],
-        },
-        chingshin: {
-          name: "清心福全",
-          sub: "",
-          type: "drinks",
-          logo: "chingshin_logo.png",
-          imgs: ["chingshin_menu.jpg"],
-        },
-        aniceholiday: {
-          name: "一沐日",
-          sub: "A NICE HOLIDAY",
-          type: "drinks",
-          logo: "aniceholiday_logo.jpg",
-          imgs: ["aniceholiday_menu.jpg"],
-        },
-        bogteashop: {
-          name: "波哥茶飲",
-          sub: "BOG TEA SHOP",
-          type: "drinks",
-          logo: "bogteashop_logo.png",
-          imgs: ["bogteashop_menu.jpg"],
-        },
-        shuansenbeverages: {
-          name: "双生綠豆沙牛奶",
-          sub: "Shuànsên beverages",
-          type: "drinks",
-          logo: "shuansenbeverages_logo.png",
-          imgs: ["shuansenbeverages_menu.jpg"],
-        },
-        lairitea: {
-          name: "來日方茶",
-          sub: "",
-          type: "drinks",
-          logo: "lairitea_logo.jpg",
-          imgs: ["lairitea_menu.jpg"],
-        },
-        tptea: {
-          name: "茶湯會",
-          sub: "TP-TEA",
-          type: "drinks",
-          logo: "tptea_logo.png",
-          imgs: ["tptea_menu.jpg"],
-        },
-        liketeashop: {
-          name: "老賴茶棧",
-          sub: "LIKE TEA SHOP",
-          type: "drinks",
-          logo: "liketeashop_logo.jpg",
-          imgs: ["liketeashop_menu.jpg"],
-        },
-        kebuke: {
-          name: "可不可熟成紅茶",
-          sub: "KEBUKE",
-          type: "drinks",
-          logo: "kebuke_logo.png",
-          imgs: ["kebuke_menu.jpg"],
-        },
-        xuanfuresidence: {
-          name: "宣福居",
-          sub: "xuanfuresidence",
-          type: "drinks",
-          logo: "xuanfuresidence_logo.jpg",
-          imgs: ["xuanfuresidence_menu.png"],
-        },
-        hechaloutea: {
-          name: "鶴茶樓",
-          sub: "hechaloutea",
-          type: "drinks",
-          logo: "hechaloutea_logo.jpeg",
-          imgs: ["hechaloutea_menu.webp"],
-        },
-        guiji: {
-          name: "龜記",
-          sub: "guiji",
-          type: "drinks",
-          logo: "guiji_logo.jpg",
-          imgs: ["guiji_menu.jpg"],
-        },
-        napteazzz: {
-          name: "再睡5分鐘",
-          sub: "napteazzz",
-          type: "drinks",
-          logo: "npateazzz_logo.png",
-          imgs: ["napteazzz_menu.avif"],
-        },
-        coco: {
-          name: "CoCo都可",
-          sub: "CoCo",
-          type: "drinks",
-          logo: "coco_logo.jpg",
-          imgs: ["coco_menu.webp"],
-        },
-        teatop: {
-          name: "TEA TOP第一味",
-          sub: "TEA TOP",
-          type: "drinks",
-          logo: "teatop_logo.png",
-          imgs: ["teatop_menu.jpg"],
-        },
-        wootea: {
-          name: "五桐號",
-          sub: "WooTea",
-          type: "drinks",
-          logo: "wootea_logo.png",
-          imgs: ["wootea_menu.jpg"],
-        },
-        // meals
-        lucymama: {
-          name: "露西媽媽",
-          sub: "Lucy Mama",
-          type: "meals",
-          logo: "lucymama_logo.jpg",
-          imgs: ["lucymama_menu1.jpg", "lucymama_menu2.jpg"],
-        },
-        guijihandmadedumplingrestaurant: {
-          name: "桂記手工水餃餐廳",
-          sub: "",
-          type: "meals",
-          logo: "guijihandmadedumplingrestaurant_logo.jpg",
-          imgs: ["guijihandmadedumplingrestaurant_menu.jpg"],
-        },
-        laotsengbeefnoodles: {
-          name: "老曾牛肉麵",
-          sub: "",
-          type: "meals",
-          logo: "laotsengbeefnoodles_logo.jpg",
-          imgs: ["laotsengbeefnoodles_menu.jpg"],
-        },
-        liufamilyduckmeat: {
-          name: "劉家鴨肉",
-          sub: "",
-          type: "meals",
-          logo: "liufamilyduckmeat_logo.jpg",
-          imgs: ["liufamilyduckmeat_menu.jpg"],
-        },
-        cometogether: {
-          name: "作伙來",
-          sub: "",
-          type: "meals",
-          logo: "cometogether_logo.jpg",
-          imgs: ["cometogether_menu.jpg"],
-        },
-        fengangelicaduck: {
-          name: "豐當歸鴨",
-          sub: "",
-          type: "meals",
-          logo: "fengangelicaduck_logo.jpg",
-          imgs: ["fengangelicaduck_menu.jpg"],
-        },
-        niuzu: {
-          name: "牛族",
-          sub: "",
-          type: "meals",
-          logo: "niuzu_logo.jpg",
-          imgs: ["niuzu_menu1.jpg","niuzu_menu2.jpg","niuzu_menu3.jpg","niuzu_menu4.jpg",],
-        },
-        dandanburger: {
-          name: "丹丹漢堡",
-          sub: "",
-          type: "meals",
-          logo: "dandanburger_logo.jpg",
-          imgs: ["dandanburger_menu.jpeg"],
-        },
-        ahzhenfriedchicken: {
-          name: "阿珍炸雞",
-          sub: "",
-          type: "meals",
-          logo: "ahzhenfriedchicken_logo.jpg",
-          imgs: ["ahzhenfriedchicken_menu.jpg"],
-        },
-        burgerking: {
-          name: "漢堡王",
-          sub: "",
-          type: "meals",
-          logo: "burgerking_logo.png",
-          imgs: [""],
-          url: "https://www.burgerking.com.tw/",
-        },
-        mcdonalds: {
-          name: "麥當勞",
-          sub: "",
-          type: "meals",
-          logo: "mcdonalds_logo.png",
-          imgs: [],
-          url: "https://www.mcdonalds.com/tw/zh-tw.html",
-        },
-        kfc: {
-          name: "肯德基",
-          sub: "",
-          type: "meals",
-          logo: "kfc_logo.png",
-          imgs: [],
-          url: "https://www.kfcclub.com.tw/",
-        },
-      };
+      const SHOPS = Object.fromEntries(
+        Object.entries(SHOP_DATA).map(([key, shop]) => [
+          key,
+          {
+            ...shop,
+            type: shop.category === "drink" ? "drinks" : "meals",
+          },
+        ]),
+      );
 
       function renderGrid(gridId, type) {
         const grid = document.getElementById(gridId);
-        const entries = Object.entries(SHOPS).filter(
-          ([, s]) => s.type === type,
-        );
+        const entries = Object.entries(SHOPS).filter(([, s]) => s.type === type);
+
         entries.forEach(([key, s], i) => {
           const logoDir = type === "drinks" ? "drinks" : "meals";
           const el = document.createElement("div");
@@ -345,10 +84,7 @@
           el.classList.add("anim-fade-up");
           el.innerHTML = `
             <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" />
-            <div class="shop-info">
-              <b>${s.name}</b>
-              ${s.sub ? `<small>${s.sub}</small>` : ""}
-            </div>`;
+            <div class="shop-info"><b>${s.name}</b></div>`;
           el.addEventListener("click", () => openShop(key));
           grid.appendChild(el);
         });
@@ -359,23 +95,11 @@
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          document
-            .querySelectorAll(".section-panel")
-            .forEach((p) => p.classList.remove("active"));
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".section-panel").forEach((p) => p.classList.remove("active"));
           btn.classList.add("active");
           const panel = document.getElementById(btn.dataset.target);
           panel.classList.add("active");
-          panel.querySelectorAll(".shop-card").forEach((card, i) => {
-            card.style.animation = "none";
-            card.offsetHeight;
-            card.style.animation = "";
-            card.style.animationDelay = `${i * 40}ms`;
-            card.classList.add("anim-fade-up");
-          });
-
           const t = btn.dataset.target === "drinkPanel" ? "drink" : "food";
           history.replaceState(null, "", `menu.html?type=${t}`);
         });
@@ -385,32 +109,32 @@
         const shop = SHOPS[key];
         if (!shop) return;
         if (shop.url) {
-          window.open(shop.url, "_blank");
+          window.open(shop.url, "_blank", "noopener,noreferrer");
           return;
         }
-        const suffix = IS_EMBED ? "&embed=1" : "";
+        const suffix = isEmbed ? "&embed=1" : "";
         history.pushState({ shop: key }, "", `menu.html?shop=${key}${suffix}`);
         showMenuView(key);
       }
 
       function reportEmbedHeight() {
-        if (!IS_EMBED || window.parent === window) return;
+        if (!isEmbed || window.parent === window) return;
         const height = document.documentElement.scrollHeight;
         window.parent.postMessage({ type: "menu-embed-height", height }, "*");
       }
 
       function showMenuView(key) {
         const shop = SHOPS[key];
-        document.title = shop.name + " 菜單 - 曾可愛家族點餐系統";
+        document.title = `${shop.name} 菜單 - 訂餐系統`;
         document.getElementById("menuShopTitle").textContent = shop.name;
         const wrap = document.getElementById("menuImgs");
         wrap.innerHTML = "";
 
-        shop.imgs.forEach((imgSrc, i) => {
+        (shop.imgs || []).forEach((imgSrc, i) => {
+          if (!imgSrc) return;
           const el = document.createElement("img");
           el.src = `menus/${shop.type}/${imgSrc}`;
-          el.alt = shop.name + " 菜單";
-          el.title = "點擊放大";
+          el.alt = `${shop.name} 菜單`;
           el.style.animationDelay = `${i * 80}ms`;
           el.classList.add("anim-scale-in");
           wrap.appendChild(el);
@@ -419,7 +143,7 @@
         document.getElementById("listView").style.display = "none";
         document.getElementById("menuView").style.display = "block";
         document.querySelector(".footer").style.display = "none";
-        if (!IS_EMBED) window.scrollTo(0, 0);
+        if (!isEmbed) window.scrollTo(0, 0);
         reportEmbedHeight();
       }
 
@@ -427,17 +151,15 @@
         document.getElementById("menuView").style.display = "none";
         document.getElementById("listView").style.display = "block";
         document.querySelector(".footer").style.display = "";
-        document.title = "菜單 - 曾可愛家族點餐系統";
+        document.title = "菜單 - 訂餐系統";
       }
 
-      document.getElementById("backBtn").addEventListener("click", () => {
-        history.back();
-      });
+      document.getElementById("backBtn").addEventListener("click", () => history.back());
 
-      window.addEventListener("popstate", (e) => {
-        const params = new URLSearchParams(location.search);
-        const shopKey = params.get("shop");
-        const type = params.get("type");
+      window.addEventListener("popstate", () => {
+        const p = new URLSearchParams(location.search);
+        const shopKey = p.get("shop");
+        const type = p.get("type");
         if (shopKey && SHOPS[shopKey]) {
           showMenuView(shopKey);
         } else {
@@ -447,53 +169,18 @@
       });
 
       (function init() {
-        const params = new URLSearchParams(location.search);
-        const shopKey = params.get("shop");
-        const type = params.get("type");
+        const p = new URLSearchParams(location.search);
+        const shopKey = p.get("shop");
+        const type = p.get("type");
         if (shopKey && SHOPS[shopKey]) {
           showMenuView(shopKey);
-        } else {
-          if (type === "food") document.getElementById("tabFood").click();
+        } else if (type === "food") {
+          document.getElementById("tabFood").click();
         }
       })();
 
-      function syncStickyTop() {
-        const nb = document.querySelector(".nb__bar");
-        if (!nb) return;
-        const h = nb.getBoundingClientRect().height + "px";
-        const tabBar = document.querySelector(".tab-bar");
-        const menuHeader = document.querySelector(".menu-header");
-        if (tabBar) tabBar.style.top = h;
-        if (menuHeader) menuHeader.style.top = h;
-      }
-      requestAnimationFrame(() => {
-        syncStickyTop();
-        window.addEventListener("resize", syncStickyTop);
-      });
-
-      document.addEventListener("click", (e) => {
-        const a = e.target.closest("a[href]");
-        if (!a) return;
-        const url = new URL(a.href, location.href);
-        if (url.pathname !== location.pathname) return;
-        const type = url.searchParams.get("type");
-        if (!type) return;
-        e.preventDefault();
-        showListView();
-        if (type === "food") {
-          document.getElementById("tabFood").click();
-        } else {
-          document.getElementById("tabDrink").click();
-        }
-        window.scrollTo(0, 0);
-      });
-    </script>
-
-    <script>
-      (function setupEmbedMode() {
-        const params = new URLSearchParams(location.search);
-        if (params.get("embed") !== "1") return;
-
+      function setupEmbedMode() {
+        if (!isEmbed) return;
         const navbarRoot = document.getElementById("navbar-root");
         const backBtn = document.getElementById("backBtn");
         const footer = document.querySelector(".footer");
@@ -514,16 +201,17 @@
 
         window.addEventListener("load", reportHeight);
         window.addEventListener("resize", reportHeight);
-
         if ("ResizeObserver" in window) {
           const observer = new ResizeObserver(reportHeight);
           observer.observe(document.body);
         }
-
         setTimeout(reportHeight, 50);
         setTimeout(reportHeight, 250);
         setTimeout(reportHeight, 800);
-      })();
+      }
+
+      setupEmbedMode();
     </script>
   </body>
 </html>
+

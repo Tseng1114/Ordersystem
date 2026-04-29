@@ -6,7 +6,7 @@
   padding: 0;
 }
 body {
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   background: #ffffff;
   color: #1a1008;
   min-height: 100vh;
@@ -19,11 +19,11 @@ body {
   padding: 48px 20px 80px;
 }
 .page-title {
-  text-align: center;
-  font-size: 1.8rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
   font-weight: 800;
-  margin-bottom: 28px;
-  letter-spacing: -0.02em;
+  margin-bottom: 36px;
+  letter-spacing: 0.01em;
 }
 
 .search-card {
@@ -54,7 +54,7 @@ body {
   border: 1.5px solid #ffe0cc;
   border-radius: 12px;
   font-size: 0.95rem;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   outline: none;
   transition: border-color 0.18s, box-shadow 0.18s;
   background: #fffaf8;
@@ -71,7 +71,7 @@ body {
   height: 44px;
   padding: 0 20px;
   border-radius: 50px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.95rem;
   background: #ff6b1a;
@@ -139,7 +139,7 @@ body {
   padding: 4px 10px;
   font-size: 0.8rem;
   cursor: pointer;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   color: #c44a00;
   transition: background 0.15s;
@@ -223,7 +223,7 @@ body {
   height: 40px;
   padding: 0 16px;
   border-radius: 50px;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.88rem;
   cursor: pointer;

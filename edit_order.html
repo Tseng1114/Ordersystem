@@ -4,15 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>修改訂單 - 曾可愛家族點餐系統</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
-    <link rel="stylesheet" href="css/edit_order_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
+    <link rel="stylesheet" href="css/order_lookup.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
   <body>
@@ -26,17 +23,17 @@
     </div>
 
     <div id="lookupArea">
-      <div class="lookup-wrap">
+      <div class="page-wrap order-lookup-wrap">
         <h1 class="page-title anim-fade-up">修改訂單</h1>
-        <div class="lookup-card anim-fade-up anim-fade-up-d1">
-          <div class="lookup-row">
+        <div class="lookup-card search-card order-code-card anim-fade-up anim-fade-up-d1">
+          <div class="lookup-row search-group order-code-group">
             <input
               id="eventIdInput"
-              class="id-input"
+              class="id-input search-input"
               type="text"
               placeholder="請輸入訂單代碼"
             />
-            <button class="btn-primary" id="loadBtn">讀取</button>
+            <button class="btn-primary search-btn" id="loadBtn">讀取</button>
           </div>
         </div>
       </div>
@@ -116,14 +113,15 @@
       import { supabase } from "./config.js";
       import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { loadShopCatalogByName } from "./menu-catalog.js";
-      import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
+      import { ICE_OPTIONS, NO_ADDON_LABEL, SUGAR_OPTIONS, combineItemAndAddon, parseItemAndAddon } from "./order-utils.js";
+      import { showToast, overrideAlert, initRipple, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./ui-utils.js";
 
       initNavbar("edit");
       overrideAlert();
       initRipple(".btn-primary, .btn-ghost, .btn-danger, .btn-save-row");
 
-      const SUGAR_OPTS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
-      const ICE_OPTS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
+      const SUGAR_OPTS = SUGAR_OPTIONS;
+      const ICE_OPTS = ICE_OPTIONS;
 
       let eventData = null;
       let currentShopCatalog = {
@@ -133,31 +131,11 @@
         addonOptions: [],
       };
 
-      function esc(str) {
-        return String(str ?? "")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;");
-      }
+      const esc = escapeHtml;
 
-      function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
-      }
+      const showLoading = setLoadingVisible;
 
-      function formatTW(iso) {
-        if (!iso) return "未設定";
-        return new Date(iso).toLocaleString("zh-TW", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-          timeZone: "Asia/Taipei",
-        });
-      }
+      const formatTW = formatTaipeiDateTime;
 
       function isDrinkEvent() {
         return eventData?.category !== "food";
@@ -172,23 +150,7 @@
       }
 
       function getCurrentDrinkAddons() {
-        return currentShopCatalog.addonOptions || ["不加料"];
-      }
-
-      function parseItemAndAddon(name = "") {
-        const text = String(name || "").trim();
-        const match = text.match(/^(.*?)(?:（加料：(.+?)）)?$/);
-        return {
-          itemName: match?.[1]?.trim() || "",
-          addonName: match?.[2]?.trim() || "不加料",
-        };
-      }
-
-      function combineItemAndAddon(itemName, addonName) {
-        const item = String(itemName || "").trim();
-        const addon = String(addonName || "").trim();
-        if (!addon || addon === "不加料" || addon === "無") return item;
-        return `${item}（加料：${addon}）`;
+        return currentShopCatalog.addonOptions || [NO_ADDON_LABEL];
       }
 
       function buildItemSelector(fieldClass, currentValue = "", inputId = "") {
@@ -618,7 +580,7 @@
         if (event.key === "Enter") loadEvent();
       });
 
-      const urlEvent = new URLSearchParams(location.search).get("event");
+      const urlEvent = getQueryParam("event");
       if (urlEvent) {
         document.getElementById("eventIdInput").value = urlEvent;
         loadEvent();

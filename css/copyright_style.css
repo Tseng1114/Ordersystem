@@ -1,15 +1,15 @@
 .footer {
-  margin-top: 40px;
+  margin-top: auto;
   padding: 30px 20px;
   text-align: center;
-  color: #8a6a5a;
+  color: #526d82;
   font-size: 0.85rem;
-  border-top: 1px solid #ffe0cc;
+  border-top: 1px solid #dde6ed;
   line-height: 1.6;
 }
 
 .disclaimer {
   margin-top: 8px;
   font-size: 0.75rem;
-  color: #c4a898;
+  color: #9db2bf;
 }

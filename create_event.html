@@ -75,7 +75,7 @@
       import { getEventCode } from "./event-utils.js";
       import { initNavbar } from "./navbar.js";
       import { SHOPS } from "./shop-data.js";
-      import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
+      import { showToast, overrideAlert, initRipple, copyText, setLoadingVisible } from "./ui-utils.js";
 
       initNavbar();
       overrideAlert();
@@ -175,7 +175,7 @@
           return;
         }
 
-        document.getElementById("loadingOverlay").style.display = "flex";
+        setLoadingVisible(true);
         try {
           const { data, error } = await supabase
             .from("events")
@@ -215,13 +215,12 @@
             location.href = orderURL.toString();
           };
           document.querySelector("#copyBtn").onclick = async () => {
-            await navigator.clipboard.writeText(finalMsg);
-            showToast("分享訊息已複製到剪貼簿。", "success");
+            await copyText(finalMsg, "分享訊息已複製到剪貼簿。");
           };
         } catch (err) {
           showToast(`建立訂單失敗：${err.message}`, "error", 5000);
         } finally {
-          document.getElementById("loadingOverlay").style.display = "none";
+          setLoadingVisible(false);
         }
       }
 

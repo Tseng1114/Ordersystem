@@ -2,11 +2,11 @@
   box-sizing: border-box;
 }
 body {
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   background: #ffffff;
   min-height: 100vh;
   margin: 0;
-  color: #1a1008;
+  color: #27374d;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -14,23 +14,30 @@ body {
   position: sticky;
   top: var(--nb-height, 58px);
   z-index: 500;
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1.5px solid #ffe0cc;
+  width: min(420px, calc(100% - 32px));
+  margin: 18px auto 0;
+  padding: 6px;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1.5px solid #dde6ed;
+  border-radius: var(--radius-pill);
   display: flex;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(255, 107, 26, 0.08);
+  justify-content: stretch;
+  box-shadow: 0 14px 34px rgba(39, 55, 77, 0.1);
   backdrop-filter: blur(10px);
 }
 .tab-btn {
-  padding: 0.9rem 2.5rem;
+  flex: 1;
+  justify-content: center;
+  padding: 0.72rem 1.4rem;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  font-family: "Noto Sans TC", sans-serif;
+  border-radius: var(--radius-pill);
+  margin-bottom: 0;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 600;
-  color: #8a6a5a;
+  color: #526d82;
   cursor: pointer;
   transition: all 0.18s;
   display: flex;
@@ -38,12 +45,13 @@ body {
   gap: 6px;
 }
 .tab-btn.active {
-  color: #1a1008;
-  border-bottom-color: #ff6b1a;
+  color: #ffffff;
+  background: linear-gradient(135deg, #27374d, #526d82);
+  box-shadow: 0 10px 22px rgba(39, 55, 77, 0.18);
 }
 .tab-btn:hover:not(.active) {
-  color: #1a1008;
-  background: #fff7f2;
+  color: #27374d;
+  background: #f4f8fa;
 }
 
 .list-wrap {
@@ -54,7 +62,7 @@ body {
 .section-title {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #1a1008;
+  color: #27374d;
   margin: 0 0 1.4rem;
   display: flex;
   align-items: center;
@@ -64,14 +72,14 @@ body {
   content: "";
   flex: 1;
   height: 2px;
-  background: linear-gradient(to right, #ff6b1a, transparent);
+  background: linear-gradient(to right, #526d82, transparent);
   border-radius: 2px;
 }
 .section-title::after {
   content: "";
   flex: 1;
   height: 2px;
-  background: linear-gradient(to right, #ff6b1a, transparent);
+  background: linear-gradient(to right, #526d82, transparent);
   border-radius: 2px;
 }
 
@@ -93,19 +101,19 @@ body {
   gap: 14px;
   padding: 18px 16px;
   background: #ffffff;
-  border: 1.5px solid #ffe0cc;
+  border: 1.5px solid #dde6ed;
   border-radius: 14px;
   text-decoration: none;
-  color: #1a1008;
-  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.08);
+  color: #27374d;
+  box-shadow: 0 8px 20px rgba(39, 55, 77, 0.08);
   transition: all 0.17s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .shop-card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 0 14px 28px rgba(255, 107, 26, 0.14);
-  background: #fff7f2;
-  border-color: #ff6b1a;
+  box-shadow: 0 14px 28px rgba(39, 55, 77, 0.14);
+  background: #f4f8fa;
+  border-color: #526d82;
 }
 .shop-logo {
   width: 54px;
@@ -113,7 +121,7 @@ body {
   flex-shrink: 0;
   object-fit: contain;
   border-radius: 10px;
-  border: 1.5px solid #ffe0cc;
+  border: 1.5px solid #dde6ed;
   padding: 5px;
   background: #fff;
 }
@@ -127,7 +135,7 @@ body {
   display: none;
 }
 .menu-header {
-  background: #ff6b1a;
+  background: linear-gradient(135deg, #27374d, #526d82);
   color: #fff;
   padding: 0 1.5rem;
   display: flex;
@@ -141,7 +149,7 @@ body {
   background: none;
   border: none;
   color: #ffffff;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.93rem;
   font-weight: 600;
   cursor: pointer;
@@ -174,8 +182,8 @@ body {
 .menu-img-wrap img {
   width: 100%;
   border-radius: 14px;
-  border: 1.5px solid #ffe0cc;
-  box-shadow: 0 10px 24px rgba(255, 107, 26, 0.08);
+  border: 1.5px solid #dde6ed;
+  box-shadow: 0 10px 24px rgba(39, 55, 77, 0.08);
   display: block;
 }
 

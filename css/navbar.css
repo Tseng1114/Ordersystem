@@ -1,6 +1,6 @@
 :root {
-  --nb-bg: rgba(255, 122, 43, 0.88);
-  --nb-bg-strong: #f0691f;
+  --nb-bg: rgba(39, 55, 77, 0.92);
+  --nb-bg-strong: #27374d;
   --nb-accent: #ffffff;
   --nb-text: #ffffff;
   --nb-dropdown-bg: #ffffff;
@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   padding: 0 1.4rem;
-  box-shadow: 0 14px 28px rgba(219, 102, 36, 0.26);
+  box-shadow: 0 14px 28px rgba(39, 55, 77, 0.18);
   border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(10px);
   box-sizing: border-box;
@@ -31,7 +31,7 @@
 }
 
 .nb__brand {
-  font-family: "Sora", "Noto Sans TC", sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.03rem;
   color: var(--nb-text);
@@ -39,7 +39,7 @@
   letter-spacing: 0.03em;
   white-space: nowrap;
   margin-right: auto;
-  text-shadow: 0 2px 10px rgba(125, 49, 6, 0.28);
+  text-shadow: none;
 }
 
 .nb__menu {
@@ -62,7 +62,7 @@
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--nb-text);
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.93rem;
   font-weight: 500;
   cursor: pointer;
@@ -96,9 +96,9 @@
   left: 0;
   min-width: 170px;
   background: var(--nb-dropdown-bg);
-  border: 1px solid rgba(255, 171, 131, 0.5);
+  border: 1px solid rgba(221, 230, 237, 0.95);
   border-radius: 14px;
-  box-shadow: 0 22px 42px rgba(174, 77, 21, 0.2);
+  box-shadow: 0 22px 42px rgba(39, 55, 77, 0.14);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
@@ -117,9 +117,9 @@
 .nb__dropdown a {
   display: block;
   padding: 0.72rem 1.15rem;
-  color: #7d401a;
+  color: #526d82;
   text-decoration: none;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 500;
   transition: background 0.16s, color 0.16s;
@@ -127,15 +127,15 @@
 }
 
 .nb__dropdown a:hover {
-  background: #fff3ea;
-  color: #ca4f0e;
-  border-left-color: #ff7b2c;
+  background: #eef4f7;
+  color: #27374d;
+  border-left-color: #526d82;
 }
 
 .nb__dropdown a.nb__active {
-  color: #c94d0d;
-  background: #fff3ea;
-  border-left-color: #ff7b2c;
+  color: #27374d;
+  background: #eef4f7;
+  border-left-color: #526d82;
   font-weight: 700;
 }
 
@@ -198,11 +198,11 @@
     top: var(--nb-height);
     left: 0;
     right: 0;
-    background: linear-gradient(180deg, #ff7a2b, #f0691f);
+    background: linear-gradient(180deg, #526d82, #27374d);
     flex-direction: column;
     align-items: stretch;
     border-top: 1px solid rgba(255, 255, 255, 0.24);
-    box-shadow: 0 18px 38px rgba(177, 84, 31, 0.26);
+    box-shadow: 0 18px 38px rgba(39, 55, 77, 0.18);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;

@@ -1,27 +1,27 @@
 :root {
   --bg-body: #ffffff;
-  --text-primary: #1a1008;
-  --accent-color: #ff6b1a;
+  --text-primary: #27374d;
+  --accent-color: #526d82;
   --surface: #ffffff;
-  --surface-soft: #fff7f2;
-  --line: #ffe0cc;
+  --surface-soft: #f4f8fa;
+  --line: #dde6ed;
   --radius: 16px;
-  --shadow-real: 0 18px 40px rgba(255, 107, 26, 0.08);
+  --shadow-real: 0 18px 40px rgba(39, 55, 77, 0.08);
 }
 
 body {
   margin: 0;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-body);
   color: var(--text-primary);
   padding-bottom: 60px;
 }
 
 .marquee-bar {
-  background: #fff0e8;
-  color: #c44a00;
+  background: #eef4f7;
+  color: #27374d;
   padding: 12px 0;
-  border-bottom: 2px solid #ffe0cc;
+  border-bottom: 2px solid #dde6ed;
   overflow: hidden;
   white-space: nowrap;
   font-weight: bold;
@@ -69,7 +69,7 @@ body {
 
 .id-label {
   font-size: 13px;
-  color: #8a6a5a;
+  color: #526d82;
   margin-bottom: 8px;
   font-weight: bold;
 }
@@ -90,7 +90,7 @@ body {
 }
 
 .copy-action-btn {
-  background: #ff6b1a;
+  background: #526d82;
   color: #ffffff;
   border: none;
   padding: 8px 16px;
@@ -98,13 +98,13 @@ body {
   cursor: pointer;
   font-weight: bold;
   white-space: nowrap;
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: var(--font-body);
 }
 
 .copy-toast {
   text-align: center;
   font-size: 12px;
-  color: #ff6b1a;
+  color: #526d82;
   margin-top: 8px;
   display: none;
   font-weight: bold;
@@ -122,7 +122,7 @@ body {
   border-radius: 12px;
   padding: 15px;
   margin-bottom: 15px;
-  box-shadow: 0 8px 20px rgba(255, 107, 26, 0.06);
+  box-shadow: 0 8px 20px rgba(39, 55, 77, 0.06);
 }
 
 .person h4 {
@@ -149,19 +149,19 @@ body {
 
 .back-home {
   text-decoration: none;
-  background: #fff0e8;
-  color: #c44a00;
+  background: #eef4f7;
+  color: #27374d;
   padding: 12px 25px;
   border-radius: 50px;
   font-weight: bold;
   cursor: pointer;
-  border: 1.5px solid #ffe0cc;
-  font-family: "Noto Sans TC", sans-serif;
+  border: 1.5px solid #dde6ed;
+  font-family: var(--font-body);
   transition: all 0.15s;
 }
 .back-home:hover {
-  background: #ffd8c0;
-  border-color: #ffc39e;
+  background: #dde6ed;
+  border-color: #9db2bf;
   transform: translate(-1px, -1px);
 }
 
@@ -178,7 +178,7 @@ body {
 }
 .meta-deadline {
   text-align: center;
-  color: #ff6b1a;
+  color: #526d82;
   font-weight: bold;
   margin: 5px 0;
 }
@@ -188,7 +188,7 @@ body {
 }
 .state-empty {
   text-align: center;
-  color: #8a6a5a;
+  color: #526d82;
   padding: 40px 0;
 }
 .order-qty {
@@ -209,17 +209,17 @@ body {
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: #8a6a5a;
-  font-family: "Noto Sans TC", sans-serif;
+  color: #526d82;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.93rem;
   cursor: pointer;
   transition: all 0.18s;
 }
 .summary-tab.active {
-  background: #ff6b1a;
+  background: #526d82;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(255, 107, 26, 0.25);
+  box-shadow: 0 6px 16px rgba(39, 55, 77, 0.16);
 }
 
 .realtime-badge {
@@ -230,9 +230,9 @@ body {
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 99px;
-  border: 1.5px solid #ffe0cc;
-  background: #fff7f2;
-  color: #c44a00;
+  border: 1.5px solid #dde6ed;
+  background: #f4f8fa;
+  color: #27374d;
   margin-left: 10px;
   vertical-align: middle;
   transition: background 0.3s, color 0.3s, border-color 0.3s;
@@ -270,7 +270,7 @@ body {
 }
 
 @keyframes highlight-new {
-  0%   { background: #fff0e8; box-shadow: 0 0 0 3px #ffd8c0; }
+  0%   { background: #eef4f7; box-shadow: 0 0 0 3px #dde6ed; }
   100% { background: transparent; box-shadow: none; }
 }
 

@@ -4,9 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>下單 - 曾可愛家族點餐系統</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/order_style.css" />
@@ -101,14 +98,14 @@
       import { initNavbar } from "./navbar.js";
       import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
       import { loadShopCatalogByName } from "./menu-catalog.js";
-      import { showToast, overrideAlert, initRipple } from "./ui-utils.js";
+      import { ICE_OPTIONS, SUGAR_OPTIONS, combineItemAndAddon } from "./order-utils.js";
+      import { showToast, overrideAlert, initRipple, getQueryParam, setLoadingVisible } from "./ui-utils.js";
 
       initNavbar();
       overrideAlert();
       initRipple(".primary, .add, .back-home, .del-btn");
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const rawEventId = urlParams.get("event");
+      const rawEventId = getQueryParam("event");
 
       let resolvedEventId = null;
       let currentCategory = "drink";
@@ -124,12 +121,7 @@
       let deadlineDate = null;        
       let menuLoadTimer = null;
 
-      const SUGAR_OPTIONS = ["正常糖", "少糖", "半糖", "微糖", "二分糖", "一分糖", "無糖"];
-      const ICE_OPTIONS = ["正常冰", "少冰", "微冰", "去冰", "完全去冰", "溫", "熱", "常溫"];
-
-      function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
-      }
+      const showLoading = setLoadingVisible;
 
       function buildSelect(className, options, selectedValue) {
         return `<select class="${className}">${options.map((o) =>
@@ -158,12 +150,6 @@
         }
         return `<select class="addon-input">${addonOptions.map((o) =>
           `<option value="${o}">${o}</option>`).join("")}</select>`;
-      }
-
-      function combineItemAndAddon(itemName, addonName) {
-        const addon = addonName?.trim();
-        if (!addon || addon === "無" || addon === "不加料") return itemName;
-        return `${itemName}（加料：${addon}）`;
       }
 
       function renderEmbeddedMenu() {

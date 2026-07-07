@@ -2,6 +2,46 @@ let toastContainer = null;
 let lightboxOverlay = null;
 let lightboxImg = null;
 
+export function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export function setLoadingVisible(show, overlayId = "loadingOverlay") {
+  const overlay = document.getElementById(overlayId);
+  if (overlay) {
+    overlay.style.display = show ? "flex" : "none";
+  }
+}
+
+export function formatTaipeiDateTime(value, fallback = "未設定") {
+  if (!value) return fallback;
+  return new Date(value).toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Taipei",
+  });
+}
+
+export function getQueryParam(name, search = window.location.search) {
+  return new URLSearchParams(search).get(name);
+}
+
+export async function copyText(text, successMessage = "") {
+  await navigator.clipboard.writeText(String(text ?? ""));
+  if (successMessage) {
+    showToast(successMessage, "success");
+  }
+}
+
 function getToastContainer() {
   if (!toastContainer) {
     toastContainer = document.createElement("div");

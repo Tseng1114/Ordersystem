@@ -4,9 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>菜單 - 訂餐系統</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/copyright_style.css" />
@@ -44,17 +41,18 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <p>c 2025 - 2026 曾可愛家族點餐系統</p>
+        <p>© 2025 - 2026 曾可愛家族點餐系統</p>
+        <p class="disclaimer">本站所有品牌標誌及菜單資訊之著作權均屬原公司所有。本系統為非營利開發練習，與上述品牌無官方關聯。</p>
       </div>
     </footer>
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
-      import { initLightbox, initRipple } from "./ui-utils.js";
+      import { getQueryParam, initLightbox, initRipple } from "./ui-utils.js";
       import { SHOPS as SHOP_DATA } from "./shop-data.js";
 
-      const params = new URLSearchParams(location.search);
-      const isEmbed = params.get("embed") === "1";
+      const initialShopKey = getQueryParam("shop");
+      const isEmbed = getQueryParam("embed") === "1";
 
       if (!isEmbed) {
         initNavbar("menu");
@@ -83,27 +81,29 @@
           el.style.animationDelay = `${i * 45}ms`;
           el.classList.add("anim-fade-up");
           el.innerHTML = `
-            <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" />
+            <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" loading="lazy" decoding="async" />
             <div class="shop-info"><b>${s.name}</b></div>`;
           el.addEventListener("click", () => openShop(key));
           grid.appendChild(el);
         });
       }
 
-      renderGrid("drinkGrid", "drinks");
-      renderGrid("foodGrid", "meals");
+      if (!isEmbed || !initialShopKey || !SHOPS[initialShopKey]) {
+        renderGrid("drinkGrid", "drinks");
+        renderGrid("foodGrid", "meals");
 
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-          document.querySelectorAll(".section-panel").forEach((p) => p.classList.remove("active"));
-          btn.classList.add("active");
-          const panel = document.getElementById(btn.dataset.target);
-          panel.classList.add("active");
-          const t = btn.dataset.target === "drinkPanel" ? "drink" : "food";
-          history.replaceState(null, "", `menu.html?type=${t}`);
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+            document.querySelectorAll(".section-panel").forEach((p) => p.classList.remove("active"));
+            btn.classList.add("active");
+            const panel = document.getElementById(btn.dataset.target);
+            panel.classList.add("active");
+            const t = btn.dataset.target === "drinkPanel" ? "drink" : "food";
+            history.replaceState(null, "", `menu.html?type=${t}`);
+          });
         });
-      });
+      }
 
       function openShop(key) {
         const shop = SHOPS[key];
@@ -135,6 +135,8 @@
           const el = document.createElement("img");
           el.src = `menus/${shop.type}/${imgSrc}`;
           el.alt = `${shop.name} 菜單`;
+          el.loading = i === 0 ? "eager" : "lazy";
+          el.decoding = "async";
           el.style.animationDelay = `${i * 80}ms`;
           el.classList.add("anim-scale-in");
           wrap.appendChild(el);
@@ -142,7 +144,7 @@
 
         document.getElementById("listView").style.display = "none";
         document.getElementById("menuView").style.display = "block";
-        document.querySelector(".footer").style.display = "none";
+        document.querySelector(".footer").style.display = isEmbed ? "none" : "";
         if (!isEmbed) window.scrollTo(0, 0);
         reportEmbedHeight();
       }
@@ -157,9 +159,8 @@
       document.getElementById("backBtn").addEventListener("click", () => history.back());
 
       window.addEventListener("popstate", () => {
-        const p = new URLSearchParams(location.search);
-        const shopKey = p.get("shop");
-        const type = p.get("type");
+        const shopKey = getQueryParam("shop");
+        const type = getQueryParam("type");
         if (shopKey && SHOPS[shopKey]) {
           showMenuView(shopKey);
         } else {
@@ -169,9 +170,8 @@
       });
 
       (function init() {
-        const p = new URLSearchParams(location.search);
-        const shopKey = p.get("shop");
-        const type = p.get("type");
+        const shopKey = getQueryParam("shop");
+        const type = getQueryParam("type");
         if (shopKey && SHOPS[shopKey]) {
           showMenuView(shopKey);
         } else if (type === "food") {

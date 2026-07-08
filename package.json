@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "sync:shop-catalog": "node ./scripts/sync-shop-catalog.mjs"
+    "sync:shop-catalog": "node ./scripts/sync-shop-catalog.mjs",
+    "audit:shop-catalog": "node ./scripts/audit-shop-catalog.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"

@@ -57,7 +57,7 @@ export const SHOPS = {
   },
   youindrink: {
     name: "有飲",
-    sub: "You in",
+    sub: "",
     category: "drink",
     logo: "youindrink_logo.png",
     imgs: ["youindrink_menu.webp"],
@@ -68,6 +68,13 @@ export const SHOPS = {
     category: "drink",
     logo: "chingshanteashop_logo.jpg",
     imgs: ["chingshanteashop_menu.jpg"],
+  },
+  peaktea: {
+    name: "青山",
+    sub: "Peak Tea",
+    category: "drink",
+    logo: "peaktea_logo.png",
+    imgs: ["peaktea_menu.webp"],
   },
   chingshin: {
     name: "清心福全",
@@ -85,14 +92,14 @@ export const SHOPS = {
   },
   bogteashop: {
     name: "波哥茶飲",
-    sub: "BOG TEA SHOP",
+    sub: "",
     category: "drink",
     logo: "bogteashop_logo.png",
     imgs: ["bogteashop_menu.jpg"],
   },
   shuansenbeverages: {
     name: "双生綠豆沙牛奶",
-    sub: "Shuànsên beverages",
+    sub: "",
     category: "drink",
     logo: "shuansenbeverages_logo.png",
     imgs: ["shuansenbeverages_menu.jpg"],
@@ -113,7 +120,7 @@ export const SHOPS = {
   },
   liketeashop: {
     name: "老賴茶棧",
-    sub: "LIKE TEA SHOP",
+    sub: "",
     category: "drink",
     logo: "liketeashop_logo.jpg",
     imgs: ["liketeashop_menu.jpg"],
@@ -127,7 +134,7 @@ export const SHOPS = {
   },
   xuanfuresidence: {
     name: "宣福居",
-    sub: "xuanfuresidence",
+    sub: "",
     category: "drink",
     logo: "xuanfuresidence_logo.jpg",
     imgs: ["xuanfuresidence_menu.png"],
@@ -148,10 +155,10 @@ export const SHOPS = {
   },
   napteazzz: {
     name: "再睡5分鐘",
-    sub: "napteazzz",
+    sub: "NAP TEA",
     category: "drink",
-    logo: "npateazzz_logo.png",
-    imgs: ["napteazzz_menu.avif"],
+    logo: "npatea_logo.png",
+    imgs: ["naptea_menu.avif"],
   },
   coco: {
     name: "CoCo都可",
@@ -176,21 +183,21 @@ export const SHOPS = {
   },
   "19teahouse": {
     name: "拾汣茶屋",
-    sub: "19teahouse",
+    sub: "",
     category: "drink",
     logo: "19teahouse_logo.png",
     imgs: ["19teahouse_menu.png"],
   },
   wootea: {
     name: "五桐號",
-    sub: "WooTea",
+    sub: "WOOTEA",
     category: "drink",
     logo: "wootea_logo.png",
     imgs: ["wootea_menu.jpg"],
   },
   lucymama: {
     name: "露西媽媽",
-    sub: "Lucy Mama",
+    sub: "LUCY MAMA PASTA",
     category: "food",
     logo: "lucymama_logo.jpg",
     imgs: ["lucymama_menu1.jpg", "lucymama_menu2.jpg"],

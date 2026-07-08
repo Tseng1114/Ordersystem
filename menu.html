@@ -31,11 +31,8 @@
       </div>
     </div>
 
-    <div id="menuView">
-      <div class="menu-header">
-        <button class="menu-back-btn" id="backBtn">返回</button>
-        <span id="menuShopTitle"></span>
-      </div>
+    <div id="menuView" class="menu-modal" role="dialog" aria-modal="true" aria-label="菜單圖片預覽">
+      <button class="menu-close-btn" id="backBtn" type="button" aria-label="關閉菜單">×</button>
       <div class="menu-img-wrap" id="menuImgs"></div>
     </div>
 
@@ -48,16 +45,16 @@
 
     <script type="module">
       import { initNavbar } from "./navbar.js";
-      import { getQueryParam, initLightbox, initRipple } from "./ui-utils.js";
+      import { getQueryParam, initRipple } from "./ui-utils.js";
       import { SHOPS as SHOP_DATA } from "./shop-data.js";
 
       const initialShopKey = getQueryParam("shop");
       const isEmbed = getQueryParam("embed") === "1";
+      let isMenuOpen = false;
 
       if (!isEmbed) {
         initNavbar("menu");
-        initLightbox(".menu-img-wrap");
-        initRipple(".tab-btn, .menu-back-btn, .shop-card");
+        initRipple(".tab-btn, .menu-close-btn, .shop-card");
       }
 
       const SHOPS = Object.fromEntries(
@@ -69,6 +66,13 @@
           },
         ]),
       );
+
+      const HIDE_SEARCH_LINK_KEYS = new Set(["mcdonalds", "kfc", "burgerking"]);
+
+      function getShopSearchUrl(shop) {
+        const keyword = `${shop.name} ${shop.sub || ""} 店家資訊`.trim();
+        return `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
+      }
 
       function renderGrid(gridId, type) {
         const grid = document.getElementById(gridId);
@@ -82,7 +86,18 @@
           el.classList.add("anim-fade-up");
           el.innerHTML = `
             <img class="shop-logo" src="./logos/${logoDir}/${s.logo}" alt="${s.name}" loading="lazy" decoding="async" />
-            <div class="shop-info"><b>${s.name}</b></div>`;
+            <div class="shop-info">
+              <b>${s.name}</b>
+              ${s.sub ? `<span>${s.sub}</span>` : ""}
+            </div>
+            ${
+              HIDE_SEARCH_LINK_KEYS.has(key)
+                ? ""
+                : `<a class="shop-link" href="${getShopSearchUrl(s)}" target="_blank" rel="noreferrer">搜尋店家</a>`
+            }`;
+          el.querySelector(".shop-link")?.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
           el.addEventListener("click", () => openShop(key));
           grid.appendChild(el);
         });
@@ -108,13 +123,13 @@
       function openShop(key) {
         const shop = SHOPS[key];
         if (!shop) return;
-        if (shop.url) {
+        if (!shop.imgs?.length && shop.url) {
           window.open(shop.url, "_blank", "noopener,noreferrer");
           return;
         }
         const suffix = isEmbed ? "&embed=1" : "";
         history.pushState({ shop: key }, "", `menu.html?shop=${key}${suffix}`);
-        showMenuView(key);
+        showMenuModal(key);
       }
 
       function reportEmbedHeight() {
@@ -123,10 +138,9 @@
         window.parent.postMessage({ type: "menu-embed-height", height }, "*");
       }
 
-      function showMenuView(key) {
+      function showMenuModal(key) {
         const shop = SHOPS[key];
         document.title = `${shop.name} 菜單 - 訂餐系統`;
-        document.getElementById("menuShopTitle").textContent = shop.name;
         const wrap = document.getElementById("menuImgs");
         wrap.innerHTML = "";
 
@@ -142,29 +156,40 @@
           wrap.appendChild(el);
         });
 
-        document.getElementById("listView").style.display = "none";
-        document.getElementById("menuView").style.display = "block";
+        isMenuOpen = true;
+        document.getElementById("menuView").classList.add("show");
+        document.body.classList.add("menu-modal-open");
         document.querySelector(".footer").style.display = isEmbed ? "none" : "";
-        if (!isEmbed) window.scrollTo(0, 0);
         reportEmbedHeight();
       }
 
-      function showListView() {
-        document.getElementById("menuView").style.display = "none";
-        document.getElementById("listView").style.display = "block";
+      function closeMenuModal({ updateHistory = true } = {}) {
+        isMenuOpen = false;
+        document.getElementById("menuView").classList.remove("show");
+        document.body.classList.remove("menu-modal-open");
         document.querySelector(".footer").style.display = "";
         document.title = "菜單 - 訂餐系統";
+        if (updateHistory) {
+          const activeType = document.getElementById("tabFood").classList.contains("active") ? "food" : "drink";
+          history.replaceState(null, "", `menu.html?type=${activeType}`);
+        }
       }
 
-      document.getElementById("backBtn").addEventListener("click", () => history.back());
+      document.getElementById("backBtn").addEventListener("click", () => closeMenuModal());
+      document.getElementById("menuView").addEventListener("click", (event) => {
+        if (event.target.id === "menuView") closeMenuModal();
+      });
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && isMenuOpen) closeMenuModal();
+      });
 
       window.addEventListener("popstate", () => {
         const shopKey = getQueryParam("shop");
         const type = getQueryParam("type");
         if (shopKey && SHOPS[shopKey]) {
-          showMenuView(shopKey);
+          showMenuModal(shopKey);
         } else {
-          showListView();
+          closeMenuModal({ updateHistory: false });
           if (type === "food") document.getElementById("tabFood").click();
         }
       });
@@ -173,7 +198,7 @@
         const shopKey = getQueryParam("shop");
         const type = getQueryParam("type");
         if (shopKey && SHOPS[shopKey]) {
-          showMenuView(shopKey);
+          showMenuModal(shopKey);
         } else if (type === "food") {
           document.getElementById("tabFood").click();
         }
@@ -191,7 +216,7 @@
         if (backBtn) backBtn.style.display = "none";
         if (footer) footer.style.display = "none";
         if (listView) listView.style.display = "none";
-        if (menuView) menuView.style.paddingTop = "0";
+        if (menuView) menuView.classList.add("embed-mode");
 
         const reportHeight = () => {
           if (window.parent === window) return;

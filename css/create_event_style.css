@@ -87,6 +87,8 @@ input,
 select,
 .share-textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 11px 14px;
   border: 1.5px solid var(--line);
   border-radius: 12px;
@@ -96,6 +98,24 @@ select,
   color: var(--text-primary);
   transition: border-color 0.18s, box-shadow 0.18s;
   outline: none;
+}
+
+input[type="datetime-local"] {
+  display: block;
+  height: 48px;
+  line-height: 1.2;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  min-height: 1.2em;
+  text-align: left;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  margin-left: 6px;
 }
 input:focus,
 select:focus {
@@ -217,11 +237,36 @@ button.primary:active {
 
 @media (max-width: 480px) {
   .wrap {
-    padding: 32px 16px 60px;
+    padding: 32px 14px 60px;
   }
   .card {
     box-shadow: 4px 4px 0 var(--line);
-    padding: 24px 20px;
+    padding: 24px 16px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  input,
+  select,
+  .share-textarea {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  input[type="datetime-local"] {
+    height: 46px;
+    font-size: 16px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+
+  .back-home,
+  button.primary {
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 0.9rem;
   }
 }
 

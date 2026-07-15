@@ -5,6 +5,7 @@
   --nb-text: #ffffff;
   --nb-dropdown-bg: #ffffff;
   --nb-height: 64px;
+  --nb-total-height: calc(var(--nb-height) + var(--safe-area-top));
 }
 
 .nb__bar {
@@ -12,10 +13,10 @@
   top: 0;
   z-index: 1000;
   background: linear-gradient(120deg, var(--nb-bg), var(--nb-bg-strong));
-  height: var(--nb-height);
+  height: var(--nb-total-height);
   display: flex;
   align-items: center;
-  padding: 0 1.4rem;
+  padding: var(--safe-area-top) max(1.4rem, var(--safe-area-right)) 0 max(1.4rem, var(--safe-area-left));
   box-shadow: 0 14px 28px rgba(39, 55, 77, 0.18);
   border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(10px);
@@ -186,7 +187,8 @@
 
 @media (max-width: 680px) {
   .nb__bar {
-    padding: 0 1rem;
+    padding-right: max(1rem, var(--safe-area-right));
+    padding-left: max(1rem, var(--safe-area-left));
   }
 
   .nb__toggle {
@@ -195,7 +197,7 @@
 
   .nb__menu {
     position: fixed;
-    top: var(--nb-height);
+    top: var(--nb-total-height);
     left: 0;
     right: 0;
     background: linear-gradient(180deg, #526d82, #27374d);

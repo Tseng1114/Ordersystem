@@ -37,6 +37,11 @@
 
   --transition-bounce: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
   --transition-smooth: all 0.2s ease;
+
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
 }
 
 html {
@@ -49,6 +54,7 @@ body {
   flex-direction: column;
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font-body);
   color: var(--text-main);
   background:
@@ -129,12 +135,28 @@ body::before {
 .footer {
   margin-top: auto;
   text-align: center;
-  padding: 48px 24px;
+  padding: 48px max(24px, var(--safe-area-right)) calc(48px + var(--safe-area-bottom)) max(24px, var(--safe-area-left));
   font-size: 0.85rem;
   color: var(--text-muted);
   border-top: 1px solid var(--accent-mid);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(221, 230, 237, 0.6));
   backdrop-filter: blur(4px);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html body select,
+  html body textarea {
+    font-size: 16px !important;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
 }
 
 .footer p + p {

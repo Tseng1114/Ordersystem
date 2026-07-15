@@ -42,7 +42,7 @@
         </div>
 
         <label for="deadline">截止時間</label>
-        <input id="deadline" type="datetime-local" required />
+        <input id="deadline" type="datetime-local" step="60" required />
         <p id="deadlineError" class="field-error hidden" role="alert">請先選擇截止時間。</p>
 
         <div class="actions">
@@ -99,6 +99,21 @@
       const shopOtherError = document.getElementById("shopOtherError");
       const deadlineError = document.getElementById("deadlineError");
 
+      function toLocalDateTimeValue(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+
+      function updateDeadlineMinimum() {
+        const now = new Date();
+        now.setSeconds(0, 0);
+        deadlineInput.min = toLocalDateTimeValue(now);
+      }
+
       function setFieldError(inputEl, errorEl, message) {
         const hasError = Boolean(message);
         inputEl.classList.toggle("input-error", hasError);
@@ -111,18 +126,24 @@
         const isCustomShop = selectedShop === "__other";
         const shop = isCustomShop ? shopOther.value.trim() : selectedShop.trim();
         const deadline = deadlineInput.value;
+        const deadlineDate = deadline ? new Date(deadline) : null;
+        const isFutureDeadline = deadlineDate && deadlineDate.getTime() > Date.now();
 
         setFieldError(shopSelect, shopError, !selectedShop ? "請先選擇店家。" : "");
         setFieldError(shopOther, shopOtherError, isCustomShop && !shop ? "請輸入店家名稱。" : "");
-        setFieldError(deadlineInput, deadlineError, !deadline ? "請先選擇截止時間。" : "");
+        setFieldError(
+          deadlineInput,
+          deadlineError,
+          !deadline ? "請先選擇截止時間。" : !isFutureDeadline ? "截止時間必須晚於現在。" : "",
+        );
 
         const firstInvalidField =
           (!selectedShop && shopSelect) ||
           (isCustomShop && !shop && shopOther) ||
-          (!deadline && deadlineInput);
+          ((!deadline || !isFutureDeadline) && deadlineInput);
 
         return {
-          isValid: Boolean(selectedShop && shop && deadline),
+          isValid: Boolean(selectedShop && shop && deadline && isFutureDeadline),
           shop,
           deadline,
           firstInvalidField,
@@ -232,6 +253,8 @@
       }
 
       document.querySelector("#createBtn").onclick = createEvent;
+      updateDeadlineMinimum();
+      window.addEventListener("pageshow", updateDeadlineMinimum);
       updateShopList("drink");
     </script>
   </body>

@@ -36,10 +36,56 @@ export function getQueryParam(name, search = window.location.search) {
 }
 
 export async function copyText(text, successMessage = "") {
-  await navigator.clipboard.writeText(String(text ?? ""));
-  if (successMessage) {
-    showToast(successMessage, "success");
+  const value = String(text ?? "");
+  let copied = false;
+
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value);
+      copied = true;
+    } catch {
+      copied = false;
+    }
   }
+
+  if (!copied) {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.inset = "0 auto auto -9999px";
+    textarea.style.fontSize = "16px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, value.length);
+
+    try {
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
+    } finally {
+      textarea.remove();
+    }
+  }
+
+  if (!copied) {
+    showToast("無法自動複製，請長按文字後選擇複製。", "warning", 4500);
+    return false;
+  }
+
+  if (successMessage) showToast(successMessage, "success");
+  return true;
+}
+
+export function openExternalUrl(value) {
+  const url = new URL(value, location.href);
+  const link = document.createElement("a");
+  link.href = url.toString();
+  link.target = "_blank";
+  link.rel = "noopener noreferrer external";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 function getToastContainer() {

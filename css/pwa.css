@@ -1,9 +1,9 @@
 .pwa-install-prompt {
   position: fixed;
   z-index: 10000;
-  right: 12px;
+  right: calc(12px + env(safe-area-inset-right));
   bottom: calc(12px + env(safe-area-inset-bottom));
-  left: 12px;
+  left: calc(12px + env(safe-area-inset-left));
   display: grid;
   grid-template-columns: 48px 1fr auto;
   gap: 12px;

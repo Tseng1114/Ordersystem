@@ -207,8 +207,8 @@
 
 .fab-group {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(24px + var(--safe-area-bottom));
+  right: max(24px, var(--safe-area-right));
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -263,7 +263,7 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  padding: 20px;
+  padding: calc(20px + var(--safe-area-top)) calc(20px + var(--safe-area-right)) calc(20px + var(--safe-area-bottom)) calc(20px + var(--safe-area-left));
 }
 
 .modal-overlay.show {

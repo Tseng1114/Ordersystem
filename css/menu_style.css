@@ -175,7 +175,7 @@ body.menu-modal-open {
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 28px;
+  padding: calc(28px + var(--safe-area-top)) calc(28px + var(--safe-area-right)) calc(28px + var(--safe-area-bottom)) calc(28px + var(--safe-area-left));
   background: rgba(39, 55, 77, 0.54);
   backdrop-filter: blur(8px);
 }
@@ -184,8 +184,8 @@ body.menu-modal-open {
 }
 .menu-close-btn {
   position: fixed;
-  top: 22px;
-  right: 24px;
+  top: calc(22px + var(--safe-area-top));
+  right: max(24px, var(--safe-area-right));
   z-index: 1;
   width: 44px;
   height: 44px;
@@ -211,6 +211,7 @@ body.menu-modal-open {
 .menu-img-wrap {
   width: min(980px, 100%);
   max-height: min(90vh, 920px);
+  max-height: min(90dvh, 920px);
   overflow: auto;
   padding: 4px;
   display: flex;
@@ -274,11 +275,11 @@ body.menu-modal-open {
   }
   .menu-modal {
     align-items: center;
-    padding: 54px 12px 18px;
+    padding: calc(54px + var(--safe-area-top)) max(12px, var(--safe-area-right)) calc(18px + var(--safe-area-bottom)) max(12px, var(--safe-area-left));
   }
   .menu-close-btn {
-    top: 10px;
-    right: 12px;
+    top: calc(10px + var(--safe-area-top));
+    right: max(12px, var(--safe-area-right));
     width: 40px;
     height: 40px;
     font-size: 1.6rem;
@@ -286,5 +287,6 @@ body.menu-modal-open {
   .menu-img-wrap {
     width: 100%;
     max-height: calc(100vh - 72px);
+    max-height: calc(100dvh - 72px - var(--safe-area-top) - var(--safe-area-bottom));
   }
 }

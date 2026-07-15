@@ -1,6 +1,7 @@
 .howto-section {
-  max-width: 700px;
+  width: min(100%, 700px);
   margin: 0 auto 60px;
+  -webkit-text-size-adjust: 100%;
 }
 
 .howto-intro {
@@ -10,6 +11,9 @@
   color: var(--muted, #64748b);
   line-height: 1.8;
   font-size: 0.95rem;
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .howto-label {
@@ -21,6 +25,7 @@
   align-items: center;
   gap: 8px;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .howto-label::before,
@@ -74,7 +79,7 @@
   padding: 28px 24px 24px;
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  height: 420px;
   transition: var(--transition-bounce);
 }
 
@@ -108,7 +113,7 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
-  flex: 1;
+  flex: 0 0 130px;
 }
 
 .sw-illus svg {
@@ -128,6 +133,9 @@
   font-size: 0.92rem;
   color: #475569;
   line-height: 1.8;
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .sw-hint {
@@ -139,6 +147,10 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  line-height: 1.55;
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .sw-hint::before {
@@ -216,10 +228,31 @@
 }
 
 @media (max-width: 520px) {
+  .howto-section {
+    margin-bottom: 48px;
+  }
+
+  .howto-intro {
+    padding-inline: 6px;
+    margin-bottom: 18px;
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
   .sw-card {
-    min-height: 300px;
-    padding: 22px 18px 18px;
+    height: 420px;
+    padding: 20px 18px 18px;
     box-shadow: 5px 5px 0 var(--navy);
+  }
+
+  .sw-step-tag {
+    margin-bottom: 12px;
+  }
+
+  .sw-illus {
+    flex-basis: 94px;
+    margin-bottom: 14px;
   }
 
   .sw-illus svg {
@@ -228,6 +261,29 @@
   }
 
   .sw-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    margin-bottom: 7px;
+  }
+
+  .sw-desc {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .sw-hint {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .sw-card {
+    height: 440px;
+    padding-inline: 16px;
+  }
+
+  .sw-desc {
+    font-size: 0.95rem;
   }
 }

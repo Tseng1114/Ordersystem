@@ -74,13 +74,6 @@
         ]),
       );
 
-      const HIDE_SEARCH_LINK_KEYS = new Set(["mcdonalds", "kfc", "burgerking"]);
-
-      function getShopSearchUrl(shop) {
-        const keyword = `${shop.name} ${shop.sub || ""} 店家資訊`.trim();
-        return `https://www.google.com/search?q=${encodeURIComponent(keyword)}`;
-      }
-
       function renderGrid(gridId, type) {
         const grid = document.getElementById(gridId);
         const entries = Object.entries(SHOPS).filter(([, s]) => s.type === type);
@@ -98,9 +91,9 @@
               ${s.sub ? `<span>${s.sub}</span>` : ""}
             </div>
             ${
-              HIDE_SEARCH_LINK_KEYS.has(key)
-                ? ""
-                : `<a class="shop-link" href="${getShopSearchUrl(s)}" target="_blank" rel="noreferrer">搜尋店家</a>`
+              s.url
+                ? `<a class="shop-link" href="${s.url}" target="_blank" rel="noopener noreferrer external" aria-label="前往${s.name}${s.linkLabel || "官方網站"}">${s.linkLabel || "官方網站"}</a>`
+                : ""
             }`;
           el.querySelector(".shop-link")?.addEventListener("click", (event) => {
             event.stopPropagation();

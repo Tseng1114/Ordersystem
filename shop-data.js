@@ -5,6 +5,7 @@ export const SHOPS = {
     category: "drink",
     logo: "milksha_logo.png",
     imgs: ["milksha_menu.jpg"],
+    url: "https://www.milksha.com/",
   },
   damingtea: {
     name: "大茗本味製茶堂",
@@ -12,6 +13,7 @@ export const SHOPS = {
     category: "drink",
     logo: "damingtea_logo.png",
     imgs: ["damingtea_menu.png"],
+    url: "https://www.damingtea.com.tw/",
   },
   truedan: {
     name: "珍煮丹",
@@ -19,6 +21,7 @@ export const SHOPS = {
     category: "drink",
     logo: "truedan_logo.png",
     imgs: ["truedan_menu.jpg"],
+    url: "https://www.truedan.com.tw/",
   },
   dejeng: {
     name: "得正",
@@ -26,6 +29,7 @@ export const SHOPS = {
     category: "drink",
     logo: "dejeng_logo.png",
     imgs: ["dejeng_menu.jpg"],
+    url: "https://dejeng.com/",
   },
   "50lan": {
     name: "50嵐",
@@ -33,6 +37,7 @@ export const SHOPS = {
     category: "drink",
     logo: "50lan_logo.png",
     imgs: ["50lan_menu.jpg"],
+    url: "https://www.xn--50-wg2du59ik3f.tw/",
   },
   minimini: {
     name: "米里米里",
@@ -40,6 +45,7 @@ export const SHOPS = {
     category: "drink",
     logo: "minimini_logo.png",
     imgs: ["minimini_menu.jpg"],
+    url: "https://minimini-tw.com/",
   },
   macutea: {
     name: "麻古茶坊",
@@ -47,6 +53,7 @@ export const SHOPS = {
     category: "drink",
     logo: "macutea_logo.png",
     imgs: ["macutea_menu.jpg"],
+    url: "https://www.macutea.com.tw/",
   },
   "8yotea": {
     name: "八曜和茶",
@@ -54,6 +61,7 @@ export const SHOPS = {
     category: "drink",
     logo: "8yotea_logo.png",
     imgs: ["8yotea_menu.jpg"],
+    url: "https://8yotea.com/",
   },
   youindrink: {
     name: "有飲",
@@ -61,6 +69,7 @@ export const SHOPS = {
     category: "drink",
     logo: "youindrink_logo.png",
     imgs: ["youindrink_menu.webp"],
+    url: "https://www.youindrink.com/",
   },
   chingshanteashop: {
     name: "青山茶行",
@@ -68,6 +77,8 @@ export const SHOPS = {
     category: "drink",
     logo: "chingshanteashop_logo.jpg",
     imgs: ["chingshanteashop_menu.jpg"],
+    url: "https://www.facebook.com/1982teashop",
+    linkLabel: "官方 Facebook",
   },
   peaktea: {
     name: "青山",
@@ -75,6 +86,7 @@ export const SHOPS = {
     category: "drink",
     logo: "peaktea_logo.png",
     imgs: ["peaktea_menu.webp"],
+    url: "https://peak-tea.com/",
   },
   chingshin: {
     name: "清心福全",
@@ -82,6 +94,7 @@ export const SHOPS = {
     category: "drink",
     logo: "chingshin_logo.png",
     imgs: ["chingshin_menu.jpg"],
+    url: "https://www.chingshin.tw/?lang=cht",
   },
   aniceholiday: {
     name: "一沐日",
@@ -89,6 +102,7 @@ export const SHOPS = {
     category: "drink",
     logo: "aniceholiday_logo.jpg",
     imgs: ["aniceholiday_menu.jpg"],
+    url: "https://www.imuz.com.tw/",
   },
   bogteashop: {
     name: "波哥茶飲",
@@ -103,6 +117,8 @@ export const SHOPS = {
     category: "drink",
     logo: "shuansenbeverages_logo.png",
     imgs: ["shuansenbeverages_menu.jpg"],
+    url: "https://www.facebook.com/ShuansenBeverages",
+    linkLabel: "官方 Facebook",
   },
   lairitea: {
     name: "來日方茶",
@@ -110,6 +126,8 @@ export const SHOPS = {
     category: "drink",
     logo: "lairitea_logo.jpg",
     imgs: ["lairitea_menu.jpg"],
+    url: "https://www.instagram.com/lairi_tea_2023/",
+    linkLabel: "官方 Instagram",
   },
   tptea: {
     name: "茶湯會",
@@ -117,6 +135,7 @@ export const SHOPS = {
     category: "drink",
     logo: "tptea_logo.png",
     imgs: ["tptea_menu.jpg"],
+    url: "https://tw.tp-tea.com/",
   },
   liketeashop: {
     name: "老賴茶棧",
@@ -124,6 +143,7 @@ export const SHOPS = {
     category: "drink",
     logo: "liketeashop_logo.jpg",
     imgs: ["liketeashop_menu.jpg"],
+    url: "https://www.liketeashop.com/",
   },
   kebuke: {
     name: "可不可熟成紅茶",
@@ -131,6 +151,7 @@ export const SHOPS = {
     category: "drink",
     logo: "kebuke_logo.png",
     imgs: ["kebuke_menu.jpg"],
+    url: "https://kebuke.com/",
   },
   xuanfuresidence: {
     name: "宣福居",
@@ -145,6 +166,7 @@ export const SHOPS = {
     category: "drink",
     logo: "hechaloutea_logo.jpeg",
     imgs: ["hechaloutea_menu.webp"],
+    url: "https://hechaloutea.com.tw/",
   },
   guiji: {
     name: "龜記",
@@ -152,6 +174,7 @@ export const SHOPS = {
     category: "drink",
     logo: "guiji_logo.jpg",
     imgs: ["guiji_menu.jpg"],
+    url: "https://www.guiji-group.com/",
   },
   napteazzz: {
     name: "再睡5分鐘",
@@ -159,6 +182,7 @@ export const SHOPS = {
     category: "drink",
     logo: "npatea_logo.png",
     imgs: ["naptea_menu.avif"],
+    url: "https://www.napteazzz.com/",
   },
   coco: {
     name: "CoCo都可",
@@ -166,6 +190,7 @@ export const SHOPS = {
     category: "drink",
     logo: "coco_logo.jpg",
     imgs: ["coco_menu.jpg"],
+    url: "https://www.coco-tea.com/",
   },
   teatop: {
     name: "TEA TOP第一味",
@@ -173,6 +198,7 @@ export const SHOPS = {
     category: "drink",
     logo: "teatop_logo.png",
     imgs: ["teatop_menu.jpg"],
+    url: "https://www.teatop.com.tw/",
   },
   toptiertea: {
     name: "特好喝",
@@ -180,6 +206,7 @@ export const SHOPS = {
     category: "drink",
     logo: "toptiertea_logo.webp",
     imgs: ["toptiertea_menu.webp"],
+    url: "https://toptiertea.com.tw/",
   },
   "19teahouse": {
     name: "拾汣茶屋",
@@ -187,6 +214,7 @@ export const SHOPS = {
     category: "drink",
     logo: "19teahouse_logo.png",
     imgs: ["19teahouse_menu.png"],
+    url: "https://www.19teahouse.com/",
   },
   wootea: {
     name: "五桐號",
@@ -194,6 +222,7 @@ export const SHOPS = {
     category: "drink",
     logo: "wootea_logo.png",
     imgs: ["wootea_menu.jpg"],
+    url: "https://www.wootea.com/",
   },
   lucymama: {
     name: "露西媽媽",

@@ -1,0 +1,45 @@
+{
+  "id": "./",
+  "name": "曾可愛家族點餐系統",
+  "short_name": "家族點餐",
+  "description": "建立揪團訂單、填寫餐點並快速彙整訂單。",
+  "lang": "zh-Hant-TW",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7fafc",
+  "theme_color": "#27374d",
+  "icons": [
+    {
+      "src": "./icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "建立訂單",
+      "short_name": "建立訂單",
+      "url": "./create_event.html"
+    },
+    {
+      "name": "查詢訂單",
+      "short_name": "查詢訂單",
+      "url": "./search_order.html"
+    }
+  ]
+}

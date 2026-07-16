@@ -1,114 +1,121 @@
-# [Ordersystem](https://ordersystem-46n.pages.dev/)
+# 曾可愛家族點餐系統
 
-整合部分手搖飲連鎖店及餐廳菜單，讓大家可以在同一個地方瀏覽多家店家的菜單，並統一建立與管理訂單。
+[線上網站](https://ordersystem-46n.pages.dev/)
 
----
+一個適合家庭、朋友與小型團體使用的多人點餐 PWA。主揪建立活動後分享參與連結，其他人不需註冊即可下單、查看彙整與最新菜單。
 
-## 功能
+## 主要功能
 
-- 瀏覽多家手搖飲店的菜單
-- 建立訂餐活動並產生專屬連結
-- 填寫、修改個人訂單
-- 查看所有人的訂單彙整
+- 建立飲料或餐點活動並設定截止時間
+- 產生參與連結與主揪管理連結
+- 多人下單、品項彙整與自動更新
+- 主揪新增、修改及刪除訂單
+- 查看店家菜單與官方網站
+- iPhone／Android PWA 安裝與離線頁面
+- LINE Bot 查詢訂單內容
 
----
+## 安全設計
 
-## 使用流程
+- `events`、`orders` 已啟用 Supabase RLS
+- 匿名使用者無法直接讀寫資料表
+- 所有活動操作透過 Token-scoped RPC 執行
+- 參與者使用 UUID Token，主揪使用獨立的 64 字元管理 Token
+- 管理 Token 在資料庫只保存 SHA-256 雜湊
+- 截止時間、欄位長度與訂購數量由資料庫函式驗證
+- Cloudflare Pages 使用 CSP、HSTS 與其他安全標頭
 
-1. 進入網站，選擇要訂的店家
-2. 建立訂餐活動，設定截止時間，取得訂單連結
-3. 將連結分享給大家填單
-4. 截止後查看訂單總覽
+## 專案結構
 
-> 也可以透過 **LINE Bot** 輸入活動 ID 來查詢訂單總覽。
-
----
-
-## 技術
-
-| 類別 | 技術 |
-|:------:|:------:|
-| 前端 | HTML / CSS / JavaScript |
-| 建置工具 | Vite |
-| 後端 | Supabase |
-| LINE Bot | LINE Messaging API |
-| CI/CD | GitHub Actions |
-| 部署 | GitHub Pages |
-
-
----
-
-## 系統架構
-
-```mermaid
-graph LR
-    classDef line fill:#2ecc71,stroke:#27ae60,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef frontend fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef automation fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef backend fill:#f39c12,stroke:#d35400,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef cloudflare fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff,font-weight:bold;
- 
-    subgraph L_Group ["LINE Bot"]
-        Line[LINE Official Account]
-        L2[Check Orders]
-        Line --- L2
-    end
- 
-    subgraph Web_Group ["Frontend (User Interface)"]
-        Index["index.html<br/>(Menus)"]
-        Create["create_event.html<br/>(Create Event)"]
-        Order["order.html<br/>(Fill Order)"]
-        Edit["edit_order.html<br/>(Edit Order)"]
-        Summary["summary.html<br/>(Summary)"]
-        
-        Index -->|Select shop & deadline| Create
-        Create -->|Create link| Order
-        Order -->|Edit| Edit
-        Order -->|Submit| Summary
-    end
- 
-    subgraph Deploy_Group ["CI/CD"]
-        Repo[GitHub Repo] -->|Push Code| CFP[Cloudflare Pages]
-    end
- 
-    subgraph DB_Group ["Backend (Supabase)"]
-        Supa[(Supabase)]
-        Events[Table: events]
-        Orders[Table: orders]
-        Supa --- Events
-        Supa --- Orders
-    end
- 
-    L2 -->|Enter order ID| Summary
-    CFP -.->|Deploy| Index
-    
-    Create -.->|Insert| Events
-    Order -.->|Insert| Orders
-    Edit -.->|Update| Orders
-    Summary -.->|Select/Filter| Supa
-    L2 -.->|Query by event_id| Supa
- 
-    class Line,L2 line;
-    class Index,Create,Order,Edit,Summary frontend;
-    class Repo automation;
-    class CFP cloudflare;
-    class Supa,Events,Orders backend;
+```text
+ordersystem/
+├─ *.html                 公開頁面入口
+├─ js/                    前端 JavaScript 模組
+├─ css/                   頁面與元件樣式
+├─ fragments/             首頁載入的 HTML 片段
+├─ data/                  店家與菜單來源資料
+├─ public/                PWA、圖片、菜單與部署標頭
+├─ scripts/               建置及資料維護腳本
+├─ supabase/
+│  ├─ migrations/         RLS 與 RPC migration
+│  └─ schema/             獨立資料表 schema
+├─ OrdersystemLineBot/    LINE Bot Edge Function
+└─ docs/                  維護與部署文件
 ```
 
----
+詳細說明請參考 [`docs/project-structure.md`](docs/project-structure.md)。
 
-## 本地開發
+## 本機開發
+
+需求：Node.js 20 以上。
 
 ```bash
 git clone https://github.com/Tseng1114/Ordersystem.git
 cd Ordersystem
 npm install
+```
+
+複製環境變數範例並填入 Supabase 設定：
+
+```bash
+copy .env.example .env
+```
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+啟動開發伺服器：
+
+```bash
 npm run dev
 ```
 
-在 `.env` 填入 Supabase 相關設定：
+## 常用指令
 
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```bash
+npm run build
+npm run preview
+npm run audit:shop-catalog
+npm run sync:shop-catalog
+```
+
+`sync:shop-catalog` 需要在本機 `.env` 設定 `SUPABASE_SERVICE_ROLE_KEY`。此金鑰不得放入 `VITE_` 變數或提交至 Git。
+
+## Supabase
+
+安全 migration 位於：
+
+```text
+supabase/migrations/202607170001_secure_event_access.sql
+```
+
+新環境需在 Supabase SQL Editor 執行 migration，再部署相同版本的前端。`events` 與 `orders` 應保持 RLS 開啟且沒有公開 Policy；`shop_catalogs` 僅保留公開唯讀 Policy。
+
+更多資訊請參考 [`docs/rls-deployment.md`](docs/rls-deployment.md)。
+
+## 部署
+
+目前網站使用 Cloudflare Pages。推送至 GitHub 後由 Cloudflare 執行：
+
+```bash
+npm run build
+```
+
+輸出目錄為：
+
+```text
+dist
+```
+
+若 LINE Bot 程式有異動，需另外重新部署 `OrdersystemLineBot/supabase/functions/LineBot` Edge Function。
+
+## 驗證
+
+提交前建議執行：
+
+```bash
+npm run build
+npm run audit:shop-catalog
+npm audit --omit=dev
 ```

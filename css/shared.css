@@ -181,15 +181,6 @@ body::before {
   margin: 20px 0;
 }
 
-.hover-lift {
-  transition: var(--transition-smooth);
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md) !important;
-}
-
 @keyframes checkmark-draw {
   0% {
     stroke-dashoffset: 60;

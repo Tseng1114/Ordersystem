@@ -1,6 +1,4 @@
 let toastContainer = null;
-let lightboxOverlay = null;
-let lightboxImg = null;
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -148,42 +146,6 @@ export function showToast(message, type = "info", duration = 3200) {
   return toast;
 }
 
-export function overrideAlert() {
-  window.alert = (message) => {
-    const text = String(message ?? "");
-    const lower = text.toLowerCase();
-
-    if (
-      lower.includes("error") ||
-      text.includes("失敗") ||
-      text.includes("找不到")
-    ) {
-      showToast(text, "error", 4500);
-      return;
-    }
-
-    if (
-      text.includes("成功") ||
-      text.includes("已複製") ||
-      text.includes("已建立")
-    ) {
-      showToast(text, "success");
-      return;
-    }
-
-    if (
-      text.includes("請") ||
-      text.includes("提醒") ||
-      text.includes("注意")
-    ) {
-      showToast(text, "warning");
-      return;
-    }
-
-    showToast(text, "info");
-  };
-}
-
 export function initRipple(
   selector = "button, .btn, .tab-btn, .shop-card",
   dark = false,
@@ -225,58 +187,6 @@ export function countUp(element, target, durationMs = 600) {
   };
 
   requestAnimationFrame(update);
-}
-
-function getLightbox() {
-  if (lightboxOverlay) {
-    return { overlay: lightboxOverlay, img: lightboxImg };
-  }
-
-  lightboxOverlay = document.createElement("div");
-  lightboxOverlay.id = "lightbox-overlay";
-  lightboxOverlay.innerHTML = `
-    <div id="lightbox-inner">
-      <button id="lightbox-close" aria-label="Close">x</button>
-      <img id="lightbox-img" alt="Preview" />
-    </div>
-  `;
-
-  document.body.appendChild(lightboxOverlay);
-  lightboxImg = document.getElementById("lightbox-img");
-
-  const close = () => {
-    lightboxOverlay.classList.remove("open");
-    document.body.style.overflow = "";
-  };
-
-  document.getElementById("lightbox-close").addEventListener("click", close);
-  lightboxOverlay.addEventListener("click", (event) => {
-    if (event.target === lightboxOverlay) close();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") close();
-  });
-
-  return { overlay: lightboxOverlay, img: lightboxImg };
-}
-
-export function openLightbox(src, alt = "") {
-  const { overlay, img } = getLightbox();
-  img.src = src;
-  img.alt = alt;
-  document.body.style.overflow = "hidden";
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => overlay.classList.add("open"));
-  });
-}
-
-export function initLightbox(containerSelector = ".menu-img-wrap") {
-  document.addEventListener("click", (event) => {
-    const img = event.target.closest(`${containerSelector} img`);
-    if (!img) return;
-    openLightbox(img.src, img.alt);
-  });
 }
 
 export function skeletonCards(count = 3) {

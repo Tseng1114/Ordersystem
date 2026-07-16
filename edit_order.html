@@ -9,12 +9,11 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>修改訂單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="stylesheet" href="css/order_lookup.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -38,7 +37,7 @@
               id="eventIdInput"
               class="id-input search-input"
               type="text"
-              placeholder="請輸入訂單代碼"
+              placeholder="請貼上主揪管理 Token 或管理連結"
             />
             <button class="btn-primary search-btn" id="loadBtn">讀取</button>
           </div>
@@ -116,21 +115,20 @@
     </footer>
 
     <script type="module">
-      import { initNavbar } from "./navbar.js";
-      import { supabase } from "./config.js";
-      import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { loadShopCatalogByName } from "./menu-catalog.js";
-      import { ICE_OPTIONS, NO_ADDON_LABEL, SUGAR_OPTIONS, combineItemAndAddon, parseItemAndAddon } from "./order-utils.js";
-      import { showToast, overrideAlert, initRipple, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./ui-utils.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { addOrderAdmin, deleteOrderAdmin, getEventAdmin, getStoredAdminToken, normalizeAdminToken, takeAdminTokenFromLocation, updateOrderAdmin } from "./js/event-api.js";
+      import { loadShopCatalogByName } from "./js/menu-catalog.js";
+      import { ICE_OPTIONS, NO_ADDON_LABEL, SUGAR_OPTIONS, combineItemAndAddon, parseItemAndAddon } from "./js/order-utils.js";
+      import { showToast, initRipple, escapeHtml, formatTaipeiDateTime, setLoadingVisible } from "./js/ui-utils.js";
 
       initNavbar("edit");
-      overrideAlert();
       initRipple(".btn-primary, .btn-ghost, .btn-danger, .btn-save-row");
 
       const SUGAR_OPTS = SUGAR_OPTIONS;
       const ICE_OPTS = ICE_OPTIONS;
 
       let eventData = null;
+      let adminToken = takeAdminTokenFromLocation() || getStoredAdminToken();
       let currentShopCatalog = {
         shopKey: null,
         shopMeta: null,
@@ -443,30 +441,18 @@
       }
 
       async function loadEvent() {
-        const id = document.getElementById("eventIdInput").value.trim();
-        if (!id) {
-          showToast("請先輸入訂單代碼", "warning");
+        const inputToken = normalizeAdminToken(document.getElementById("eventIdInput").value);
+        const nextAdminToken = inputToken || adminToken;
+        if (!nextAdminToken) {
+          showToast("請先輸入主揪管理 Token 或管理連結", "warning");
           return;
         }
 
         showLoading(true);
         try {
-          const resolved = await resolveEventId(supabase, id);
-          if (!resolved.id) {
-            showToast(getResolveEventMessage(resolved.reason), "error");
-            return;
-          }
-
-          const { data, error } = await supabase
-            .from("events")
-            .select("*, orders(*)")
-            .eq("id", resolved.id)
-            .single();
-
-          if (error || !data) {
-            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
-            return;
-          }
+          const data = await getEventAdmin(nextAdminToken);
+          adminToken = nextAdminToken;
+          sessionStorage.setItem("event-admin-token", adminToken);
 
           eventData = data;
           currentShopCatalog = await loadShopCatalogByName(data.shop, data.category);
@@ -498,14 +484,13 @@
 
         showLoading(true);
         try {
-          const { data, error } = await supabase
-            .from("orders")
-            .update({ customer, name, suger: specA, ice: specB, qty })
-            .eq("id", orderId)
-            .select()
-            .single();
-
-          if (error) throw error;
+          const data = await updateOrderAdmin(adminToken, orderId, {
+            customer,
+            name,
+            suger: specA,
+            ice: specB,
+            qty,
+          });
           const index = eventData.orders.findIndex((item) => item.id === orderId);
           if (index !== -1) eventData.orders[index] = data;
           renderOrders(isLocked());
@@ -522,8 +507,7 @@
 
         showLoading(true);
         try {
-          const { error } = await supabase.from("orders").delete().eq("id", orderId);
-          if (error) throw error;
+          await deleteOrderAdmin(adminToken, orderId);
           eventData.orders = eventData.orders.filter((item) => item.id !== orderId);
           renderOrders(isLocked());
           showToast("已刪除", "success");
@@ -558,13 +542,13 @@
 
         showLoading(true);
         try {
-          const { data, error } = await supabase
-            .from("orders")
-            .insert([{ event_id: eventData.id, customer, name, suger: specA, ice: specB, qty }])
-            .select()
-            .single();
-
-          if (error) throw error;
+          const data = await addOrderAdmin(adminToken, {
+            customer,
+            name,
+            suger: specA,
+            ice: specB,
+            qty,
+          });
           eventData.orders.push(data);
           clearAddRow();
           renderOrders(isLocked());
@@ -587,9 +571,7 @@
         if (event.key === "Enter") loadEvent();
       });
 
-      const urlEvent = getQueryParam("event");
-      if (urlEvent) {
-        document.getElementById("eventIdInput").value = urlEvent;
+      if (adminToken) {
         loadEvent();
       }
     </script>

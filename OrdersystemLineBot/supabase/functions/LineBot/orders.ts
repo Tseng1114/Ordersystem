@@ -40,13 +40,28 @@ function formatOrderList(eventId: string, orders: OrderRow[]): string {
 }
 
 export async function handleOrderQuery(rawId: string, supabase: SupabaseClient): Promise<string> {
-  const eventId = rawId.trim()
-  if (!eventId) return "請在「訂單」後面加上編號，例如：訂單 abc123"
+  const accessToken = rawId.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i)?.[0].toLowerCase() ?? ""
+  if (!accessToken) return "請在「訂單」後面加上活動 Token。"
+
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("id")
+    .eq("access_token", accessToken)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error("DB error:", eventError.message)
+    return "查詢失敗，請稍後再試。"
+  }
+
+  if (!event) {
+    return "找不到此活動，請確認 Token 是否正確。"
+  }
 
   const { data, error } = await supabase
     .from("orders")
     .select("customer, name, suger, ice, qty")
-    .eq("event_id", eventId)
+    .eq("event_id", event.id)
     .returns<OrderRow[]>()
 
   if (error) {
@@ -58,5 +73,5 @@ export async function handleOrderQuery(rawId: string, supabase: SupabaseClient):
     return "找不到此訂單，請確認編號是否正確。"
   }
 
-  return formatOrderList(eventId, data)
+  return formatOrderList(`${accessToken.slice(0, 8)}…`, data)
 }

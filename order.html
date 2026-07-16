@@ -9,13 +9,12 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>下單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/order_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
@@ -101,20 +100,17 @@
     </footer>
 
     <script type="module">
-      import { supabase } from "./config.js";
-      import { initNavbar } from "./navbar.js";
-      import { getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { loadShopCatalogByName } from "./menu-catalog.js";
-      import { ICE_OPTIONS, SUGAR_OPTIONS, combineItemAndAddon } from "./order-utils.js";
-      import { showToast, overrideAlert, initRipple, getQueryParam, setLoadingVisible } from "./ui-utils.js";
+      import { getEventSecure, normalizeAccessToken, submitOrdersSecure } from "./js/event-api.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { loadShopCatalogByName } from "./js/menu-catalog.js";
+      import { ICE_OPTIONS, SUGAR_OPTIONS, combineItemAndAddon } from "./js/order-utils.js";
+      import { showToast, initRipple, getQueryParam, setLoadingVisible } from "./js/ui-utils.js";
 
       initNavbar();
-      overrideAlert();
       initRipple(".primary, .add, .back-home, .del-btn");
 
-      const rawEventId = getQueryParam("event");
+      const accessToken = normalizeAccessToken(getQueryParam("event"));
 
-      let resolvedEventId = null;
       let currentCategory = "drink";
       let currentShopCatalog = {
         shopKey: null,
@@ -229,25 +225,13 @@
       }
 
       async function ensureEvent() {
-        if (!rawEventId) {
+        if (!accessToken) {
           showToast("無效訂單編號", "error");
           return;
         }
         showLoading(true);
         try {
-          const resolved = await resolveEventId(supabase, rawEventId);
-          if (!resolved.id) {
-            showToast(getResolveEventMessage(resolved.reason), "error");
-            return;
-          }
-          resolvedEventId = resolved.id;
-
-          const { data: ev, error } = await supabase
-            .from("events").select("*").eq("id", resolvedEventId).single();
-          if (error || !ev) {
-            showToast("找不到這筆訂單", "error");
-            return;
-          }
+          const ev = await getEventSecure(accessToken);
 
           currentCategory = ev.category || "drink";
           currentShopCatalog = await loadShopCatalogByName(ev.shop, currentCategory);
@@ -315,7 +299,6 @@
         }
 
         const rows = trs.map((tr) => ({
-          event_id: resolvedEventId,
           customer: tr.querySelector(".who").value.trim(),
           name: combineItemAndAddon(
             tr.querySelector(".item-input").value.trim(),
@@ -333,8 +316,7 @@
 
         showLoading(true);
         try {
-          const { error } = await supabase.from("orders").insert(rows);
-          if (error) throw error;
+          await submitOrdersSecure(accessToken, rows);
 
           clearInterval(countdownTimer);
           document.getElementById("countdownBar").classList.remove("show");
@@ -349,7 +331,7 @@
             el.style.animation = "";
           });
           document.getElementById("goSummaryBtn").onclick = () => {
-            location.href = `summary.html?event=${resolvedEventId}`;
+            location.href = `summary.html?event=${accessToken}`;
           };
         } catch (err) {
           showToast(`送出失敗：${err.message}`, "error", 5000);
@@ -366,7 +348,9 @@
           if (event.data?.type !== "menu-embed-height") return;
           const frame = document.getElementById("menuEmbedFrame");
           if (!frame) return;
-          frame.style.height = `${Math.max(480, Number(event.data.height) || 0)}px`;
+          if (event.origin !== location.origin || event.source !== frame.contentWindow) return;
+          const height = Math.min(10000, Math.max(480, Number(event.data.height) || 0));
+          frame.style.height = `${height}px`;
         });
 
         ensureEvent().then(() => {

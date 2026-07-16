@@ -13,8 +13,7 @@ type Command = {
 const HELP_TEXT = [
   "🍹 小九的功能：",
   "1. 輸入「官網」→ 取得點餐系統連結",
-  "2. 輸入「訂單 <編號>」→ 查看訂單明細",
-  "   範例：訂單 abc123",
+  "2. 輸入「訂單 <參與連結或 Token>」→ 查看訂單明細",
 ].join("\n")
 
 const COMMANDS: Command[] = [

@@ -9,12 +9,11 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>查詢訂單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/loading.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="stylesheet" href="css/order_lookup.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -59,7 +58,6 @@
           <div id="resByPerson"></div>
           <div class="result-footer">
             <button class="btn btn-ghost" id="clearBtn">清除結果</button>
-            <a id="editLink" class="btn btn-ghost" href="#">修改訂單</a>
             <a id="summaryLink" class="btn btn-dark" href="#">完整彙整</a>
           </div>
         </div>
@@ -74,13 +72,11 @@
     </footer>
 
     <script type="module">
-      import { initNavbar } from "./navbar.js";
-      import { supabase } from "./config.js";
-      import { getEventCode, getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { showToast, overrideAlert, initRipple, copyText, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./ui-utils.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { getEventSecure, normalizeAccessToken } from "./js/event-api.js";
+      import { showToast, initRipple, copyText, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./js/ui-utils.js";
 
       initNavbar("lookup");
-      overrideAlert();
       initRipple(".search-btn, .btn, .copy-id-btn");
 
       const esc = escapeHtml;
@@ -89,13 +85,11 @@
 
       const formatTW = formatTaipeiDateTime;
 
-      function render(ev) {
-        const shortCode = getEventCode(ev.id);
+      function render(ev, accessToken) {
         document.getElementById("resShopName").textContent = ev.shop;
-        document.getElementById("resEventId").textContent = shortCode;
+        document.getElementById("resEventId").textContent = accessToken;
         document.getElementById("resDeadline").textContent = formatTW(ev.deadline);
-        document.getElementById("summaryLink").href = `summary.html?event=${shortCode}`;
-        document.getElementById("editLink").href = `edit_order.html?event=${shortCode}`;
+        document.getElementById("summaryLink").href = `summary.html?event=${accessToken}`;
 
         const expired = ev.deadline && new Date(ev.deadline) < new Date();
         const badge = document.getElementById("resBadge");
@@ -139,32 +133,16 @@
       }
 
       async function doSearch() {
-        const id = document.getElementById("searchInput").value.trim();
-        if (!id) {
+        const accessToken = normalizeAccessToken(document.getElementById("searchInput").value);
+        if (!accessToken) {
           showToast("請先輸入訂單代碼", "warning");
           return;
         }
 
         showLoading(true);
         try {
-          const resolved = await resolveEventId(supabase, id);
-          if (!resolved.id) {
-            showToast(getResolveEventMessage(resolved.reason), "error");
-            return;
-          }
-
-          const { data, error } = await supabase
-            .from("events")
-            .select("*, orders(*)")
-            .eq("id", resolved.id)
-            .single();
-
-          if (error || !data) {
-            showToast("找不到這筆訂單，請確認代碼是否正確。", "error");
-            return;
-          }
-
-          render(data);
+          const data = await getEventSecure(accessToken);
+          render(data, accessToken);
           showToast("查詢成功", "success");
         } catch (error) {
           showToast(`查詢失敗：${error.message}`, "error", 5000);

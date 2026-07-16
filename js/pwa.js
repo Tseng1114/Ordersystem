@@ -1,4 +1,4 @@
-import "./css/pwa.css";
+import "../css/pwa.css";
 
 const isStandalone =
   window.matchMedia("(display-mode: standalone)").matches ||

@@ -1,8 +1,8 @@
 import { access, readFile, readdir } from "node:fs/promises";
 import process from "node:process";
 
-const seedRows = JSON.parse(await readFile(new URL("../shop-catalog-seed.json", import.meta.url), "utf8"));
-const { SHOPS } = await import("../shop-data.js");
+const seedRows = JSON.parse(await readFile(new URL("../data/shop-catalog-seed.json", import.meta.url), "utf8"));
+const { SHOPS } = await import("../js/shop-data.js");
 
 const menuRootUrl = new URL("../public/menus/", import.meta.url);
 const problems = [];
@@ -33,7 +33,7 @@ function auditSeedRows() {
     seedKeys.add(row.key);
 
     if (!shopKeys.has(row.key)) {
-      addProblem("missing-shop-data", `${row.key} exists in shop-catalog-seed.json but not shop-data.js`);
+      addProblem("missing-shop-data", `${row.key} exists in data/shop-catalog-seed.json but not js/shop-data.js`);
     }
 
     const menuItems = Array.isArray(row.menuItems) ? row.menuItems : [];
@@ -66,7 +66,7 @@ function auditSeedRows() {
 
   for (const [shopKey, shop] of Object.entries(SHOPS)) {
     if (!seedKeys.has(shopKey)) {
-      addProblem("missing-seed", `${shopKey} (${shop.name}) exists in shop-data.js but not shop-catalog-seed.json`);
+      addProblem("missing-seed", `${shopKey} (${shop.name}) exists in js/shop-data.js but not data/shop-catalog-seed.json`);
     }
   }
 }
@@ -94,7 +94,7 @@ async function auditMenuImages() {
     for (const imageName of imageNames) {
       const imagePath = `${menuDir}/${imageName}`;
       if (!referencedImages.has(imagePath)) {
-        addProblem("unused-menu-image", `public/menus/${imagePath} is not referenced by shop-data.js`);
+        addProblem("unused-menu-image", `public/menus/${imagePath} is not referenced by js/shop-data.js`);
       }
     }
   }

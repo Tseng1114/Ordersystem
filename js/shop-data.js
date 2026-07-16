@@ -318,12 +318,6 @@ export const SHOPS = {
   },
 };
 
-export function getShopList(category) {
-  return Object.values(SHOPS)
-    .filter((shop) => shop.category === category)
-    .map((shop) => shop.name);
-}
-
 export function findShopByName(name, category) {
   return Object.entries(SHOPS).find(([, shop]) => {
     const sameCategory = category ? shop.category === category : true;

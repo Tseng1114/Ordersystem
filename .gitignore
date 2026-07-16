@@ -1,17 +1,49 @@
+# Dependencies and build output
 node_modules/
 dist/
+.vite/
+.cache/
+coverage/
+.nyc_output/
+
+# Package-manager caches
+.npm/
+.npm-cache/
+.pnpm-store/
+
+# Environment variables and secrets
 .env
 .env.local
 .env.*
 !.env.example
+
+# Editor and local agent settings
 .vscode/
 .idea/
-.venv/
-.venv-ocr/
+.agents/
+.codex/
+
+# Local deployment and database tooling
 .wrangler/
-.DS_Store
+**/supabase/.temp/
+**/supabase/.branches/
+
+# Virtual environments and Python caches
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-__pycache__/
-*.py[cod]
+pnpm-debug.log*
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini

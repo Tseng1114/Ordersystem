@@ -46,7 +46,7 @@ if (!supabaseUrl || !serviceRoleKey) {
   process.exit(1);
 }
 
-const fileUrl = new URL("../shop-catalog-seed.json", import.meta.url);
+const fileUrl = new URL("../data/shop-catalog-seed.json", import.meta.url);
 const seedText = await readFile(fileUrl, "utf8");
 const seedRows = JSON.parse(seedText);
 

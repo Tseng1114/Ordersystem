@@ -9,13 +9,12 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>首頁 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/index_style.css" />
     <link rel="stylesheet" href="css/usage_flow.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
@@ -68,10 +67,10 @@
     </footer>
 
     <script type="module">
-      import { initNavbar } from "./navbar.js";
-      import { initRipple } from "./ui-utils.js";
-      import usageFlowHtml from "./usage_flow.html?raw";
-      import linebotGuideHtml from "./linebot_guide.html?raw";
+      import { initNavbar } from "./js/navbar.js";
+      import { initRipple } from "./js/ui-utils.js";
+      import usageFlowHtml from "./fragments/usage_flow.html?raw";
+      import linebotGuideHtml from "./fragments/linebot_guide.html?raw";
 
       initNavbar();
       initRipple(".fab, .modal-line-btn, .modal-close, .sw-btn, .sw-dot");

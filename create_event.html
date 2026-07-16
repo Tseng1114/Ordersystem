@@ -9,13 +9,12 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>建立訂單 - 曾可愛家族點餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/create_event_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
@@ -59,6 +58,12 @@
           <div class="actions action-gap">
             <button class="primary" id="copyBtn" type="button">複製分享訊息</button>
           </div>
+          <hr class="divider" />
+          <label for="adminUrl">主揪管理連結（請妥善保存）</label>
+          <textarea id="adminUrl" class="share-textarea" readonly rows="3"></textarea>
+          <div class="actions action-gap">
+            <button class="primary" id="copyAdminBtn" type="button">複製主揪管理連結</button>
+          </div>
         </div>
       </div>
     </div>
@@ -78,14 +83,12 @@
     </footer>
 
     <script type="module">
-      import { supabase } from "./config.js";
-      import { getEventCode } from "./event-utils.js";
-      import { initNavbar } from "./navbar.js";
-      import { SHOPS } from "./shop-data.js";
-      import { showToast, overrideAlert, initRipple, copyText, setLoadingVisible } from "./ui-utils.js";
+      import { createEventSecure } from "./js/event-api.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { SHOPS } from "./js/shop-data.js";
+      import { showToast, initRipple, copyText, setLoadingVisible } from "./js/ui-utils.js";
 
       initNavbar();
-      overrideAlert();
       initRipple(".primary, .back-home, .toggle-btn, #directGoBtn");
 
       let currentCategory = "drink";
@@ -205,34 +208,23 @@
 
         setLoadingVisible(true);
         try {
-          const { data, error } = await supabase
-            .from("events")
-            .insert([
-              {
-                title: `${shop} 訂單`,
-                shop,
-                category: currentCategory,
-                deadline: new Date(deadline).toISOString(),
-                status: "open",
-              },
-            ])
-            .select("id")
-            .single();
+          const data = await createEventSecure({
+            shop,
+            category: currentCategory,
+            deadline: new Date(deadline).toISOString(),
+          });
 
-          if (error) throw error;
-
-          const id = data.id;
-          const shortId = getEventCode(id);
           const orderURL = new URL("order.html", location.href);
-          const shareOrderURL = new URL("order.html", location.href);
-          orderURL.searchParams.set("event", id);
-          shareOrderURL.searchParams.set("event", shortId);
+          orderURL.searchParams.set("event", data.access_token);
+          const adminURL = new URL("edit_order.html", location.href);
+          adminURL.hash = new URLSearchParams({ admin: data.admin_token }).toString();
 
           const d = new Date(deadline);
           const deadlineText = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 
-          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n點餐連結：${shareOrderURL.toString()}`;
+          const finalMsg = `你好，這是 ${shop} 的訂單，請你於 ${deadlineText} 之前進行點餐。\n\n點餐連結：${orderURL.toString()}`;
           document.querySelector("#shareMsg").value = finalMsg;
+          document.querySelector("#adminUrl").value = adminURL.toString();
           const resultEl = document.querySelector("#result");
           resultEl.classList.remove("hidden");
           resultEl.classList.add("anim-fade-up");
@@ -244,6 +236,9 @@
           };
           document.querySelector("#copyBtn").onclick = async () => {
             await copyText(finalMsg, "分享訊息已複製到剪貼簿。");
+          };
+          document.querySelector("#copyAdminBtn").onclick = async () => {
+            await copyText(adminURL.toString(), "主揪管理連結已複製。");
           };
         } catch (err) {
           showToast(`建立訂單失敗：${err.message}`, "error", 5000);

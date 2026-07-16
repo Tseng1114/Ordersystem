@@ -9,11 +9,10 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <title>菜單 - 訂餐系統</title>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/menu_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -51,9 +50,9 @@
     </footer>
 
     <script type="module">
-      import { initNavbar } from "./navbar.js";
-      import { getQueryParam, initRipple, openExternalUrl } from "./ui-utils.js";
-      import { SHOPS as SHOP_DATA } from "./shop-data.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { getQueryParam, initRipple, openExternalUrl } from "./js/ui-utils.js";
+      import { SHOPS as SHOP_DATA } from "./js/shop-data.js";
 
       const initialShopKey = getQueryParam("shop");
       const isEmbed = getQueryParam("embed") === "1";
@@ -135,7 +134,7 @@
       function reportEmbedHeight() {
         if (!isEmbed || window.parent === window) return;
         const height = document.documentElement.scrollHeight;
-        window.parent.postMessage({ type: "menu-embed-height", height }, "*");
+        window.parent.postMessage({ type: "menu-embed-height", height }, location.origin);
       }
 
       function showMenuModal(key) {
@@ -221,7 +220,7 @@
         const reportHeight = () => {
           if (window.parent === window) return;
           const height = document.documentElement.scrollHeight;
-          window.parent.postMessage({ type: "menu-embed-height", height }, "*");
+          window.parent.postMessage({ type: "menu-embed-height", height }, location.origin);
         };
 
         window.addEventListener("load", reportHeight);

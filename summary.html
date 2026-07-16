@@ -10,12 +10,11 @@
     <meta name="apple-mobile-web-app-title" content="家族點餐" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-    <script type="module" src="./pwa.js"></script>
+    <script type="module" src="./js/pwa.js"></script>
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/shared.css" />
     <link rel="stylesheet" href="css/summary_style.css" />
     <link rel="stylesheet" href="css/loading.css" />
-    <link rel="stylesheet" href="css/copyright_style.css" />
     <link rel="stylesheet" href="css/toast.css" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   </head>
@@ -78,22 +77,19 @@
     </footer>
 
     <script type="module">
-      import { supabase } from "./config.js";
-      import { getEventCode, getResolveEventMessage, resolveEventId } from "./event-utils.js";
-      import { initNavbar } from "./navbar.js";
-      import { showToast, overrideAlert, initRipple, countUp, skeletonCards, copyText, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./ui-utils.js";
+      import { getEventSecure, normalizeAccessToken } from "./js/event-api.js";
+      import { initNavbar } from "./js/navbar.js";
+      import { showToast, initRipple, countUp, skeletonCards, copyText, escapeHtml, formatTaipeiDateTime, getQueryParam, setLoadingVisible } from "./js/ui-utils.js";
 
       initNavbar();
-      overrideAlert();
       initRipple(".back-home, .copy-action-btn, .summary-tab, #btnReload");
 
       const esc = escapeHtml;
 
-      const rawEventId = getQueryParam("event");
-      let resolvedEventId = null;
-      let displayEventCode = rawEventId || "";
+      const accessToken = normalizeAccessToken(getQueryParam("event"));
+      let displayEventCode = accessToken;
       let allOrders = [];        
-      let realtimeChannel = null;  
+      let refreshTimer = null;
       let currentTab = "person";   
 
       const btnCopy = document.getElementById("btnCopy");
@@ -121,10 +117,10 @@
         realtimeBadge.className = "realtime-badge";
         if (status === "connected") {
           realtimeBadge.classList.add();   
-          realtimeLabel.textContent = "即時同步中";
+          realtimeLabel.textContent = "自動更新中";
         } else if (status === "connecting") {
           realtimeBadge.classList.add("connecting");
-          realtimeLabel.textContent = "連線中";
+          realtimeLabel.textContent = "更新中";
         } else {
           realtimeBadge.classList.add("error");
           realtimeLabel.textContent = "已中斷";
@@ -219,94 +215,27 @@
         };
       }
 
-      function handleNewOrder(newOrder) {
-        if (allOrders.some((o) => o.id === newOrder.id)) return;
-        allOrders.push(newOrder);
-
-        renderByPerson(allOrders, newOrder.id);
-        renderByItem(allOrders);
-
-        if (currentTab === "item") {
-          document.querySelectorAll(".count-target").forEach((el) => {
-            const target = parseInt(el.dataset.target, 10);
-            countUp(el, target, 400);
-          });
-        }
-
-        showToast(`${newOrder.customer} 新增了一筆訂單`, "info");
-      }
-
-      function handleDeleteOrder(oldOrder) {
-        allOrders = allOrders.filter((o) => o.id !== oldOrder.id);
-        renderByPerson(allOrders);
-        renderByItem(allOrders);
-        if (currentTab === "item") {
-          document.querySelectorAll(".count-target").forEach((el) => {
-            const target = parseInt(el.dataset.target, 10);
-            countUp(el, target, 400);
-          });
-        }
-        showToast("有一筆訂單被刪除", "warning");
-      }
-
-      function handleUpdateOrder(updatedOrder) {
-        const idx = allOrders.findIndex((o) => o.id === updatedOrder.id);
-        if (idx !== -1) allOrders[idx] = updatedOrder;
-        renderByPerson(allOrders);
-        renderByItem(allOrders);
-      }
-
-      function subscribeRealtime(eventId) {
-        if (realtimeChannel) {
-          supabase.removeChannel(realtimeChannel);
-        }
-
+      async function refreshOrders() {
         setRealtimeStatus("connecting");
+        try {
+          const eventData = await getEventSecure(accessToken);
+          allOrders = eventData.orders || [];
+          renderByPerson(allOrders);
+          renderByItem(allOrders);
+          setRealtimeStatus("connected");
+        } catch {
+          setRealtimeStatus("error");
+        }
+      }
 
-        realtimeChannel = supabase
-          .channel(`orders-${eventId}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "INSERT",
-              schema: "public",
-              table: "orders",
-              filter: `event_id=eq.${eventId}`,
-            },
-            (payload) => handleNewOrder(payload.new)
-          )
-          .on(
-            "postgres_changes",
-            {
-              event: "DELETE",
-              schema: "public",
-              table: "orders",
-              filter: `event_id=eq.${eventId}`,
-            },
-            (payload) => handleDeleteOrder(payload.old)
-          )
-          .on(
-            "postgres_changes",
-            {
-              event: "UPDATE",
-              schema: "public",
-              table: "orders",
-              filter: `event_id=eq.${eventId}`,
-            },
-            (payload) => handleUpdateOrder(payload.new)
-          )
-          .subscribe((status) => {
-            if (status === "SUBSCRIBED") {
-              setRealtimeStatus("connected");
-            } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-              setRealtimeStatus("error");
-              showToast("即時同步連線失敗，請手動重新整理", "error", 5000);
-            }
-          });
+      function startAutoRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        setRealtimeStatus("connected");
+        refreshTimer = setInterval(refreshOrders, 15000);
       }
 
       async function load() {
-        if (!rawEventId) {
+        if (!accessToken) {
           showToast("網址缺少訂單編號，請重新從首頁進入。", "error", 5000);
           setTimeout(() => { location.href = "index.html"; }, 2000);
           return;
@@ -316,30 +245,8 @@
         document.getElementById("byPersonList").innerHTML = skeletonCards(3);
 
         try {
-          const resolved = await resolveEventId(supabase, rawEventId);
-          if (!resolved.id) {
-            document.getElementById("eventInfo").innerHTML =
-              `<p class="state-error">${getResolveEventMessage(resolved.reason)}</p>`;
-            showToast(getResolveEventMessage(resolved.reason), "error");
-            return;
-          }
-          resolvedEventId = resolved.id;
-
-          const { data: results, error } = await supabase
-            .from("events")
-            .select("*, orders(*)")
-            .eq("id", resolvedEventId);
-
-          if (error) throw error;
-          if (!results || results.length === 0) {
-            document.getElementById("eventInfo").innerHTML =
-              `<p class="state-error">找不到此活動。</p>`;
-            return;
-          }
-
-          const ev = results[0];
-          displayEventCode = getEventCode(ev.id);
-          targetOrderId.innerText = displayEventCode;
+          const ev = await getEventSecure(accessToken);
+          targetOrderId.innerText = `${accessToken.slice(0, 8)}…`;
           document.getElementById("eventInfo").innerHTML = `
             <div class="meta-container anim-scale-in">
               <h2 class="meta-shop">${esc(ev.shop)}</h2>
@@ -351,7 +258,7 @@
           renderByItem(allOrders);
           setupTabs();
 
-          subscribeRealtime(resolvedEventId);
+          startAutoRefresh();
 
           showToast(`已讀取 ${allOrders.length} 筆訂單`, "success");
 
@@ -366,7 +273,7 @@
       document.addEventListener("DOMContentLoaded", load);
 
       window.addEventListener("beforeunload", () => {
-        if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+        if (refreshTimer) clearInterval(refreshTimer);
       });
     </script>
   </body>

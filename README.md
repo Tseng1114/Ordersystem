@@ -24,6 +24,62 @@
 - 截止時間、欄位長度與訂購數量由資料庫函式驗證
 - Cloudflare Pages 使用 CSP、HSTS 與其他安全標頭
 
+## 系統架構
+
+```mermaid
+flowchart LR
+    Participant["參與者<br/>iPhone／Android PWA"]
+    Organizer["主揪<br/>管理連結"]
+
+    subgraph Frontend["Cloudflare Pages 前端"]
+        Web["Vite 多頁面網站"]
+        PublicToken["參與 Token"]
+        AdminToken["主揪 Token"]
+    end
+
+    subgraph Supabase["Supabase"]
+        RPC["Security Definer RPC"]
+        RLS["RLS<br/>禁止匿名直接存取"]
+        Events[(events)]
+        Orders[(orders)]
+        Catalog[(shop_catalogs)]
+    end
+
+    subgraph Line["LINE Bot"]
+        LineOA["LINE Official Account"]
+        Edge["LineBot Edge Function"]
+        Signature["LINE HMAC 簽章驗證"]
+    end
+
+    subgraph Deploy["部署流程"]
+        GitHub["GitHub Repository"]
+        Pages["Cloudflare Pages"]
+    end
+
+    Participant -->|"開啟參與連結"| Web
+    Organizer -->|"開啟管理連結"| Web
+    Web --> PublicToken
+    Web --> AdminToken
+    PublicToken -->|"查詢／下單"| RPC
+    AdminToken -->|"新增／修改／刪除"| RPC
+    RPC -->|"受控存取"| Events
+    RPC -->|"受控存取"| Orders
+    Web -. "直接存取被阻擋" .-> RLS
+    RLS -.-> Events
+    RLS -.-> Orders
+    Web -->|"公開唯讀"| Catalog
+
+    Participant -->|"貼上參與連結或 Token"| LineOA
+    LineOA --> Edge
+    Edge --> Signature
+    Signature -->|"驗證成功"| Edge
+    Edge -->|"Service Role 查詢"| Events
+    Edge -->|"Service Role 查詢"| Orders
+
+    GitHub -->|"Push"| Pages
+    Pages -->|"部署"| Web
+```
+
 ## 專案結構
 
 ```text
